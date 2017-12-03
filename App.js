@@ -39,7 +39,7 @@ export default class App extends Component<{}> {
           {instructions}
         </Text>
         <Text style={styles.instructions}>
-          {this.state.devices}
+          {JSON.stringify(this.state.devices)}
         </Text>
       </View>
     );

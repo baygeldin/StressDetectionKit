@@ -71,7 +71,6 @@ import com.android.build.OutputFile
  *   extraPackagerArgs: []
  * ]
  */
-
 project.ext.react = [
     entryFile: "index.js"
 ]
@@ -94,9 +93,13 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = false
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
 
+    // compileOptions {
+    //   sourceCompatibility JavaVersion.VERSION_1_8
+    //   targetCompatibility JavaVersion.VERSION_1_8
+    // }
     defaultConfig {
         applicationId "com.reactivedevicekit"
         minSdkVersion 17
@@ -106,6 +109,9 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
+        // jackOptions {
+        //   enabled true
+        // }
     }
     splits {
         abi {
