@@ -9,8 +9,11 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View
+  View,
+  FlatList,
+  DeviceEventEmitter
 } from 'react-native';
+import { List, ListItem } from "react-native-elements"
 import DeviceKit from './DeviceKit'
 
 const instructions = Platform.select({
@@ -23,30 +26,25 @@ const instructions = Platform.select({
 export default class App extends Component<{}> {
   constructor(props) {
     super(props);
-    this.state = {devices: 'Wait...'};
+    this.state = {devices: []};
   }
 
   render() {
+    let devices = this.state.devices.map((d) => Object.assign({ key: d.id }, d))
+
+    console.log(devices)
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
-        <Text style={styles.instructions}>
-          {JSON.stringify(this.state.devices)}
-        </Text>
+        <List>
+          <FlatList data={devices} renderItem={(i) => <ListItem title={i.name} /> } />
+        </List>
       </View>
     );
   }
 
   componentDidMount() {
-    DeviceKit.getDevices().then((devices) => this.setState({ devices }))
+    DeviceEventEmitter.addListener('DeviceKit:deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
+    DeviceKit.startScan()
   }
 }
 

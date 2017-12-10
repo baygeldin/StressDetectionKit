@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class DeviceKitPackage implements ReactPackage {
-
   @Override
   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
     return Collections.emptyList();
@@ -25,5 +24,4 @@ public class DeviceKitPackage implements ReactPackage {
 
     return modules;
   }
-
 }
