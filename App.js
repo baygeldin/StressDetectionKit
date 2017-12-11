@@ -16,13 +16,6 @@ import {
 import { List, ListItem } from "react-native-elements"
 import DeviceKit from './DeviceKit'
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
-
 export default class App extends Component<{}> {
   constructor(props) {
     super(props);
@@ -30,13 +23,17 @@ export default class App extends Component<{}> {
   }
 
   render() {
-    let devices = this.state.devices.map((d) => Object.assign({ key: d.id }, d))
-
-    console.log(devices)
     return (
       <View style={styles.container}>
         <List>
-          <FlatList data={devices} renderItem={(i) => <ListItem title={i.name} /> } />
+          <FlatList
+            data={this.state.devices}
+            keyExtractor={(i) => i.id}
+            renderItem={({ item }) => {
+              let title = `${item.manufacturer} ${item.modelName}`
+              return <ListItem title={title} subtitle={item.address} />
+            }}
+          />
         </List>
       </View>
     );
@@ -51,18 +48,6 @@ export default class App extends Component<{}> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  }
 });
