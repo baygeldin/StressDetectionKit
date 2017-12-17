@@ -11,12 +11,25 @@ import {
   Text,
   View,
   FlatList,
+  Button,
   DeviceEventEmitter
 } from 'react-native';
-import { List, ListItem } from "react-native-elements"
+import { List, ListItem, Header } from "react-native-elements"
+import { StackNavigator, DrawerNavigator } from 'react-navigation'
+import Icon from 'react-native-vector-icons/FontAwesome'
 import DeviceKit from './DeviceKit'
 
-export default class App extends Component<{}> {
+let HomeScreen = ({ navigation }) => (
+  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <Text>Home Screen</Text>
+    <Button
+      onPress={() => navigation.navigate('Settings')}
+      title="Go to settings"
+    />
+  </View>
+);
+
+class SettingsScreen extends Component<{}> {
   constructor(props) {
     super(props);
     this.state = {devices: []};
@@ -24,7 +37,7 @@ export default class App extends Component<{}> {
 
   render() {
     return (
-      <View style={styles.container}>
+      <View style={{ flex: 1 }}>
         <List>
           <FlatList
             data={this.state.devices}
@@ -40,14 +53,32 @@ export default class App extends Component<{}> {
   }
 
   componentDidMount() {
-    DeviceEventEmitter.addListener('DeviceKit:deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
+    this.deviceObserver = DeviceEventEmitter.addListener('DeviceKit:deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
     DeviceKit.startScan()
+  }
+
+  componentWillUnmount() {
+    this.deviceObserver.remove()
+    DeviceKit.stopScan()
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5FCFF',
-  }
+
+
+const RootNavigator = StackNavigator({
+  Home: {
+    screen: HomeScreen,
+    navigationOptions: ({ navigation }) => ({
+      headerTitle: 'Reactive Device Kit',
+      headerRight: (<Icon.Button name="cog" style={{backgroundColor: 'white'}} color="black" onPress={() => navigation.navigate('Settings')} />)
+    })
+  },
+  Settings: {
+    screen: SettingsScreen,
+    navigationOptions: {
+      headerTitle: 'Settings',
+    }
+  },
 });
+
+export default RootNavigator;

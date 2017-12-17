@@ -14,11 +14,11 @@ class DeviceKitModule(private val reactContext: ReactApplicationContext) : React
 
     override fun getConstants() = mapOf("DEMO" to "DEMO")
 
-    fun sendEvent(eventName: String, params: WritableMap) {
+    private fun sendEvent(eventName: String, params: WritableMap) {
         eventEmitter?.emit("DeviceKit:$eventName", params)
     }
 
-    fun mapDeviceDescription(device: IDeviceDescription): WritableMap = Arguments.makeNativeMap(mapOf(
+    private fun mapDeviceDescription(device: IDeviceDescription): WritableMap = Arguments.makeNativeMap(mapOf(
             "id" to device.sku,
             "address" to device.address,
             "name" to device.name,
