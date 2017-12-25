@@ -53,8 +53,10 @@ class SettingsScreen extends Component<{}> {
   }
 
   componentDidMount() {
-    this.deviceObserver = DeviceEventEmitter.addListener('DeviceKit:deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
-    DeviceKit.startScan()
+    DeviceKit.init('device-kit-demo-key').then(() => {
+      this.deviceObserver = DeviceEventEmitter.addListener('DeviceKit:deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
+      DeviceKit.startScan()
+    })
   }
 
   componentWillUnmount() {
