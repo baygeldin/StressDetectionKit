@@ -35,6 +35,7 @@ local.properties
 node_modules/
 npm-debug.log
 yarn-error.log
+build/
 
 # BUCK
 buck-out/
@@ -55,3 +56,7 @@ buck-out/
 # vim
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
+
+# Haul
+#
+haul-debug.log

@@ -5,13 +5,32 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.medm.devicekit.*
 
 const val MODULE_NAME = "DeviceKit"
+
 const val INIT_ERROR = "INIT_ERROR"
 const val PAIR_ERROR = "PAIR_ERROR"
+
+const val EVENT_PREFIX = MODULE_NAME
+const val DATA_EVENT = "data"
+const val DEVICE_FOUND_EVENT = "deviceFound"
+const val DEVICE_CONNECTED_EVENT = "deviceConnected"
+const val DEVICE_DISCONNECTED_EVENT = "deviceDisconnected"
+const val AMBIGUOUS_DEVICE_FOUND_EVENT = "ambiguousDeviceFound"
+const val SCAN_FINISHED_EVENT = "scanFinished"
+const val COLLECTION_FINISHED_EVENT = "collectionFinished"
 
 class DeviceKitModule(
         private val reactContext: ReactApplicationContext
 ) : ReactContextBaseJavaModule(reactContext) {
     override fun getName() = MODULE_NAME
+
+    override fun getConstants() = mapOf(
+            EVENT_PREFIX to EVENT_PREFIX,
+            "EVENTS" to listOf(
+                    DATA_EVENT, DEVICE_FOUND_EVENT, DEVICE_CONNECTED_EVENT,
+                    DEVICE_DISCONNECTED_EVENT, AMBIGUOUS_DEVICE_FOUND_EVENT,
+                    SCAN_FINISHED_EVENT, COLLECTION_FINISHED_EVENT
+            )
+    )
 
     private val eventEmitter by lazy {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
@@ -22,7 +41,7 @@ class DeviceKitModule(
     private var cancellationTokens = mutableListOf<DeviceAddingCancellationToken>()
 
     private fun sendEvent(eventName: String, params: Any?) {
-        eventEmitter.emit("$MODULE_NAME:$eventName", params)
+        eventEmitter.emit("$EVENT_PREFIX:$eventName", params)
     }
 
     private fun mapDeviceDescription(device: IDeviceDescription): WritableMap =
@@ -48,17 +67,17 @@ class DeviceKitModule(
     fun startScan() {
         scannerToken = MedMDeviceKit.getScanner().start(object : IScannerCallback {
             override fun onDeviceFound(device: IDeviceDescription) {
-                sendEvent("deviceFound", mapDeviceDescription(device))
+                sendEvent(DEVICE_FOUND_EVENT, mapDeviceDescription(device))
             }
 
             override fun onAmbiguousDeviceFound(devices: Array<IDeviceDescription>) {
                 for (d in devices) {
-                    sendEvent("ambiguousDeviceFound", mapDeviceDescription(d))
+                    sendEvent(AMBIGUOUS_DEVICE_FOUND_EVENT, mapDeviceDescription(d))
                 }
             }
 
             override fun onScanFinished() {
-                sendEvent("scanFinished", null)
+                sendEvent(SCAN_FINISHED_EVENT, null)
             }
         })
     }
@@ -91,7 +110,7 @@ class DeviceKitModule(
     }
 
     @ReactMethod
-    fun cancelPairing() {
+    fun cancelPairings() {
         for (token in cancellationTokens) token.cancel()
     }
 
@@ -100,23 +119,23 @@ class DeviceKitModule(
         MedMDeviceKit.getCollector().start(
                 object : IDataCallback {
                     override fun onNewData(device: IDeviceDescription, data: String) {
-                        sendEvent("data", Arguments.makeNativeMap(mapOf(
+                        sendEvent(DATA_EVENT, Arguments.makeNativeMap(mapOf(
                                 "data" to data,
                                 "device" to mapDeviceDescription(device)
                         )))
                     }
 
                     override fun onDataCollectionStopped() {
-                        sendEvent("collectionFinished", null)
+                        sendEvent(COLLECTION_FINISHED_EVENT, null)
                     }
                 },
                 object : IDeviceStatusCallback {
                     override fun onConnected(device: IDeviceDescription) {
-                        sendEvent("deviceConnected", mapDeviceDescription(device))
+                        sendEvent(DEVICE_CONNECTED_EVENT, mapDeviceDescription(device))
                     }
 
                     override fun onDisconnected(device: IDeviceDescription) {
-                        sendEvent("deviceDisconnected", mapDeviceDescription(device))
+                        sendEvent(DEVICE_DISCONNECTED_EVENT, mapDeviceDescription(device))
                     }
                 }
         )

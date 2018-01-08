@@ -1,23 +1,9 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
-import React, { Component } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  Button,
-  DeviceEventEmitter
-} from 'react-native';
+import React, { Component } from 'react'
+import { Platform, StyleSheet, Text, View, FlatList, Button }  from 'react-native'
 import { List, ListItem, Header } from "react-native-elements"
 import { StackNavigator, DrawerNavigator } from 'react-navigation'
 import Icon from 'react-native-vector-icons/FontAwesome'
-import DeviceKit from './DeviceKit'
+import DeviceKit, { Device, Reading } from './device_kit'
 
 let HomeScreen = ({ navigation }) => (
   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -29,10 +15,14 @@ let HomeScreen = ({ navigation }) => (
   </View>
 );
 
-class SettingsScreen extends Component<{}> {
+interface SettingsScreenState {
+  devices: Device[]
+}
+
+class SettingsScreen extends Component<any, any> {
   constructor(props) {
     super(props);
-    this.state = {devices: []};
+    this.state = { devices: [] };
   }
 
   render() {
@@ -52,15 +42,15 @@ class SettingsScreen extends Component<{}> {
     );
   }
 
-  componentDidMount() {
+  componentWillMount() {
     DeviceKit.init('device-kit-demo-key').then(() => {
-      this.deviceObserver = DeviceEventEmitter.addListener('DeviceKit:deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
+      DeviceKit.on('deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
       DeviceKit.startScan()
     })
   }
 
   componentWillUnmount() {
-    this.deviceObserver.remove()
+    DeviceKit.removeAllListeners('deviceFound')
     DeviceKit.stopScan()
   }
 }

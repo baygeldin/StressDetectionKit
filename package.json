@@ -4,7 +4,12 @@
 	"private": true,
 	"scripts": {
 		"start": "node node_modules/react-native/local-cli/cli.js start",
-		"test": "jest"
+		"test": "jest",
+		"tsc": "tsc",
+		"clean": "rimraf build",
+		"build": "npm run clean && npm run tsc --",
+		"lint": "tslint src/**/*.ts",
+		"haul": "haul"
 	},
 	"dependencies": {
 		"react": "16.0.0",
@@ -14,10 +19,23 @@
 		"react-navigation": "^1.0.0-beta.21"
 	},
 	"devDependencies": {
+		"@types/jest": "^21.1.9",
+		"@types/node": "^8.5.7",
+		"@types/react": "^16.0.31",
+		"@types/react-native": "^0.51.7",
 		"babel-jest": "21.2.0",
+		"babel-loader": "^7.1.2",
 		"babel-preset-react-native": "4.0.0",
+		"concurrently": "^3.5.1",
+		"haul": "^1.0.0-beta.11",
 		"jest": "21.2.1",
-		"react-test-renderer": "16.0.0"
+		"react-test-renderer": "16.0.0",
+		"rimraf": "^2.6.2",
+		"ts-loader": "^3.2.0",
+		"tslint": "^5.8.0",
+		"tslint-microsoft-contrib": "^5.0.1",
+		"tslint-react": "^3.2.0",
+		"typescript": "^2.6.2"
 	},
 	"jest": {
 		"preset": "react-native"
