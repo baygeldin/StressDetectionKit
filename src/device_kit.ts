@@ -46,7 +46,15 @@ class DeviceKit extends EventEmitter {
     return super.removeAllListeners(event)
   }
 
+  private initialized = false
+
   init(key: string): Promise<void> {
+    if (this.initialized) {
+      return Promise.resolve()
+    }
+
+    this.initialized = true
+
     for (let e of EVENTS) {
       DeviceEventEmitter.addListener(`${EVENT_PREFIX}:${e}`, (d) => {
         d !== null ? this.emit(e, d) : this.emit(e)
