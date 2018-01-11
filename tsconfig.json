@@ -12,24 +12,13 @@
     "allowJs": false,
     "sourceMap": true,
     "noImplicitReturns": true,
-    "noUnusedParameters": true,
-    "noUnusedLocals": true
+    "strictNullChecks": true,
+    "strictFunctionTypes": true
   },
-  "filesGlob": [
-    "typings/index.d.ts",
-    "app/**/*.ts",
-    "app/**/*.tsx"
-  ],
   "types": [
     "react",
     "react-native",
-    "jest"
-  ],
-  "exclude": [
-    "android",
-    "ios",
-    "build",
-    "node_modules"
-  ],
-  "compileOnSave": false
+    "jest",
+    "node"
+  ]
 }

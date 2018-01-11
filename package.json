@@ -3,13 +3,15 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"start": "node node_modules/react-native/local-cli/cli.js start",
+		"start": "haul start --platform all",
 		"test": "jest",
-		"tsc": "tsc",
 		"clean": "rimraf build",
 		"build": "npm run clean && npm run tsc --",
 		"lint": "tslint src/**/*.ts",
-		"haul": "haul"
+		"android": "haul start --platform android",
+		"ios": "haul start --platform ios",
+		"reload": "haul reload",
+		"reverse": "adb reverse tcp:8081 tcp:8081"
 	},
 	"dependencies": {
 		"react": "16.0.0",

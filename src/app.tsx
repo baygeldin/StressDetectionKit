@@ -42,11 +42,9 @@ class SettingsScreen extends Component<any, any> {
     );
   }
 
-  componentWillMount() {
-    DeviceKit.init('device-kit-demo-key').then(() => {
-      DeviceKit.on('deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
-      DeviceKit.startScan()
-    })
+  componentDidMount() {
+    DeviceKit.on('deviceFound', (d) => this.setState({ devices: [...this.state.devices, d] }))
+    DeviceKit.startScan()
   }
 
   componentWillUnmount() {
@@ -73,4 +71,21 @@ const RootNavigator = StackNavigator({
   },
 });
 
-export default RootNavigator;
+class App extends Component<any,any> {
+  constructor(props) {
+    super(props)
+    this.state = { init: false }
+  }
+
+  render() {
+    return this.state.init ? <RootNavigator /> : <Text>Wait...</Text>
+  }
+
+  componentDidMount() {
+    DeviceKit.init('device-kit-demo-key').then(() => {
+      this.setState({ init: true })
+    })
+  }
+}
+
+export default App;

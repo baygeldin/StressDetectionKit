@@ -24,7 +24,7 @@ class DeviceKitModule(
     override fun getName() = MODULE_NAME
 
     override fun getConstants() = mapOf(
-            EVENT_PREFIX to EVENT_PREFIX,
+            "EVENT_PREFIX" to EVENT_PREFIX,
             "EVENTS" to listOf(
                     DATA_EVENT, DEVICE_FOUND_EVENT, DEVICE_CONNECTED_EVENT,
                     DEVICE_DISCONNECTED_EVENT, AMBIGUOUS_DEVICE_FOUND_EVENT,

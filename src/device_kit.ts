@@ -1,6 +1,5 @@
 import { NativeModules, DeviceEventEmitter } from 'react-native'
 import { EventEmitter } from 'events'
-import { removeListener, removeAllListeners } from 'cluster';
 
 export interface Device {
   id: String,
@@ -22,10 +21,10 @@ type DEVICE_DISCONNECTED = 'deviceDisconnected'
 type AMBIGUOUS_DEVICE_FOUND = 'ambiguousDeviceFound'
 type SCAN_FINISHED = 'scanFinished'
 type COLLECTION_FINISHED = 'collectionFinished'
-type EVENTS = DATA | DEVICE_FOUND | DEVICE_CONNECTED | DEVICE_DISCONNECTED |
-  AMBIGUOUS_DEVICE_FOUND | SCAN_FINISHED | COLLECTION_FINISHED
-
-// TODO: typeof EVENTS... compare to EVENTS array and throw error if anything.
+type DEVICE_EVENTS = DEVICE_FOUND | DEVICE_CONNECTED |
+  DEVICE_DISCONNECTED | AMBIGUOUS_DEVICE_FOUND
+type STATE_EVENTS = SCAN_FINISHED | COLLECTION_FINISHED
+type EVENTS = DATA | DEVICE_EVENTS | STATE_EVENTS
 
 const DeviceKitModule = NativeModules.DeviceKit
 const { EVENT_PREFIX, EVENTS } = DeviceKitModule
@@ -33,12 +32,8 @@ const { EVENT_PREFIX, EVENTS } = DeviceKitModule
 // Wrapper for native DeviceKit with type declarations
 class DeviceKit extends EventEmitter {
   on(event: DATA, fn: (reading: Reading) => void): this
-  on(event: DEVICE_FOUND, fn: (device: Device) => void): this
-  on(event: DEVICE_CONNECTED, fn: (device: Device) => void): this
-  on(event: DEVICE_DISCONNECTED, fn: (device: Device) => void): this
-  on(event: AMBIGUOUS_DEVICE_FOUND, fn: (device: Device) => void): this
-  on(event: SCAN_FINISHED, fn: () => void): this
-  on(event: COLLECTION_FINISHED, fn: () => void): this
+  on(event: DEVICE_EVENTS, fn: (device: Device) => void): this
+  on(event: STATE_EVENTS, fn: () => void): this
   on(event: string, fn: (...args: any[]) => void) {
     return super.on(event, fn)
   }
