@@ -4,8 +4,8 @@ import { List, ListItem, Header } from "react-native-elements"
 import { StackNavigator, DrawerNavigator, NavigationRouteConfigMap, NavigationRouteConfig, NavigationScreenConfig } from 'react-navigation'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import DeviceKit, { Device, Reading } from './device_kit'
-import { observable, action, useStrict } from 'mobx'
-import { observer } from 'mobx-react/native'
+import { observable, action, useStrict, toJS } from 'mobx'
+import { observer, Observer } from 'mobx-react/native'
 
 useStrict(true)
 
@@ -21,6 +21,21 @@ class Store {
     if (!this.devices.find((_d) => _d.id == d.id)) {
       this.devices.push(d)
     }
+  }
+
+  @observable.ref navigationState = {
+    index: 0,
+    routes: [
+      { key: "Index", routeName: "Index" },
+    ],
+  }
+
+  // NOTE: the second param, is to avoid stacking and reset the nav state
+  @action dispatch = (action: any, stackNavState = true) => {
+    const previousNavState = stackNavState ? this.navigationState : null;
+    return this.navigationState = RootNavigator
+        .router
+        .getStateForAction(action, previousNavState);
   }
 }
 
@@ -39,16 +54,14 @@ let HomeScreen = ({ navigation }: { navigation: any }) => (
 @observer
 class SettingsScreen extends Component<any, any> {
   render() {
-    console.log('DAMN: yup')
     return (
       <View style={{ flex: 1 }}>
         <List>
           <FlatList
-            data={store.devices}
+            data={toJS(store.devices)}
             keyExtractor={(i) => i.id}
             renderItem={({ item }) => {
-              let title = `${item.manufacturer} ${item.modelName}`
-              return <ListItem title={title} subtitle={item.address} />
+              return <ListItem title={`${item.manufacturer} ${item.modelName}`} subtitle={item.address} />
             }}
           />
         </List>
@@ -57,10 +70,7 @@ class SettingsScreen extends Component<any, any> {
   }
 
   componentDidMount() {
-    DeviceKit.on('deviceFound', (d) => {
-      store.addDevice(d)
-      this.forceUpdate() // WTF, WHY IT DOESN'T UPDATE AUTOMATICALLY, WHERE IS MY MAGIC?!
-    })
+    DeviceKit.on('deviceFound', (d) => store.addDevice(d))
     DeviceKit.startScan()
   }
 
