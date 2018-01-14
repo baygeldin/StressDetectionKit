@@ -15,12 +15,10 @@
     "noImplicitReturns": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "experimentalDecorators": true
-  },
-  "types": [
-    "react",
-    "react-native",
-    "jest",
-    "node"
-  ]
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["@types/*"]
+    }
+  }
 }

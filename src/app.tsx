@@ -6,9 +6,11 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import DeviceKit, { Device, Reading } from './device_kit'
 import { observable, action, useStrict, toJS } from 'mobx'
 import { observer, Observer } from 'mobx-react/native'
+import remotedev from 'mobx-remotedev'
 
 useStrict(true)
 
+@remotedev
 class Store {
   @observable initialized = false
   @observable devices: Device[] = []
