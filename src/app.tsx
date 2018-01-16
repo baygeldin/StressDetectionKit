@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Platform, StyleSheet, Text, View, FlatList, Button }  from 'react-native'
 import { List, ListItem, Header } from "react-native-elements"
-import { StackNavigator, DrawerNavigator, NavigationRouteConfigMap, NavigationRouteConfig, NavigationScreenConfig } from 'react-navigation'
+import { StackNavigator, DrawerNavigator } from 'react-navigation'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import DeviceKit, { Device, Reading } from './device_kit'
 import { observable, action, useStrict, toJS } from 'mobx'

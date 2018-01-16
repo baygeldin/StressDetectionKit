@@ -29,23 +29,16 @@ type EVENTS = DATA | DEVICE_EVENTS | STATE_EVENTS
 const DeviceKitModule = NativeModules.DeviceKit
 const { EVENT_PREFIX, EVENTS } = DeviceKitModule
 
-// Wrapper for native DeviceKit with type declarations
-class DeviceKit extends EventEmitter {
+interface DeviceKit {
   on(event: DATA, fn: (reading: Reading) => void): this
   on(event: DEVICE_EVENTS, fn: (device: Device) => void): this
   on(event: STATE_EVENTS, fn: () => void): this
-  on(event: string, fn: (...args: any[]) => void) {
-    return super.on(event, fn)
-  }
+  removeListener(event: EVENTS, fn: (...args: any[]) => void): this
+  removeAllListeners(event: EVENTS): this
+}
 
-  removeListener(event: EVENTS, fn: (...args: any[]) => void) {
-    return super.removeListener(event, fn)
-  }
-
-  removeAllListeners(event: EVENTS) {
-    return super.removeAllListeners(event)
-  }
-
+// Wrapper for native DeviceKit with type declarations
+class DeviceKit extends EventEmitter {
   private initialized = false
 
   init(key: string): Promise<void> {
