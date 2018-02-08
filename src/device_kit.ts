@@ -33,11 +33,16 @@ interface DeviceKit {
   on(event: DATA, fn: (reading: Reading) => void): this
   on(event: DEVICE_EVENTS, fn: (device: Device) => void): this
   on(event: STATE_EVENTS, fn: () => void): this
+  once(event: DATA, fn: (reading: Reading) => void): this
+  once(event: DEVICE_EVENTS, fn: (device: Device) => void): this
+  once(event: STATE_EVENTS, fn: () => void): this
+  emit(event: DATA, data: Reading): boolean
+  emit(event: DEVICE_EVENTS, data: Device): boolean
+  emit(event: STATE_EVENTS): boolean
   removeListener(event: EVENTS, fn: (...args: any[]) => void): this
   removeAllListeners(event: EVENTS): this
 }
 
-// Wrapper for native DeviceKit with type declarations
 class DeviceKit extends EventEmitter {
   private initialized = false
 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Platform, StyleSheet, Text, View, FlatList, Button }  from 'react-native'
+import { Platform, StyleSheet, Text, View, FlatList, Button, BackHandler }  from 'react-native'
 import { List, ListItem, Header } from "react-native-elements"
-import { StackNavigator, DrawerNavigator } from 'react-navigation'
+import { StackNavigator, NavigationActions, addNavigationHelpers, NavigationRouter } from 'react-navigation'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import DeviceKit, { Device, Reading } from './device_kit'
 import { observable, action, useStrict, toJS } from 'mobx'
@@ -19,35 +19,45 @@ class Store {
     this.initialized = true
   }
 
-  @action addDevice(d: Device) {
-    if (!this.devices.find((_d) => _d.id == d.id)) {
-      this.devices.push(d)
+  @action addDevice(device: Device) {
+    if (!this.devices.find((d) => d.id == device.id)) {
+      this.devices.push(device)
     }
   }
+}
 
-  @observable.ref navigationState = {
-    index: 0,
-    routes: [
-      { key: "Index", routeName: "Index" },
-    ],
+let initRoute = NavigationActions.navigate({ routeName: 'Home' })
+
+@remotedev
+class Navigation {
+  constructor(public router: NavigationRouter<any, any, any>) {}
+
+  @observable.ref state = this.router.getStateForAction(initRoute, null);
+  
+  @action dispatch = (action: any) => {
+    return this.state = this.router.getStateForAction(action, this.state);
   }
 
-  // NOTE: the second param, is to avoid stacking and reset the nav state
-  @action dispatch = (action: any, stackNavState = true) => {
-    const previousNavState = stackNavState ? this.navigationState : null;
-    return this.navigationState = RootNavigator
-        .router
-        .getStateForAction(action, previousNavState);
+  reset() {
+    this.dispatch(NavigationActions.reset({ index: 0, actions: [initRoute] }));
+  }
+
+  goBack() {
+    this.dispatch(NavigationActions.back());
+  }
+
+  goTo(route: string) {
+    this.dispatch(NavigationActions.navigate({ routeName: route }));
   }
 }
 
 const store = new Store()
 
-let HomeScreen = ({ navigation }: { navigation: any }) => (
+let HomeScreen = () => (
   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
     <Text>Home Screen</Text>
     <Button
-      onPress={() => navigation.navigate('Settings')}
+      onPress={() => navigation.goTo('Settings')}
       title="Go to settings"
     />
   </View>
@@ -85,9 +95,12 @@ class SettingsScreen extends Component<any, any> {
 const RootNavigator = StackNavigator({
   Home: {
     screen: HomeScreen,
-    navigationOptions: ({ navigation }: { navigation: any }) => ({
+    navigationOptions: () => ({
       headerTitle: 'Reactive Device Kit',
-      headerRight: (<Icon.Button name="cog" style={{backgroundColor: 'white'}} color="black" onPress={() => navigation.navigate('Settings')} />)
+      headerRight: (
+        <Icon.Button name="cog" style={{backgroundColor: 'white'}} color="black"
+          onPress={() => navigation.goTo('Settings')} />
+      )
     })
   },
   Settings: {
@@ -98,14 +111,29 @@ const RootNavigator = StackNavigator({
   }
 })
 
+const navigation = new Navigation(RootNavigator.router)
+
 @observer
 class App extends Component<any, any> {
   render() {
-    return store.initialized ? <RootNavigator /> : <Text>Wait...</Text>
+    return store.initialized ? <RootNavigator navigation={addNavigationHelpers({ state: navigation.state, dispatch: navigation.dispatch })} /> : <View />
   }
 
   componentDidMount() {
-    DeviceKit.init('device-kit-demo-key').then(() => store.initialize())
+    DeviceKit.init('device-kit-demo-key').then(() => store.initialize());
+    
+    BackHandler.addEventListener('hardwareBackPress', () => {
+      if (navigation.state.index === 0) {
+        return false;
+      } else {
+        navigation.goBack();
+        return true;
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', navigation.goBack);
   }
 }
 
