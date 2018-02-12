@@ -19,7 +19,9 @@
     "baseUrl": "./",
     "paths": {
       "*": ["@types/*"],
-      "DeviceKit": ["src/device-kit.ts"]
+      "lib/*": ["src/lib/*"],
+      "screens/*": ["src/screens/*"],
+      "stores/*": ["src/stores/*"]
     }
   }
 }

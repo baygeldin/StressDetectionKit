@@ -91,4 +91,7 @@ class DeviceKit extends EventEmitter {
   }
 }
 
+// This is a singleton instance for a reason. Since it's just a wrapper around native
+// DeviceKit SDK which is inherently a singleton, there's no benefits in exporting a class.
+
 export default new DeviceKit()

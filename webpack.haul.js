@@ -33,7 +33,9 @@ module.exports = ({ platform }, defaults) => ({
     ],
     alias: {
       ...defaults.resolve.alias,
-      DeviceKit: path.resolve(__dirname, 'src/device-kit.ts')
+      lib: path.resolve(__dirname, 'src/lib/'),
+      screens: path.resolve(__dirname, 'src/screens/'),
+      stores: path.resolve(__dirname, 'src/stores/')
     }
   },
   plugins: [
