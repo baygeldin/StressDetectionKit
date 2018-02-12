@@ -1,7 +1,9 @@
-module.exports = ({ platform }, { module, resolve }) => ({
+const path = require('path');
+
+module.exports = ({ platform }, defaults) => ({
   entry: `./src/index.ts`,
   module: {
-    ...module,
+    ...defaults.module,
     rules: [
       {
         test: /\.tsx?$/,
@@ -12,14 +14,14 @@ module.exports = ({ platform }, { module, resolve }) => ({
           },
           {
             loader: 'ts-loader'
-          },
-        ],
+          }
+        ]
       },
-      ...module.rules
+      ...defaults.module.rules
     ]
   },
   resolve: {
-    ...resolve,
+    ...defaults.resolve,
     extensions: [
       '.ts',
       '.tsx',
@@ -27,7 +29,14 @@ module.exports = ({ platform }, { module, resolve }) => ({
       '.native.ts',
       `.${platform}.tsx`,
       '.native.tsx',
-      ...resolve.extensions
-    ]
-  }
-})
+      ...defaults.resolve.extensions
+    ],
+    alias: {
+      ...defaults.resolve.alias,
+      DeviceKit: path.resolve(__dirname, 'src/device-kit.ts')
+    }
+  },
+  plugins: [
+    ...defaults.plugins
+  ]
+});

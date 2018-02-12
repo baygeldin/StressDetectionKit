@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { Platform, StyleSheet, Text, View, FlatList, Button, BackHandler }  from 'react-native'
 import { List, ListItem, Header } from "react-native-elements"
-import { StackNavigator, NavigationActions, addNavigationHelpers, NavigationRouter } from 'react-navigation'
+import { StackNavigator, NavigationActions, addNavigationHelpers, NavigationRouter, NavigationNavigateAction } from 'react-navigation'
 import Icon from 'react-native-vector-icons/FontAwesome'
-import DeviceKit, { Device, Reading } from './device_kit'
+import DeviceKit, { Device, Reading } from 'DeviceKit'
 import { observable, action, useStrict, toJS } from 'mobx'
 import { observer, Observer } from 'mobx-react/native'
 import remotedev from 'mobx-remotedev'
@@ -26,20 +26,24 @@ class Store {
   }
 }
 
-let initRoute = NavigationActions.navigate({ routeName: 'Home' })
+let initRoute = NavigationActions.navigate({ routeName: 'Home' });
 
 @remotedev
 class Navigation {
-  constructor(public router: NavigationRouter<any, any, any>) {}
+  router: NavigationRouter<any, any, any>;
 
-  @observable.ref state = this.router.getStateForAction(initRoute, null);
+  configure (router: NavigationRouter<any, any, any>) {
+    this.router = router;
+  }
+
+  @observable.ref state: any;
   
   @action dispatch = (action: any) => {
     return this.state = this.router.getStateForAction(action, this.state);
   }
 
-  reset() {
-    this.dispatch(NavigationActions.reset({ index: 0, actions: [initRoute] }));
+  @action reset() {
+    this.state = this.router.getStateForAction(NavigationActions.init(), null);
   }
 
   goBack() {
@@ -49,22 +53,42 @@ class Navigation {
   goTo(route: string) {
     this.dispatch(NavigationActions.navigate({ routeName: route }));
   }
+
+  goToSettings() {
+    this.goTo('Settings');
+  }
 }
 
 const store = new Store()
 
-let HomeScreen = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>Home Screen</Text>
-    <Button
-      onPress={() => navigation.goTo('Settings')}
-      title="Go to settings"
-    />
-  </View>
-)
+class HomeScreen extends Component<any, any> {
+  static navigationOptions = {
+    title: 'Stress Detection Kit',
+    headerRight: (
+      <Icon.Button name="cog" style={{backgroundColor: 'white'}} color="black"
+        onPress={() => navigation.goToSettings()} />
+    )
+  }
+
+  render() {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>Home Screen</Text>
+        <Button
+          onPress={() => navigation.goToSettings()}
+          title="Go to settings"
+        />
+      </View>
+    )
+  }
+}
 
 @observer
 class SettingsScreen extends Component<any, any> {
+  static navigationOptions = {
+    title: 'Settings'
+  }
+
   render() {
     return (
       <View style={{ flex: 1 }}>
@@ -92,26 +116,16 @@ class SettingsScreen extends Component<any, any> {
   }
 }
 
+const SETTINGS = 'Settings'
+
 const RootNavigator = StackNavigator({
-  Home: {
-    screen: HomeScreen,
-    navigationOptions: () => ({
-      headerTitle: 'Reactive Device Kit',
-      headerRight: (
-        <Icon.Button name="cog" style={{backgroundColor: 'white'}} color="black"
-          onPress={() => navigation.goTo('Settings')} />
-      )
-    })
-  },
-  Settings: {
-    screen: SettingsScreen,
-    navigationOptions: {
-      headerTitle: 'Settings',
-    }
-  }
+  Home: { screen: HomeScreen },
+  [SETTINGS]: { screen: SettingsScreen }
 })
 
-const navigation = new Navigation(RootNavigator.router)
+const navigation = new Navigation();
+navigation.configure(RootNavigator.router);
+navigation.reset();
 
 @observer
 class App extends Component<any, any> {
@@ -137,4 +151,4 @@ class App extends Component<any, any> {
   }
 }
 
-export default App
+export default App;

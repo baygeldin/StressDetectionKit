@@ -16,9 +16,10 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "experimentalDecorators": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
-      "*": ["@types/*"]
+      "*": ["@types/*"],
+      "DeviceKit": ["src/device-kit.ts"]
     }
   }
 }

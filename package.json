@@ -39,6 +39,7 @@
 		"react-test-renderer": "16.0.0",
 		"rimraf": "^2.6.2",
 		"ts-loader": "^3.2.0",
+		"awesome-typescript-loader": "^3.4.1",
 		"tslint": "^5.8.0",
 		"tslint-microsoft-contrib": "^5.0.1",
 		"tslint-react": "^3.2.0",
