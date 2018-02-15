@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react/native';
 import { View, FlatList }  from 'react-native';
 import { List, ListItem } from 'react-native-elements';
-import DeviceKit from 'lib/device-kit';
+import Component from 'lib/component';
 
-@inject('store')
+@inject('store', 'sdk')
 @observer
-export default class extends Component<any, any> {
+export default class extends Component<{}, {}> {
   static navigationOptions = {
     title: 'Settings'
   }
@@ -18,7 +18,7 @@ export default class extends Component<any, any> {
       <View style={{ flex: 1 }}>
         <List>
           <FlatList
-            data={toJS(this.props.store.devices)}
+            data={toJS(this.store.devices)}
             keyExtractor={(i) => i.id}
             renderItem={({ item }) => {
               return <ListItem title={`${item.manufacturer} ${item.modelName}`} subtitle={item.address} />
@@ -30,12 +30,12 @@ export default class extends Component<any, any> {
   }
 
   componentDidMount() {
-    DeviceKit.on('deviceFound', (d) => this.props.store.addDevice(d))
-    DeviceKit.startScan()
+    this.sdk.on('deviceFound', (d) => this.store.addDevice(d));
+    this.sdk.startScan();
   }
 
   componentWillUnmount() {
-    DeviceKit.removeAllListeners('deviceFound')
-    DeviceKit.stopScan()
+    this.sdk.removeAllListeners('deviceFound');
+    this.sdk.stopScan();
   }
 }

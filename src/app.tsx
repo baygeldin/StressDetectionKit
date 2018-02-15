@@ -4,8 +4,7 @@ import { StackNavigator, addNavigationHelpers } from 'react-navigation';
 import DeviceKit from 'lib/device-kit';
 import { observable, action, useStrict } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
-
-import Navigation from 'stores/navigation';
+import Router from 'stores/router';
 import Store from 'stores/main';
 import HomeScreen from 'screens/home';
 import SettingsScreen from 'screens/settings';
@@ -18,36 +17,36 @@ const RootNavigator = StackNavigator({
 });
 
 const store = new Store();
-const navigation = new Navigation(RootNavigator.router);
+const router = new Router(RootNavigator.router);
+
+const sdk = new DeviceKit();
 
 @observer
-class App extends Component<any, any> {
+export default class extends Component<any, any> {
   render() {
     if (!store.initialized) return <View />;
     
     return (
-      <Provider navigation={navigation} store={store}>
-        <RootNavigator navigation={addNavigationHelpers(navigation)} />
+      <Provider router={router} store={store} sdk={sdk}>
+        <RootNavigator navigation={addNavigationHelpers(router)} />
       </Provider>
     );
   }
 
   componentDidMount() {
-    DeviceKit.init('device-kit-demo-key').then(() => store.initialize());
+    sdk.register('device-kit-demo-key').then(() => store.initialize());
     
     BackHandler.addEventListener('hardwareBackPress', () => {
-      if (navigation.state.index === 0) {
+      if (router.state.index === 0) {
         return false;
       } else {
-        navigation.goBack();
+        router.goBack();
         return true;
       }
     });
   }
 
   componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', navigation.goBack);
+    BackHandler.removeEventListener('hardwareBackPress', router.goBack);
   }
 }
-
-export default App;

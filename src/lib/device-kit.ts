@@ -1,5 +1,5 @@
-import { NativeModules, DeviceEventEmitter } from 'react-native'
-import { EventEmitter } from 'events'
+import { NativeModules, DeviceEventEmitter } from 'react-native';
+import { EventEmitter } from 'events';
 
 export interface Device {
   id: String,
@@ -14,20 +14,20 @@ export interface Reading {
   source: Device
 }
 
-type DATA = 'data'
-type DEVICE_FOUND = 'deviceFound'
-type DEVICE_CONNECTED = 'deviceConnected'
-type DEVICE_DISCONNECTED = 'deviceDisconnected'
-type AMBIGUOUS_DEVICE_FOUND = 'ambiguousDeviceFound'
-type SCAN_FINISHED = 'scanFinished'
-type COLLECTION_FINISHED = 'collectionFinished'
+type DATA = 'data';
+type DEVICE_FOUND = 'deviceFound';
+type DEVICE_CONNECTED = 'deviceConnected';
+type DEVICE_DISCONNECTED = 'deviceDisconnected';
+type AMBIGUOUS_DEVICE_FOUND = 'ambiguousDeviceFound';
+type SCAN_FINISHED = 'scanFinished';
+type COLLECTION_FINISHED = 'collectionFinished';
 type DEVICE_EVENTS = DEVICE_FOUND | DEVICE_CONNECTED |
-  DEVICE_DISCONNECTED | AMBIGUOUS_DEVICE_FOUND
+  DEVICE_DISCONNECTED | AMBIGUOUS_DEVICE_FOUND;
 type STATE_EVENTS = SCAN_FINISHED | COLLECTION_FINISHED
-type EVENTS = DATA | DEVICE_EVENTS | STATE_EVENTS
+type EVENTS = DATA | DEVICE_EVENTS | STATE_EVENTS;
 
-const DeviceKitModule = NativeModules.DeviceKit
-const { EVENT_PREFIX, EVENTS } = DeviceKitModule
+const DeviceKitModule = NativeModules.DeviceKit;
+const { EVENT_PREFIX, EVENTS } = DeviceKitModule;
 
 interface DeviceKit {
   on(event: DATA, fn: (reading: Reading) => void): this
@@ -44,54 +44,47 @@ interface DeviceKit {
 }
 
 class DeviceKit extends EventEmitter {
-  private initialized = false
-
-  init(key: string): Promise<void> {
-    if (this.initialized) {
-      return Promise.resolve()
-    }
-
-    this.initialized = true
+  constructor() {
+    super();
 
     for (let e of EVENTS) {
       DeviceEventEmitter.addListener(`${EVENT_PREFIX}:${e}`, (d) => {
-        d !== null ? this.emit(e, d) : this.emit(e)
-      })
+        d !== null ? this.emit(e, d) : this.emit(e);
+      });
     }
+  }
 
-    return DeviceKitModule.init(key)
+  register(key: string): Promise<void> {
+    return DeviceKitModule.init(key);
   }
 
   startScan() {
-    DeviceKitModule.startScan()
+    DeviceKitModule.startScan();
   }
 
   stopScan() {
-    DeviceKitModule.stopScan()
+    DeviceKitModule.stopScan();
   }
 
   addDevice(device: Device): Promise<void> {
-    return DeviceKitModule.addDevice(device.address, device.name, device.id)
+    return DeviceKitModule.addDevice(device.address, device.name, device.id);
   }
 
   removeDevice(device: Device) {
-    DeviceKitModule.removeDevice(device.address)
+    DeviceKitModule.removeDevice(device.address);
   }
 
   cancelPairings() {
-    DeviceKitModule.cancelPairings()
+    DeviceKitModule.cancelPairings();
   }
 
   startCollection() {
-    DeviceKitModule.startCollection()
+    DeviceKitModule.startCollection();
   }
 
   stopCollection() {
-    DeviceKitModule.stopCollection()
+    DeviceKitModule.stopCollection();
   }
 }
 
-// This is a singleton instance for a reason. Since it's just a wrapper around native
-// DeviceKit SDK which is inherently a singleton, there's no benefits in exporting a class.
-
-export default new DeviceKit()
+export default DeviceKit;
