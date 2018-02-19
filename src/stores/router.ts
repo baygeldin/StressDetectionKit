@@ -3,13 +3,19 @@ import { observable, action } from 'mobx';
 import { NavigationActions, NavigationRouter } from 'react-navigation';
 
 @remotedev
-export default class {
+export default class Router {
   constructor(public router: NavigationRouter<any, any, any>) {}
 
-  @observable.ref state = this.router.getStateForAction(NavigationActions.init(), null);
-  
-  @action dispatch (action: any, reset = false) {
-    return this.state = this.router.getStateForAction(action, reset ? null : this.state);
+  @observable.ref
+  state = this.router.getStateForAction(NavigationActions.init(), null);
+
+  @action
+  dispatch(action: any, reset = false) {
+    this.state = this.router.getStateForAction(
+      action,
+      reset ? null : this.state
+    );
+    return this.state;
   }
 
   reset() {

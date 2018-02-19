@@ -18,10 +18,18 @@
     "experimentalDecorators": true,
     "baseUrl": "./",
     "paths": {
-      "*": ["@types/*"],
-      "lib/*": ["src/lib/*"],
-      "screens/*": ["src/screens/*"],
-      "stores/*": ["src/stores/*"]
+      "*": [
+        "@types/*"
+      ],
+      "lib/*": [
+        "src/lib/*"
+      ],
+      "screens/*": [
+        "src/screens/*"
+      ],
+      "stores/*": [
+        "src/stores/*"
+      ]
     }
   }
 }
