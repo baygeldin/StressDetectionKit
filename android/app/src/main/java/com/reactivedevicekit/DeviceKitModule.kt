@@ -3,7 +3,6 @@ package com.reactivedevicekit
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.medm.devicekit.*
-import android.util.Log
 
 const val MODULE_NAME = "DeviceKit"
 

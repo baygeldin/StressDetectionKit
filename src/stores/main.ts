@@ -1,5 +1,11 @@
 import remotedev from 'mobx-remotedev';
 import { observable, action } from 'mobx';
+import {
+  Accelerometer,
+  Gyroscope,
+  SensorData,
+  SensorObservable
+} from 'react-native-sensors';
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
 
@@ -11,6 +17,11 @@ export default class Main {
   @observable.shallow devices: Device[] = [];
   @observable.ref currentDevice?: Device;
   @observable.shallow readings: Reading[] = [];
+  @observable.shallow accelerometerData: SensorData[] = [];
+  @observable.shallow gyroscopeData: SensorData[] = [];
+
+  private accelerometer: SensorObservable;
+  private gyroscope: SensorObservable;
 
   constructor(private sdk: DeviceKit) {}
 
@@ -27,8 +38,37 @@ export default class Main {
     if (this.collecting) return;
 
     this.collecting = true;
+
     this.sdk.on('data', r => this.addReading(r));
     this.sdk.startCollection();
+
+    Gyroscope({ updateInterval: 500 })
+      .then(observable => {
+        this.gyroscope = observable;
+
+        this.gyroscope.subscribe(
+          action('addGyroscopeData', (d: SensorData) => {
+            this.gyroscopeData.push(d);
+          })
+        );
+      })
+      .catch(error => {
+        console.error(error);
+      });
+
+    Accelerometer({ updateInterval: 500 })
+      .then(observable => {
+        this.accelerometer = observable;
+
+        this.accelerometer.subscribe(
+          action('addGyroscopeData', (d: SensorData) => {
+            this.accelerometerData.push(d);
+          })
+        );
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   @action
@@ -42,6 +82,8 @@ export default class Main {
 
     this.collecting = false;
     this.sdk.stopCollection();
+    this.accelerometer.stop();
+    this.gyroscope.stop();
   }
 
   startScan() {

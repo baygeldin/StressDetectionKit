@@ -34,6 +34,10 @@ export default class extends Component<{}, {}> {
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>
+          Accelerometer data collected: {this.store.accelerometerData.length}
+        </Text>
+        <Text>Gyroscope data collected: {this.store.gyroscopeData.length}</Text>
         <Text>Readings collected: {this.store.readings.length}</Text>
         <Button onPress={cb} title={title} />
       </View>
