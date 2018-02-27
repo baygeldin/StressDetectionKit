@@ -33,7 +33,7 @@ export default class extends Component<any, any> {
   }
 
   componentDidMount() {
-    store.initialize('device-kit-demo-key');
+    store.initialize(process.env.MEDM_DEVICEKIT_LICENSE_KEY!);
 
     BackHandler.addEventListener('hardwareBackPress', () => {
       if (router.state.index === 0) {

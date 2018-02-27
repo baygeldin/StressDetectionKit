@@ -54,9 +54,18 @@ buck-out/
 */fastlane/screenshots
 
 # vim
+#
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
 
 # Haul
 #
 haul-debug.log
+
+# Proprietary
+#
+android/app/libs/MedMDeviceKit.aar
+
+# Local setup helper
+#
+configure.sh
