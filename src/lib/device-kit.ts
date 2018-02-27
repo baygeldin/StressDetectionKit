@@ -77,6 +77,10 @@ class DeviceKit extends EventEmitter {
     DeviceKitModule.removeDevice(device.address);
   }
 
+  fetchDevices(): Promise<Device[]> {
+    return DeviceKitModule.listDevices();
+  }
+
   cancelPairings() {
     DeviceKitModule.cancelPairings();
   }

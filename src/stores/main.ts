@@ -26,11 +26,19 @@ export default class Main {
   constructor(private sdk: DeviceKit) {}
 
   initialize(key: string) {
-    this.sdk.register(key).then(
-      action('initialize', () => {
-        this.initialized = true;
-      })
-    );
+    this.sdk
+      .register(key)
+      .then(() => this.sdk.fetchDevices())
+      .then(
+        action('initialize', (devices: Device[]) => {
+          this.initialized = true;
+          this.devices = devices;
+
+          if (devices[0]) {
+            this.currentDevice = devices[0];
+          }
+        })
+      );
   }
 
   @action
@@ -61,7 +69,7 @@ export default class Main {
         this.accelerometer = observable;
 
         this.accelerometer.subscribe(
-          action('addGyroscopeData', (d: SensorData) => {
+          action('addAccelerometerData', (d: SensorData) => {
             this.accelerometerData.push(d);
           })
         );

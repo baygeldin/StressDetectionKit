@@ -110,6 +110,12 @@ class DeviceKitModule(
     }
 
     @ReactMethod
+    fun listDevices(promise: Promise) {
+        val devices = MedMDeviceKit.getDeviceManager().devicesList.map { mapDeviceDescription(it) }
+        promise.resolve(Arguments.makeNativeArray<WritableMap>(devices.toTypedArray()))
+    }
+
+    @ReactMethod
     fun cancelPairings() {
         for (token in cancellationTokens) token.cancel()
     }
