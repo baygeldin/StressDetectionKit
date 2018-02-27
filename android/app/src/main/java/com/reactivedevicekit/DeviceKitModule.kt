@@ -88,7 +88,7 @@ class DeviceKitModule(
     }
 
     @ReactMethod
-    fun addDevice(address: String, name: String, sku: Int, promise: Promise) {
+    fun addDevice(address: String, sku: Int, promise: Promise) {
         val callback = object : IAddDeviceCallback {
             override fun onFailure(device: IDeviceDescription) {
                 val device = mapDeviceDescription(device).toString()
@@ -101,7 +101,7 @@ class DeviceKitModule(
             }
         }
         cancellationTokens.add(MedMDeviceKit.getDeviceManager()
-                .addDeviceManually(address, name, sku, callback))
+                .addDeviceManually(address, sku, callback))
     }
 
     @ReactMethod

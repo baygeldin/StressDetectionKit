@@ -70,7 +70,7 @@ class DeviceKit extends EventEmitter {
   }
 
   addDevice(device: Device): Promise<void> {
-    return DeviceKitModule.addDevice(device.address, device.name, device.id);
+    return DeviceKitModule.addDevice(device.address, device.id);
   }
 
   removeDevice(device: Device) {
