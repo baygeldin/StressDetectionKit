@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, BackHandler } from 'react-native';
+import { View, BackHandler, PermissionsAndroid, Alert } from 'react-native';
 import { StackNavigator, addNavigationHelpers } from 'react-navigation';
 import { observable, action, useStrict } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
@@ -34,6 +34,21 @@ export default class extends Component<any, any> {
 
   componentDidMount() {
     store.initialize(process.env.MEDM_DEVICEKIT_LICENSE_KEY!);
+
+    PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+    ]).then(permissions => {
+      if (!Object.values(permissions).every(p => p === 'granted')) {
+        Alert.alert(
+          'Permissions Not Granted',
+          'Requested permissions are required for the app to work properly. Please, grant them next time.',
+          [{ text: 'OK' }],
+          { cancelable: false }
+        );
+      }
+    });
 
     BackHandler.addEventListener('hardwareBackPress', () => {
       if (router.state.index === 0) {

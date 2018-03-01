@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "target": "es2017",
     "module": "es2015",
     "moduleResolution": "node",
     "jsx": "react",
@@ -18,18 +18,10 @@
     "experimentalDecorators": true,
     "baseUrl": "./",
     "paths": {
-      "*": [
-        "@types/*"
-      ],
-      "lib/*": [
-        "src/lib/*"
-      ],
-      "screens/*": [
-        "src/screens/*"
-      ],
-      "stores/*": [
-        "src/stores/*"
-      ]
+      "*": ["@types/*"],
+      "lib/*": ["src/lib/*"],
+      "screens/*": ["src/screens/*"],
+      "stores/*": ["src/stores/*"]
     }
   }
 }
