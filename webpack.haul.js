@@ -1,15 +1,6 @@
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = ({ platform }, defaults) => {
-  let definePluginId = defaults.plugins.findIndex(
-    p => p.constructor.name === 'DefinePlugin'
-  );
-
-  defaults.plugins[definePluginId].definitions['process.env'][
-    'MEDM_DEVICEKIT_LICENSE_KEY'
-  ] = JSON.stringify(process.env.MEDM_DEVICEKIT_LICENSE_KEY);
-
   return {
     entry: `./src/index.ts`,
     module: {
