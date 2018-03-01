@@ -1,9 +1,9 @@
 package com.reactivedevicekit
 
+import android.util.Log
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.medm.devicekit.*
-import android.util.Log
 
 const val MODULE_NAME = "DeviceKit"
 
@@ -43,6 +43,8 @@ class DeviceKitModule(
     private var collectionToken: CollectorStopToken? = null
     private var cancellationTokens = mutableListOf<DeviceAddingCancellationToken>()
 
+    private var foundDevices = mutableListOf<IDeviceDescription>()
+
     private fun sendEvent(eventName: String, params: Any?) {
         Log.i(TAG, "Send '$eventName' event.")
         eventEmitter.emit("$EVENT_PREFIX:$eventName", params)
@@ -72,6 +74,7 @@ class DeviceKitModule(
         Log.i(TAG, "Start scanning for devices.")
         scannerToken = MedMDeviceKit.getScanner().start(object : IScannerCallback {
             override fun onDeviceFound(device: IDeviceDescription) {
+                foundDevices.add(device)
                 sendEvent(DEVICE_FOUND_EVENT, mapDeviceDescription(device))
             }
 
@@ -94,7 +97,7 @@ class DeviceKitModule(
     }
 
     @ReactMethod
-    fun addDevice(address: String, sku: Int, promise: Promise) {
+    fun addDevice(sku: Int, promise: Promise) {
         val callback = object : IAddDeviceCallback {
             override fun onFailure(device: IDeviceDescription) {
                 val device = mapDeviceDescription(device).toString()
@@ -106,9 +109,9 @@ class DeviceKitModule(
                 promise.resolve(null)
             }
         }
-        Log.i(TAG, "Pair $sku device with $address address.")
-        cancellationTokens.add(MedMDeviceKit.getDeviceManager()
-                .addDeviceManually(address, sku, callback))
+        val device = foundDevices.find { it.sku === sku }!!
+        Log.i(TAG, "Pair ${device.modelName} device with ${device.sku} SKU.")
+        cancellationTokens.add(MedMDeviceKit.getDeviceManager().addDevice(device, callback))
     }
 
     @ReactMethod
