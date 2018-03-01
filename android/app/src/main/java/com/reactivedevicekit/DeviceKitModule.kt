@@ -3,8 +3,11 @@ package com.reactivedevicekit
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.medm.devicekit.*
+import android.util.Log
 
 const val MODULE_NAME = "DeviceKit"
+
+const val TAG = "ReactiveDeviceKit"
 
 const val INIT_ERROR = "INIT_ERROR"
 const val PAIR_ERROR = "PAIR_ERROR"
@@ -41,6 +44,7 @@ class DeviceKitModule(
     private var cancellationTokens = mutableListOf<DeviceAddingCancellationToken>()
 
     private fun sendEvent(eventName: String, params: Any?) {
+        Log.i(TAG, "Send '$eventName' event.")
         eventEmitter.emit("$EVENT_PREFIX:$eventName", params)
     }
 
@@ -65,6 +69,7 @@ class DeviceKitModule(
 
     @ReactMethod
     fun startScan() {
+        Log.i(TAG, "Start scanning for devices.")
         scannerToken = MedMDeviceKit.getScanner().start(object : IScannerCallback {
             override fun onDeviceFound(device: IDeviceDescription) {
                 sendEvent(DEVICE_FOUND_EVENT, mapDeviceDescription(device))
@@ -84,6 +89,7 @@ class DeviceKitModule(
 
     @ReactMethod
     fun stopScan() {
+        Log.i(TAG, "Stop scanning for devices.")
         scannerToken?.stopScan()
     }
 
@@ -100,12 +106,14 @@ class DeviceKitModule(
                 promise.resolve(null)
             }
         }
+        Log.i(TAG, "Pair $sku device with $address address.")
         cancellationTokens.add(MedMDeviceKit.getDeviceManager()
                 .addDeviceManually(address, sku, callback))
     }
 
     @ReactMethod
     fun removeDevice(address: String) {
+        Log.i(TAG, "Remove device with $address address.")
         MedMDeviceKit.getDeviceManager().removeDevice(address)
     }
 
@@ -117,11 +125,13 @@ class DeviceKitModule(
 
     @ReactMethod
     fun cancelPairings() {
+        Log.i(TAG, "Cancel all pairings.")
         for (token in cancellationTokens) token.cancel()
     }
 
     @ReactMethod
     fun startCollection() {
+        Log.i(TAG, "Start data collection.")
         collectionToken = MedMDeviceKit.getCollector().start(
                 object : IDataCallback {
                     override fun onNewData(device: IDeviceDescription, data: String) {
@@ -149,6 +159,7 @@ class DeviceKitModule(
 
     @ReactMethod
     fun stopCollection() {
+        Log.i(TAG, "Stop data collection.")
         collectionToken?.stopCollect()
     }
 }
