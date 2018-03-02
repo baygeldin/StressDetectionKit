@@ -7,6 +7,15 @@ module.exports = ({ platform }, defaults) => {
       ...defaults.module,
       rules: [
         {
+          test: /\.jsx?$/,
+          include: [/node_modules\/@shoutem/],
+          use: [
+            {
+              loader: 'babel-loader'
+            }
+          ]
+        },
+        {
           test: /\.tsx?$/,
           exclude: '/node_modules/',
           use: [

@@ -32,7 +32,6 @@ export default class Main {
       .then(
         action('initialize', (devices: Device[]) => {
           this.initialized = true;
-          this.devices = devices;
 
           if (devices[0]) {
             this.currentDevice = devices[0];
@@ -94,6 +93,7 @@ export default class Main {
     this.gyroscope.stop();
   }
 
+  @action
   startScan() {
     if (this.scanning) return;
 
@@ -102,12 +102,18 @@ export default class Main {
     this.scanning = true;
   }
 
+  @action
   stopScan() {
     if (!this.scanning) return;
 
     this.sdk.removeAllListeners('deviceFound');
     this.sdk.stopScan();
     this.scanning = false;
+  }
+
+  restartScan() {
+    this.stopScan();
+    this.startScan();
   }
 
   @action
@@ -130,9 +136,18 @@ export default class Main {
     if (newDevice) {
       this.sdk.addDevice(newDevice).then(
         action('setDevice', () => {
+          this.devices = this.devices.filter(d => d.id !== newDevice!.id);
           this.currentDevice = newDevice;
         })
       );
+    }
+  }
+
+  @action
+  removeDevice() {
+    if (this.currentDevice) {
+      this.sdk.removeDevice(this.currentDevice);
+      this.currentDevice = undefined;
     }
   }
 }
