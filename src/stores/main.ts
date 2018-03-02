@@ -9,6 +9,13 @@ import {
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
 
+type StressLevels = 'low' | 'medium' | 'high';
+
+interface StressMark {
+  timestamp: number;
+  level: StressLevels;
+}
+
 @remotedev
 export default class Main {
   @observable initialized = false;
@@ -19,6 +26,7 @@ export default class Main {
   @observable.shallow readings: Reading[] = [];
   @observable.shallow accelerometerData: SensorData[] = [];
   @observable.shallow gyroscopeData: SensorData[] = [];
+  @observable.shallow stressMarks: StressMark[] = [];
 
   private accelerometer: SensorObservable;
   private gyroscope: SensorObservable;
@@ -149,5 +157,10 @@ export default class Main {
       this.sdk.removeDevice(this.currentDevice);
       this.currentDevice = undefined;
     }
+  }
+
+  @action
+  addStressMark(level: StressLevels) {
+    this.stressMarks.push({ level, timestamp: Date.now() });
   }
 }

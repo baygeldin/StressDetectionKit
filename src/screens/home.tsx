@@ -28,18 +28,62 @@ export default class extends Component<{}, {}> {
 
   render() {
     let title = this.store.collecting ? 'Stop Collection' : 'Start Collection';
-    let cb = () => {
-      this.store.collecting ? this.stopCollection() : this.startCollection();
-    };
+    let handler = this.store.collecting
+      ? () => this.stopCollection()
+      : () => this.startCollection();
+    let stressButtons = this.store.collecting ? (
+      <View style={{ marginTop: 20 }}>
+        <Button
+          onPress={() => {
+            this.store.addStressMark('low');
+          }}
+          title="Low stress"
+          color="bisque"
+        />
+        <Button
+          onPress={() => {
+            this.store.addStressMark('medium');
+          }}
+          title="Medium stress"
+          color="tomato"
+        />
+        <Button
+          onPress={() => {
+            this.store.addStressMark('high');
+          }}
+          title="High stress"
+          color="crimson"
+        />
+      </View>
+    ) : null;
 
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text>
-          Accelerometer data collected: {this.store.accelerometerData.length}
-        </Text>
-        <Text>Gyroscope data collected: {this.store.gyroscopeData.length}</Text>
-        <Text>Readings collected: {this.store.readings.length}</Text>
-        <Button onPress={cb} title={title} />
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <Text style={{ textAlign: 'center' }}>
+            Accelerometer data collected: {this.store.accelerometerData.length}
+          </Text>
+          <Text style={{ textAlign: 'center' }}>
+            Gyroscope data collected: {this.store.gyroscopeData.length}
+          </Text>
+          <Text style={{ textAlign: 'center' }}>
+            Readings collected: {this.store.readings.length}
+          </Text>
+          <Text style={{ textAlign: 'center' }}>
+            Stress marks collected: {this.store.stressMarks.length}
+          </Text>
+          {stressButtons}
+        </View>
+        <View style={{ height: 50 }}>
+          <Button onPress={handler} title={title} />
+        </View>
       </View>
     );
   }
