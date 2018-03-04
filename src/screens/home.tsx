@@ -3,6 +3,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, View, Button } from 'react-native';
 import { observer, inject } from 'mobx-react/native';
 import Component from 'lib/component';
+import { APP_NAME } from 'lib/constants';
 
 @inject('router')
 class CogButton extends Component<{}, {}> {
@@ -22,7 +23,7 @@ class CogButton extends Component<{}, {}> {
 @observer
 export default class extends Component<{}, {}> {
   static navigationOptions = {
-    title: 'Stress Detection Kit',
+    title: APP_NAME,
     headerRight: <CogButton />
   };
 

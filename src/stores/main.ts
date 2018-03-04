@@ -1,13 +1,15 @@
 import remotedev from 'mobx-remotedev';
-import { observable, action } from 'mobx';
+import { observable, action, toJS } from 'mobx';
 import {
   Accelerometer,
   Gyroscope,
   SensorData,
   SensorObservable
 } from 'react-native-sensors';
+import RNFS from 'react-native-fs';
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
+import { APP_NAME } from 'lib/constants';
 
 type StressLevels = 'low' | 'medium' | 'high';
 
@@ -99,6 +101,40 @@ export default class Main {
     this.sdk.stopCollection();
     this.accelerometer.stop();
     this.gyroscope.stop();
+
+    if (__DEV__) {
+      this.saveData()
+        .then(() => {
+          console.log('Stream data is written.');
+        })
+        .catch(err => {
+          console.error(err);
+        });
+    }
+  }
+
+  private saveData() {
+    const timestamp = Date.now();
+    const folder = `${
+      RNFS.ExternalStorageDirectoryPath
+    }/${APP_NAME}/${timestamp}`;
+
+    function write(path: string, data: any): Promise<void> {
+      return RNFS.writeFile(
+        `${folder}/${path}`,
+        JSON.stringify(toJS(data)),
+        'ascii' // No idea why utf8 doesn't work here
+      );
+    }
+
+    return RNFS.mkdir(folder).then(() =>
+      Promise.all([
+        write('accelerometer.json', this.accelerometerData),
+        write('gyroscope.json', this.gyroscopeData),
+        write('stress.json', this.stressMarks),
+        write('heartrate.json', this.readings.map(r => r.data))
+      ])
+    );
   }
 
   @action
