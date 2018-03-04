@@ -18,6 +18,8 @@ interface StressMark {
   level: StressLevels;
 }
 
+type Sensor = typeof Accelerometer | typeof Gyroscope;
+
 @remotedev
 export default class Main {
   @observable initialized = false;
@@ -59,27 +61,31 @@ export default class Main {
     this.sdk.on('data', r => this.addReading(r));
     this.sdk.startCollection();
 
-    Gyroscope({ updateInterval: 500 })
+    this.startSensorCollection(Accelerometer);
+    this.startSensorCollection(Gyroscope);
+  }
+
+  private startSensorCollection(sensor: Sensor) {
+    sensor({ updateInterval: 500 })
       .then(observable => {
-        this.gyroscope = observable;
+        const isAccelerometer = sensor === Accelerometer;
+        if (isAccelerometer) {
+          this.accelerometer = observable;
+        } else {
+          this.gyroscope = observable;
+        }
 
-        this.gyroscope.subscribe(
-          action('addGyroscopeData', (d: SensorData) => {
-            this.gyroscopeData.push(d);
-          })
-        );
-      })
-      .catch(error => {
-        console.error(error);
-      });
+        const actionName = isAccelerometer
+          ? 'addAccelerometerData'
+          : 'addGyroscopeData';
 
-    Accelerometer({ updateInterval: 500 })
-      .then(observable => {
-        this.accelerometer = observable;
+        const data = isAccelerometer
+          ? this.accelerometerData
+          : this.gyroscopeData;
 
-        this.accelerometer.subscribe(
-          action('addAccelerometerData', (d: SensorData) => {
-            this.accelerometerData.push(d);
+        observable.subscribe(
+          action(actionName, (d: SensorData) => {
+            data.push(d);
           })
         );
       })
