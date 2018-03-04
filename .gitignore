@@ -69,3 +69,7 @@ android/app/libs/MedMDeviceKit.aar
 # Local setup helper
 #
 configure.sh
+
+# Data samples
+#
+samples/

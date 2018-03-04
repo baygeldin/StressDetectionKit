@@ -12,7 +12,8 @@
     "android": "haul start --platform android",
     "ios": "haul start --platform ios",
     "reload": "haul reload",
-    "reverse": "adb reverse tcp:8081 tcp:8081"
+    "reverse": "adb reverse tcp:8081 tcp:8081",
+    "pull": "adb pull /sdcard/Stress\\ Detection\\ Kit ./samples"
   },
   "dependencies": {
     "@shoutem/ui": "^0.23.4",
