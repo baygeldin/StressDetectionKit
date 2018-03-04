@@ -137,10 +137,11 @@ class DeviceKitModule(
         Log.i(TAG, "Start data collection.")
         collectionToken = MedMDeviceKit.getCollector().start(
                 object : IDataCallback {
-                    override fun onNewData(device: IDeviceDescription, data: String) {
+                    override fun onNewData(device: IDeviceDescription?, data: String) {
+                        val deviceMap = if (device != null) mapDeviceDescription(device) else null
                         sendEvent(DATA_EVENT, Arguments.makeNativeMap(mapOf(
                                 "data" to data,
-                                "device" to mapDeviceDescription(device)
+                                "device" to deviceMap
                         )))
                     }
 

@@ -11,7 +11,7 @@ export interface Device {
 
 export interface Reading {
   data: string;
-  source: Device;
+  source?: Device;
 }
 
 type DATA = 'data';
