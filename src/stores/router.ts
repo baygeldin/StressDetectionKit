@@ -9,7 +9,7 @@ export default class Router {
   @observable.ref
   state = this.router.getStateForAction(NavigationActions.init(), null);
 
-  @action
+  @action.bound
   dispatch(action: any, reset = false) {
     this.state = this.router.getStateForAction(
       action,
@@ -18,18 +18,22 @@ export default class Router {
     return this.state;
   }
 
+  @action.bound
   reset() {
     this.dispatch(NavigationActions.init(), true);
   }
 
+  @action.bound
   goBack() {
     this.dispatch(NavigationActions.back());
   }
 
+  @action.bound
   goTo(route: string) {
     this.dispatch(NavigationActions.navigate({ routeName: route }));
   }
 
+  @action.bound
   goToSettings() {
     this.goTo('Settings');
   }

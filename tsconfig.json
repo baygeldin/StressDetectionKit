@@ -21,7 +21,8 @@
       "*": ["@types/*"],
       "lib/*": ["src/lib/*"],
       "screens/*": ["src/screens/*"],
-      "stores/*": ["src/stores/*"]
+      "stores/*": ["src/stores/*"],
+      "components/*": ["src/components/*"]
     }
   }
 }

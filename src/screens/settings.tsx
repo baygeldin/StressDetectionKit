@@ -25,13 +25,13 @@ export default class extends Component<{}, {}> {
   };
 
   render() {
-    let currentDevice = this.store.currentDevice;
-    let onDeviceRemove = () => {
+    const currentDevice = this.store.currentDevice;
+    const onDeviceRemove = () => {
       this.store.removeDevice();
       this.store.restartScan();
     };
 
-    let deviceInfo = currentDevice ? (
+    const deviceInfo = currentDevice ? (
       <Row styleName="small">
         <View styleName="vertical">
           <Subtitle>{currentDevice.name}</Subtitle>
@@ -49,9 +49,9 @@ export default class extends Component<{}, {}> {
       </Text>
     );
 
-    let devices = toJS(this.store.devices);
+    const devices = toJS(this.store.devices);
 
-    let availableDevices =
+    const availableDevices =
       devices.length > 0 ? (
         <ListView
           data={toJS(this.store.devices)}

@@ -13,20 +13,23 @@
     "ios": "haul start --platform ios",
     "reload": "haul reload",
     "reverse": "adb reverse tcp:8081 tcp:8081",
-    "pull": "adb pull /sdcard/Stress\\ Detection\\ Kit ./samples"
+    "pull": "adb pull /sdcard/Stress\\ Detection\\ Kit ./samples",
+    "bundle": "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
   },
   "dependencies": {
     "@shoutem/ui": "^0.23.4",
+    "denque": "^1.2.3",
     "mobx": "^3.4.1",
     "mobx-react": "^4.3.5",
+    "moment": "^2.21.0",
     "react": "16.0.0",
     "react-native": "0.50.4",
     "react-native-elements": "^0.18.5",
     "react-native-fs": "^2.9.11",
-    "react-native-sensors":
-      "git://github.com/baygeldin/react-native-sensors.git#fix_startupdates",
+    "react-native-sensors": "git://github.com/baygeldin/react-native-sensors.git#fix_startupdates",
     "react-native-vector-icons": "^4.4.2",
-    "react-navigation": "^1.0.0-beta.21"
+    "react-navigation": "^1.0.0-beta.21",
+    "xmldom": "^0.1.27"
   },
   "devDependencies": {
     "@types/jest": "^21.1.9",
@@ -37,6 +40,7 @@
     "@types/react-native-vector-icons": "^4.4.2",
     "@types/react-navigation": "^1.0.30",
     "@types/rx": "^4.1.1",
+    "@types/xmldom": "^0.1.29",
     "awesome-typescript-loader": "^3.4.1",
     "babel-jest": "21.2.0",
     "babel-loader": "^7.1.2",

@@ -45,7 +45,8 @@ module.exports = ({ platform }, defaults) => {
         ...defaults.resolve.alias,
         lib: path.resolve(__dirname, 'src/lib/'),
         screens: path.resolve(__dirname, 'src/screens/'),
-        stores: path.resolve(__dirname, 'src/stores/')
+        stores: path.resolve(__dirname, 'src/stores/'),
+        components: path.resolve(__dirname, 'src/components/')
       }
     }
   };

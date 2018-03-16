@@ -1,5 +1,5 @@
 import remotedev from 'mobx-remotedev';
-import { observable, action, toJS } from 'mobx';
+import { observable, action, computed, toJS } from 'mobx';
 import {
   Accelerometer,
   Gyroscope,
@@ -7,36 +7,53 @@ import {
   SensorObservable
 } from 'react-native-sensors';
 import RNFS from 'react-native-fs';
+import { DOMParser } from 'xmldom';
+import Denque from 'denque';
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
-import { APP_NAME } from 'lib/constants';
-
-type StressLevels = 'low' | 'medium' | 'high';
-
-interface StressMark {
-  timestamp: number;
-  level: StressLevels;
-}
-
-type Sensor = typeof Accelerometer | typeof Gyroscope;
+import { APP_NAME, WINDOW_SIZE, CHUNK_LENGTH } from 'lib/constants';
+import { chunkArray } from 'lib/helpers';
+import {
+  Chunk,
+  Sample,
+  StressLevels,
+  PulseMark,
+  RrIntervalMark,
+  StressMark,
+  Sensor
+} from 'lib/types';
 
 @remotedev
 export default class Main {
   @observable initialized = false;
   @observable collecting = false;
   @observable scanning = false;
+
   @observable.shallow devices: Device[] = [];
   @observable.ref currentDevice?: Device;
-  @observable.shallow readings: Reading[] = [];
-  @observable.shallow accelerometerData: SensorData[] = [];
-  @observable.shallow gyroscopeData: SensorData[] = [];
-  @observable.shallow stressMarks: StressMark[] = [];
+
+  @observable.shallow percievedStress: StressMark[] = [];
+  @observable currentPercievedStressLevel: StressLevels = 'none';
+  @observable percievedStressStartedAt: number;
+
+  @observable collectionStartedAt: number;
+
+  @observable.shallow pulseBuffer: PulseMark[] = [];
+  @observable.shallow rrIntervalsBuffer: RrIntervalMark[] = [];
+  @observable.shallow accelerometerBuffer: SensorData[] = [];
+  @observable.shallow gyroscopeBuffer: SensorData[] = [];
+
+  @observable.shallow chunksQueue = new Denque<Chunk>([]);
+  @observable.shallow chunksCollected = 0;
+
+  @observable.shallow samplesQueue = new Denque<Sample>([]); // TODO: load from AsyncStorage
 
   private accelerometer: SensorObservable;
   private gyroscope: SensorObservable;
 
   constructor(private sdk: DeviceKit) {}
 
+  @action.bound
   initialize(key: string) {
     this.sdk
       .register(key)
@@ -52,21 +69,32 @@ export default class Main {
       );
   }
 
-  @action
+  @action.bound
   startCollection() {
     if (this.collecting) return;
 
     this.collecting = true;
 
-    this.sdk.on('data', r => this.addReading(r));
-    this.sdk.startCollection();
+    this.sdk.on('data', r => {
+      try {
+        this.processReading(r);
+      } catch (e) {
+        console.error('Reading is corrupted.', e);
+      }
+    });
+
+    const timestamp = Date.now();
+    this.stressStartedAt = timestamp;
+    this.collectionStartedAt = timestamp;
 
     this.startSensorCollection(Accelerometer);
     this.startSensorCollection(Gyroscope);
+
+    this.sdk.startCollection();
   }
 
   private startSensorCollection(sensor: Sensor) {
-    sensor({ updateInterval: 500 })
+    sensor({ updateInterval: 1000 })
       .then(observable => {
         const isAccelerometer = sensor === Accelerometer;
         if (isAccelerometer) {
@@ -94,33 +122,89 @@ export default class Main {
       });
   }
 
-  @action
-  addReading(reading: Reading) {
-    this.readings.push(reading);
+  @action.bound
+  processReading(reading: Reading) {
+    this.heartrateDataRaw.push(reading.data);
+    return;
+
+    const doc = new DOMParser().parseFromString(reading.data);
+
+    function getTextContent(nodes: NodeListOf<Element>) {
+      return nodes[0].textContent!.trim();
+    }
+
+    // According to MedM there is always only one chunk in the reading
+    const chunk = doc.getElementsByTagName('chunk')[0];
+    const measuredAt = Date.parse(
+      getTextContent(doc.getElementsByTagName('measured-at'))
+    );
+    const start = parseInt(getTextContent(chunk.getElementsByTagName('start')));
+
+    const {
+      pulse,
+      pulse_quality,
+      rr_intervals,
+      rr_intervals_quality
+    } = JSON.parse(
+      getTextContent(chunk.getElementsByTagName('heartrate'))
+    ).irregular;
+
+    // Apply quality and split the stream to points
+    function processStream(
+      originalPoints: number[],
+      originalQuality: number[]
+    ) {
+      const points = chunkArray(originalPoints, 2);
+      const quality = chunkArray(originalQuality, 2);
+      return points.filter((p, i) => quality[i][0] === 255);
+    }
+
+    const pulseStream = processStream(pulse, pulse_quality);
+    const rrStream = processStream(rr_intervals, rr_intervals_quality);
+
+    // TODO! Filter points that doesn't have both pulse and RR points!
+    for (let i = 0; i < rrStream.length; i++) {
+      const offset = rrStream[i][1];
+      this.heartrateData.push({
+        rr: rrStream[i][0],
+        pulse: pulseStream[i][0],
+        timestamp: measuredAt + offset * 1000 // bug! wrong timestamp
+      });
+    }
   }
 
-  @action
+  @action.bound
   stopCollection() {
     if (!this.collecting) return;
 
     this.collecting = false;
+    this.changeStressLevel('none');
     this.sdk.stopCollection();
     this.accelerometer.stop();
     this.gyroscope.stop();
 
     if (__DEV__) {
-      this.saveData()
-        .then(() => {
-          console.log('Stream data is written.');
-        })
+      const timestamp = Date.now();
+      this.saveData(timestamp)
+        .then(
+          action('flushData', () => {
+            this.accelerometerData = [];
+            this.gyroscopeData = [];
+            this.heartrateData = [];
+            this.stressData = [];
+            this.samplesSaved.push({
+              timestamp,
+              duration: timestamp - this.collectionStartedAt
+            });
+          })
+        )
         .catch(err => {
           console.error(err);
         });
     }
   }
 
-  private saveData() {
-    const timestamp = Date.now();
+  private saveData(timestamp: number) {
     const folder = `${
       RNFS.ExternalStorageDirectoryPath
     }/${APP_NAME}/${timestamp}`;
@@ -137,13 +221,14 @@ export default class Main {
       Promise.all([
         write('accelerometer.json', this.accelerometerData),
         write('gyroscope.json', this.gyroscopeData),
-        write('stress.json', this.stressMarks),
-        write('heartrate.json', this.readings.map(r => r.data))
+        write('stress.json', this.stressData),
+        write('heartrate.json', this.heartrateData),
+        write('raw.json', this.heartrateDataRaw)
       ])
     );
   }
 
-  @action
+  @action.bound
   startScan() {
     if (this.scanning) return;
 
@@ -152,7 +237,7 @@ export default class Main {
     this.scanning = true;
   }
 
-  @action
+  @action.bound
   stopScan() {
     if (!this.scanning) return;
 
@@ -161,12 +246,13 @@ export default class Main {
     this.scanning = false;
   }
 
+  @action.bound
   restartScan() {
     this.stopScan();
     this.startScan();
   }
 
-  @action
+  @action.bound
   addDevice(device: Device) {
     if (!this.devices.find(d => d.id === device.id)) {
       this.devices.push(device);
@@ -178,7 +264,7 @@ export default class Main {
       this.sdk.removeDevice(this.currentDevice);
     }
 
-    let newDevice =
+    const newDevice =
       typeof device === 'number'
         ? this.devices.find(d => d.id === device)
         : device;
@@ -193,7 +279,7 @@ export default class Main {
     }
   }
 
-  @action
+  @action.bound
   removeDevice() {
     if (this.currentDevice) {
       this.sdk.removeDevice(this.currentDevice);
@@ -201,8 +287,15 @@ export default class Main {
     }
   }
 
-  @action
-  addStressMark(level: StressLevels) {
-    this.stressMarks.push({ level, timestamp: Date.now() });
+  @action.bound
+  changeStressLevel(level: StressLevels) {
+    if (level === this.currentStressLevel) return;
+
+    const start = this.stressStartedAt;
+    const end = Date.now();
+    this.stressStartedAt = end;
+    const previousLevel = this.currentStressLevel;
+    this.currentStressLevel = level;
+    this.stressData.push({ level: previousLevel, start, end });
   }
 }

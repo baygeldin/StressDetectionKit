@@ -33,7 +33,13 @@ export default class extends Component<any, any> {
   }
 
   componentDidMount() {
-    store.initialize(process.env.MEDM_DEVICEKIT_LICENSE_KEY!);
+    const key = process.env.MEDM_DEVICEKIT_LICENSE_KEY;
+
+    if (key) {
+      store.initialize(key);
+    } else {
+      throw new Error('MEDM_DEVICEKIT_LICENSE_KEY is not provided!');
+    }
 
     PermissionsAndroid.requestMultiple([
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
