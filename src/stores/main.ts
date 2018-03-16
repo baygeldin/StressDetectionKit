@@ -8,7 +8,7 @@ import {
 } from 'react-native-sensors';
 import RNFS from 'react-native-fs';
 import { DOMParser } from 'xmldom';
-import Denque from 'denque';
+import ObservableDeque from 'lib/deque';
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
 import { APP_NAME, WINDOW_SIZE, CHUNK_LENGTH } from 'lib/constants';
@@ -43,10 +43,10 @@ export default class Main {
   @observable.shallow accelerometerBuffer: SensorData[] = [];
   @observable.shallow gyroscopeBuffer: SensorData[] = [];
 
-  @observable.shallow chunksQueue = new Denque<Chunk>([]);
+  @observable.ref chunksQueue = new ObservableDeque<Chunk>([]);
   @observable.shallow chunksCollected = 0;
 
-  @observable.shallow samplesQueue = new Denque<Sample>([]); // TODO: load from AsyncStorage
+  @observable.shallow currentSamples = [];
 
   private accelerometer: SensorObservable;
   private gyroscope: SensorObservable;
