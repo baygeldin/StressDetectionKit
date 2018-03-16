@@ -11,7 +11,7 @@ import { DOMParser } from 'xmldom';
 import Denque from 'denque';
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
-import { APP_NAME, WINDOW_SIZE, CHUNK_LENGTH } from 'lib/constants';
+import { APP_NAME, WINDOW_SIZE, STEP_SIZE, CHUNK_LENGTH } from 'lib/constants';
 import { chunkArray } from 'lib/helpers';
 import {
   Chunk,
@@ -46,7 +46,7 @@ export default class Main {
   private chunksQueue = new Denque<Chunk>([]);
   @observable.shallow chunksCollected = 0;
 
-  @observable.shallow currentSamples = [];
+  @observable.shallow currentSamples: Sample[] = [];
 
   private accelerometer: SensorObservable;
   private gyroscope: SensorObservable;
@@ -75,6 +75,59 @@ export default class Main {
 
     this.collecting = true;
 
+    const timestamp = Date.now();
+    this.percievedStressStartedAt = timestamp;
+    this.collectionStartedAt = timestamp;
+
+    this.startSensorCollection(Accelerometer);
+    this.startSensorCollection(Gyroscope);
+    this.startHeartrateCollection();
+
+    setTimeout(() => this.pushChunk(), CHUNK_LENGTH * 1000);
+  }
+
+  private pushChunk() {
+    this.chunksQueue.push({
+      rrIntervals: this.rrIntervalsBuffer.splice(0),
+      pulse: this.pulseBuffer.splice(0),
+      gyroscope: this.gyroscopeBuffer.splice(0),
+      accelerometer: this.accelerometerBuffer.splice(0),
+      timestamp: Date.now()
+    });
+
+    this.chunksCollected++;
+
+    if (this.chunksCollected > WINDOW_SIZE) {
+      this.chunksQueue.unshift();
+
+      if (this.chunksCollected % STEP_SIZE === 0) {
+        this.pushSample();
+      }
+
+      if (__DEV__ && this.chunksCollected % WINDOW_SIZE === 0) {
+        this.persistChunks().catch(err => {
+          console.error(err);
+        });
+      }
+    }
+  }
+
+  private pushSample() {
+    // TODO: calculate activityIndex and HRV
+    const state =
+      this.currentPercievedStressLevel === 'medium' ||
+      this.currentPercievedStressLevel === 'high';
+
+    this.currentSamples.push({
+      state,
+      activityIndex: 0,
+      hrv: 0,
+      stress: this.currentPercievedStressLevel,
+      timestamp: Date.now()
+    });
+  }
+
+  private startHeartrateCollection() {
     this.sdk.on('data', r => {
       try {
         this.processReading(r);
@@ -83,13 +136,6 @@ export default class Main {
       }
     });
 
-    const timestamp = Date.now();
-    this.stressStartedAt = timestamp;
-    this.collectionStartedAt = timestamp;
-
-    this.startSensorCollection(Accelerometer);
-    this.startSensorCollection(Gyroscope);
-
     this.sdk.startCollection();
   }
 
@@ -97,6 +143,7 @@ export default class Main {
     sensor({ updateInterval: 1000 })
       .then(observable => {
         const isAccelerometer = sensor === Accelerometer;
+
         if (isAccelerometer) {
           this.accelerometer = observable;
         } else {
@@ -108,8 +155,8 @@ export default class Main {
           : 'addGyroscopeData';
 
         const data = isAccelerometer
-          ? this.accelerometerData
-          : this.gyroscopeData;
+          ? this.accelerometerBuffer
+          : this.gyroscopeBuffer;
 
         observable.subscribe(
           action(actionName, (d: SensorData) => {
@@ -124,21 +171,18 @@ export default class Main {
 
   @action.bound
   processReading(reading: Reading) {
-    this.heartrateDataRaw.push(reading.data);
-    return;
-
     const doc = new DOMParser().parseFromString(reading.data);
-
-    function getTextContent(nodes: NodeListOf<Element>) {
-      return nodes[0].textContent!.trim();
-    }
 
     // According to MedM there is always only one chunk in the reading
     const chunk = doc.getElementsByTagName('chunk')[0];
+
     const measuredAt = Date.parse(
-      getTextContent(doc.getElementsByTagName('measured-at'))
+      this.getTextContent(doc.getElementsByTagName('measured-at'))
     );
-    const start = parseInt(getTextContent(chunk.getElementsByTagName('start')));
+
+    const start =
+      measuredAt +
+      parseInt(this.getTextContent(chunk.getElementsByTagName('start')));
 
     const {
       pulse,
@@ -146,31 +190,21 @@ export default class Main {
       rr_intervals,
       rr_intervals_quality
     } = JSON.parse(
-      getTextContent(chunk.getElementsByTagName('heartrate'))
+      this.getTextContent(chunk.getElementsByTagName('heartrate'))
     ).irregular;
 
-    // Apply quality and split the stream to points
-    function processStream(
-      originalPoints: number[],
-      originalQuality: number[]
-    ) {
-      const points = chunkArray(originalPoints, 2);
-      const quality = chunkArray(originalQuality, 2);
-      return points.filter((p, i) => quality[i][0] === 255);
-    }
+    const pulseStream = this.processStream(pulse, pulse_quality);
+    const rrStream = this.processStream(rr_intervals, rr_intervals_quality);
 
-    const pulseStream = processStream(pulse, pulse_quality);
-    const rrStream = processStream(rr_intervals, rr_intervals_quality);
+    this.pulseBuffer = pulseStream.map(p => ({
+      pulse: p[0],
+      timestamp: start + p[1]
+    }));
 
-    // TODO! Filter points that doesn't have both pulse and RR points!
-    for (let i = 0; i < rrStream.length; i++) {
-      const offset = rrStream[i][1];
-      this.heartrateData.push({
-        rr: rrStream[i][0],
-        pulse: pulseStream[i][0],
-        timestamp: measuredAt + offset * 1000 // bug! wrong timestamp
-      });
-    }
+    this.rrIntervalsBuffer = pulseStream.map(p => ({
+      rrInterval: p[0],
+      timestamp: start + p[1]
+    }));
   }
 
   @action.bound
@@ -184,48 +218,23 @@ export default class Main {
     this.gyroscope.stop();
 
     if (__DEV__) {
-      const timestamp = Date.now();
-      this.saveData(timestamp)
-        .then(
-          action('flushData', () => {
-            this.accelerometerData = [];
-            this.gyroscopeData = [];
-            this.heartrateData = [];
-            this.stressData = [];
-            this.samplesSaved.push({
-              timestamp,
-              duration: timestamp - this.collectionStartedAt
-            });
-          })
-        )
-        .catch(err => {
-          console.error(err);
-        });
+      Promise.all([this.persistSamples(), this.persistStress]).catch(err => {
+        console.error(err);
+      });
     }
   }
 
-  private saveData(timestamp: number) {
-    const folder = `${
-      RNFS.ExternalStorageDirectoryPath
-    }/${APP_NAME}/${timestamp}`;
+  private persistChunks() {
+    return this.persist(`${Date.now()}.json`, this.chunksQueue.toArray());
+  }
 
-    function write(path: string, data: any): Promise<void> {
-      return RNFS.writeFile(
-        `${folder}/${path}`,
-        JSON.stringify(toJS(data)),
-        'ascii' // No idea why utf8 doesn't work here
-      );
-    }
+  private persistSamples() {
+    // TODO: remove unreliable samples
+    return this.persist('stress.json', this.currentSamples);
+  }
 
-    return RNFS.mkdir(folder).then(() =>
-      Promise.all([
-        write('accelerometer.json', this.accelerometerData),
-        write('gyroscope.json', this.gyroscopeData),
-        write('stress.json', this.stressData),
-        write('heartrate.json', this.heartrateData),
-        write('raw.json', this.heartrateDataRaw)
-      ])
-    );
+  private persistStress() {
+    return this.persist('stress.json', this.percievedStress);
   }
 
   @action.bound
@@ -289,13 +298,42 @@ export default class Main {
 
   @action.bound
   changeStressLevel(level: StressLevels) {
-    if (level === this.currentStressLevel) return;
+    if (level === this.currentPercievedStressLevel) return;
 
-    const start = this.stressStartedAt;
+    const start = this.percievedStressStartedAt;
     const end = Date.now();
-    this.stressStartedAt = end;
-    const previousLevel = this.currentStressLevel;
-    this.currentStressLevel = level;
-    this.stressData.push({ level: previousLevel, start, end });
+    this.percievedStressStartedAt = end;
+    const previousLevel = this.currentPercievedStressLevel;
+    this.currentPercievedStressLevel = level;
+    this.percievedStress.push({ level: previousLevel, start, end });
+  }
+
+  // Helpers
+
+  private getTextContent(nodes: NodeListOf<Element>) {
+    return nodes[0].textContent!.trim();
+  }
+
+  private processStream(originalPoints: number[], originalQuality: number[]) {
+    // Apply quality and split the stream to points
+    const points = chunkArray(originalPoints, 2);
+    const quality = chunkArray(originalQuality, 2);
+    return points.filter((p, i) => quality[i][0] === 255);
+  }
+
+  private persist(path: string, data: any): Promise<void> {
+    const folder = `${RNFS.ExternalStorageDirectoryPath}/${APP_NAME}/${
+      this.collectionStartedAt
+    }`;
+
+    const serialized = toJS(data);
+
+    return RNFS.mkdir(folder).then(() =>
+      RNFS.writeFile(
+        `${folder}/${path}`,
+        JSON.stringify(serialized),
+        'ascii' // No idea why utf8 doesn't work here
+      )
+    );
   }
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, BackHandler, PermissionsAndroid, Alert } from 'react-native';
 import { StackNavigator, addNavigationHelpers } from 'react-navigation';
-import { observable, action, useStrict } from 'mobx';
+import { observable, action, configure } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
 import DeviceKit from 'lib/device-kit';
 import Router from 'stores/router';
@@ -9,7 +9,7 @@ import Store from 'stores/main';
 import HomeScreen from 'screens/home';
 import SettingsScreen from 'screens/settings';
 
-useStrict(true);
+configure({ enforceActions: true });
 
 const RootNavigator = StackNavigator({
   Home: { screen: HomeScreen },

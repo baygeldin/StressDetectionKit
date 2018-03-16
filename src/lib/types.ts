@@ -9,7 +9,7 @@ export interface StressMark {
 }
 
 export interface PulseMark {
-  rr: number;
+  pulse: number;
   timestamp: number;
 }
 
@@ -27,9 +27,10 @@ export interface Chunk {
 }
 
 export interface Sample {
+  state: boolean;
   activityIndex: number;
   hrv: number;
-  stress: boolean;
+  stress: StressLevels;
   timestamp: number;
 }
 
