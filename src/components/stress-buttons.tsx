@@ -1,5 +1,5 @@
 import React from 'react';
-import { observer } from 'mobx-react/native';
+import { observer, inject } from 'mobx-react/native';
 import { Button, View } from 'react-native';
 import Component from 'lib/component';
 import {
@@ -8,39 +8,37 @@ import {
   MEDIUM_STRESS_COLOR,
   HIGH_STRESS_COLOR
 } from 'lib/constants';
-import { StressLevels } from 'lib/types';
 
-type Props = { changeStressLevel: (level: StressLevels) => void };
-
+@inject('store')
 @observer
-class StressButtons extends Component<Props, {}> {
+class StressButtons extends Component<{}, {}> {
   render() {
     return (
       <View style={{ margin: 10, width: 200 }}>
         <Button
           onPress={() => {
-            this.props.changeStressLevel('none');
+            this.store.changeStressLevel('none');
           }}
           title="No stress"
           color={NONE_STRESS_COLOR}
         />
         <Button
           onPress={() => {
-            this.props.changeStressLevel('low');
+            this.store.changeStressLevel('low');
           }}
           title="Low stress"
           color={LOW_STRESS_COLOR}
         />
         <Button
           onPress={() => {
-            this.props.changeStressLevel('medium');
+            this.store.changeStressLevel('medium');
           }}
           title="Medium stress"
           color={MEDIUM_STRESS_COLOR}
         />
         <Button
           onPress={() => {
-            this.props.changeStressLevel('high');
+            this.store.changeStressLevel('high');
           }}
           title="High stress"
           color={HIGH_STRESS_COLOR}

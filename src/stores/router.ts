@@ -2,7 +2,7 @@ import remotedev from 'mobx-remotedev';
 import { observable, action } from 'mobx';
 import { NavigationActions, NavigationRouter } from 'react-navigation';
 
-@remotedev
+//@remotedev
 export default class Router {
   constructor(public router: NavigationRouter<any, any, any>) {}
 

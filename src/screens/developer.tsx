@@ -11,24 +11,28 @@ import {
   HIGH_STRESS_COLOR
 } from 'lib/constants';
 import CogButton from 'components/cog-button';
+import StressButtons from 'components/stress-buttons';
+import StressInfo from 'components/stress-info';
+import Stats from 'components/stats';
 import CollectionButton from 'components/collection-button';
 
 @inject('store')
 @observer
 export default class extends Component<{}, {}> {
   static navigationOptions = {
-    title: APP_NAME,
-    headerRight: <CogButton />
+    title: 'Developer'
   };
 
   render() {
     const collecting = this.store.collecting;
     const content = collecting ? (
       <View style={{ alignItems: 'center' }}>
-        <Text>{JSON.stringify(this.store.lastSample)}</Text>
+        <Stats />
+        <StressButtons />
+        <StressInfo />
       </View>
     ) : (
-      <Text>Hello! Start collection first!</Text>
+      <Text>Start data collection first.</Text>
     );
 
     return (

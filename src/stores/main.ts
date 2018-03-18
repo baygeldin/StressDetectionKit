@@ -11,7 +11,13 @@ import { DOMParser } from 'xmldom';
 import Denque from 'denque';
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
-import { APP_NAME, WINDOW_SIZE, STEP_SIZE, CHUNK_LENGTH } from 'lib/constants';
+import {
+  APP_NAME,
+  WINDOW_SIZE,
+  STEP_SIZE,
+  CHUNK_LENGTH,
+  SENSOR_UPDATE_INTERVAL
+} from 'lib/constants';
 import { chunkArray } from 'lib/helpers';
 import {
   Chunk,
@@ -23,7 +29,7 @@ import {
   Sensor
 } from 'lib/types';
 
-@remotedev
+//@remotedev
 export default class Main {
   @observable initialized = false;
   @observable collecting = false;
@@ -44,7 +50,7 @@ export default class Main {
   @observable.shallow gyroscopeBuffer: SensorData[] = [];
 
   private chunksQueue = new Denque<Chunk>([]);
-  @observable.shallow chunksCollected = 0;
+  @observable chunksCollected = 0;
 
   @observable.shallow currentSamples: Sample[] = [];
 
@@ -52,6 +58,11 @@ export default class Main {
   private gyroscope: SensorObservable;
 
   constructor(private sdk: DeviceKit) {}
+
+  @computed
+  get lastSample() {
+    return this.currentSamples[this.currentSamples.length - 1];
+  }
 
   @action.bound
   initialize(key: string) {
@@ -86,6 +97,141 @@ export default class Main {
     setTimeout(() => this.pushChunk(), CHUNK_LENGTH * 1000);
   }
 
+  @action.bound
+  processReading(reading: Reading) {
+    const doc = new DOMParser().parseFromString(reading.data);
+
+    // According to MedM there is always only one chunk in the reading
+    const chunk = doc.getElementsByTagName('chunk')[0];
+
+    const start =
+      Date.parse(this.getTextContent(doc, 'measured-at')) +
+      parseInt(this.getTextContent(chunk, 'start'));
+
+    const {
+      pulse,
+      pulse_quality,
+      rr_intervals,
+      rr_intervals_quality
+    } = JSON.parse(this.getTextContent(chunk, 'heartrate')).irregular;
+
+    const pulseStream = this.processStream(pulse, pulse_quality).map(p => ({
+      pulse: p[0],
+      timestamp: start + p[1]
+    }));
+
+    const rrIntervalsStream = this.processStream(
+      rr_intervals,
+      rr_intervals_quality
+    ).map(p => ({
+      rrInterval: p[0],
+      timestamp: start + p[1]
+    }));
+
+    this.pulseBuffer.push(...pulseStream);
+    this.rrIntervalsBuffer.push(...rrIntervalsStream);
+  }
+
+  @action.bound
+  stopCollection() {
+    if (!this.collecting) return;
+
+    this.collecting = false;
+    this.changeStressLevel('none');
+    this.sdk.stopCollection();
+    this.accelerometer.stop();
+    this.gyroscope.stop();
+
+    if (__DEV__) {
+      Promise.all([this.persistSamples(), this.persistStress()])
+        .then(this.flushSamples)
+        .catch(err => {
+          console.error(err);
+        });
+    } else {
+      this.flushSamples();
+    }
+  }
+
+  @action.bound
+  flushSamples() {
+    this.currentSamples = [];
+    this.percievedStress = [];
+  }
+
+  @action.bound
+  startScan() {
+    if (this.scanning) return;
+
+    this.scanning = true;
+
+    this.sdk.on('deviceFound', d => this.addDevice(d));
+    this.sdk.startScan();
+  }
+
+  @action.bound
+  stopScan() {
+    if (!this.scanning) return;
+
+    this.scanning = false;
+
+    this.sdk.removeAllListeners('deviceFound');
+    this.sdk.stopScan();
+  }
+
+  @action.bound
+  restartScan() {
+    this.stopScan();
+    this.startScan();
+  }
+
+  @action.bound
+  addDevice(device: Device) {
+    if (!this.devices.find(d => d.id === device.id)) {
+      this.devices.push(device);
+    }
+  }
+
+  @action.bound
+  setDevice(device: Device) {
+    if (this.currentDevice) {
+      this.sdk.removeDevice(this.currentDevice);
+    }
+
+    this.sdk.addDevice(device).then(
+      action('setDevice', () => {
+        this.devices = this.devices.filter(d => d.id !== device!.id);
+        this.currentDevice = device;
+      })
+    );
+  }
+
+  @action.bound
+  removeDevice() {
+    if (this.currentDevice) {
+      this.sdk.removeDevice(this.currentDevice);
+      this.currentDevice = undefined;
+    }
+  }
+
+  @action.bound
+  changeStressLevel(level: StressLevels) {
+    if (level === this.currentPercievedStressLevel) return;
+
+    const timestamp = Date.now();
+
+    this.percievedStress.push({
+      level: this.currentPercievedStressLevel,
+      start: this.percievedStressStartedAt,
+      end: timestamp
+    });
+
+    this.percievedStressStartedAt = timestamp;
+    this.currentPercievedStressLevel = level;
+  }
+
+  // Private
+
   private pushChunk() {
     this.chunksQueue.push({
       rrIntervals: this.rrIntervalsBuffer.splice(0),
@@ -97,9 +243,7 @@ export default class Main {
 
     this.chunksCollected++;
 
-    if (this.chunksCollected > WINDOW_SIZE) {
-      this.chunksQueue.unshift();
-
+    if (this.chunksQueue.length === WINDOW_SIZE) {
       if (this.chunksCollected % STEP_SIZE === 0) {
         this.pushSample();
       }
@@ -109,19 +253,24 @@ export default class Main {
           console.error(err);
         });
       }
+
+      this.chunksQueue.unshift();
     }
   }
 
   private pushSample() {
     // TODO: calculate activityIndex and HRV
+    const hrv = Math.floor(Math.random() * 100);
+    const activityIndex = Math.floor(Math.random() * 50);
+
     const state =
       this.currentPercievedStressLevel === 'medium' ||
       this.currentPercievedStressLevel === 'high';
 
     this.currentSamples.push({
       state,
-      activityIndex: 0,
-      hrv: 0,
+      activityIndex,
+      hrv,
       stress: this.currentPercievedStressLevel,
       timestamp: Date.now()
     });
@@ -140,7 +289,7 @@ export default class Main {
   }
 
   private startSensorCollection(sensor: Sensor) {
-    sensor({ updateInterval: 1000 })
+    sensor({ updateInterval: SENSOR_UPDATE_INTERVAL })
       .then(observable => {
         const isAccelerometer = sensor === Accelerometer;
 
@@ -169,61 +318,6 @@ export default class Main {
       });
   }
 
-  @action.bound
-  processReading(reading: Reading) {
-    const doc = new DOMParser().parseFromString(reading.data);
-
-    // According to MedM there is always only one chunk in the reading
-    const chunk = doc.getElementsByTagName('chunk')[0];
-
-    const measuredAt = Date.parse(
-      this.getTextContent(doc.getElementsByTagName('measured-at'))
-    );
-
-    const start =
-      measuredAt +
-      parseInt(this.getTextContent(chunk.getElementsByTagName('start')));
-
-    const {
-      pulse,
-      pulse_quality,
-      rr_intervals,
-      rr_intervals_quality
-    } = JSON.parse(
-      this.getTextContent(chunk.getElementsByTagName('heartrate'))
-    ).irregular;
-
-    const pulseStream = this.processStream(pulse, pulse_quality);
-    const rrStream = this.processStream(rr_intervals, rr_intervals_quality);
-
-    this.pulseBuffer = pulseStream.map(p => ({
-      pulse: p[0],
-      timestamp: start + p[1]
-    }));
-
-    this.rrIntervalsBuffer = pulseStream.map(p => ({
-      rrInterval: p[0],
-      timestamp: start + p[1]
-    }));
-  }
-
-  @action.bound
-  stopCollection() {
-    if (!this.collecting) return;
-
-    this.collecting = false;
-    this.changeStressLevel('none');
-    this.sdk.stopCollection();
-    this.accelerometer.stop();
-    this.gyroscope.stop();
-
-    if (__DEV__) {
-      Promise.all([this.persistSamples(), this.persistStress]).catch(err => {
-        console.error(err);
-      });
-    }
-  }
-
   private persistChunks() {
     return this.persist(`${Date.now()}.json`, this.chunksQueue.toArray());
   }
@@ -237,81 +331,10 @@ export default class Main {
     return this.persist('stress.json', this.percievedStress);
   }
 
-  @action.bound
-  startScan() {
-    if (this.scanning) return;
-
-    this.sdk.on('deviceFound', d => this.addDevice(d));
-    this.sdk.startScan();
-    this.scanning = true;
-  }
-
-  @action.bound
-  stopScan() {
-    if (!this.scanning) return;
-
-    this.sdk.removeAllListeners('deviceFound');
-    this.sdk.stopScan();
-    this.scanning = false;
-  }
-
-  @action.bound
-  restartScan() {
-    this.stopScan();
-    this.startScan();
-  }
-
-  @action.bound
-  addDevice(device: Device) {
-    if (!this.devices.find(d => d.id === device.id)) {
-      this.devices.push(device);
-    }
-  }
-
-  setDevice(device: Device | number) {
-    if (this.currentDevice) {
-      this.sdk.removeDevice(this.currentDevice);
-    }
-
-    const newDevice =
-      typeof device === 'number'
-        ? this.devices.find(d => d.id === device)
-        : device;
-
-    if (newDevice) {
-      this.sdk.addDevice(newDevice).then(
-        action('setDevice', () => {
-          this.devices = this.devices.filter(d => d.id !== newDevice!.id);
-          this.currentDevice = newDevice;
-        })
-      );
-    }
-  }
-
-  @action.bound
-  removeDevice() {
-    if (this.currentDevice) {
-      this.sdk.removeDevice(this.currentDevice);
-      this.currentDevice = undefined;
-    }
-  }
-
-  @action.bound
-  changeStressLevel(level: StressLevels) {
-    if (level === this.currentPercievedStressLevel) return;
-
-    const start = this.percievedStressStartedAt;
-    const end = Date.now();
-    this.percievedStressStartedAt = end;
-    const previousLevel = this.currentPercievedStressLevel;
-    this.currentPercievedStressLevel = level;
-    this.percievedStress.push({ level: previousLevel, start, end });
-  }
-
   // Helpers
 
-  private getTextContent(nodes: NodeListOf<Element>) {
-    return nodes[0].textContent!.trim();
+  private getTextContent(node: Document | Element, tag: string) {
+    return node.getElementsByTagName(tag)[0].textContent!.trim();
   }
 
   private processStream(originalPoints: number[], originalQuality: number[]) {

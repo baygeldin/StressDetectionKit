@@ -10,3 +10,5 @@ export const HIGH_STRESS_COLOR = 'crimson';
 export const CHUNK_LENGTH = 10; // in seconds
 export const STEP_SIZE = 3; // in chunks
 export const WINDOW_SIZE = 300; // in chunks
+
+export const SENSOR_UPDATE_INTERVAL = 1000

@@ -8,7 +8,7 @@ module.exports = ({ platform }, defaults) => {
       rules: [
         {
           test: /\.jsx?$/,
-          include: [/node_modules\/@shoutem/],
+          include: [/node_modules\/native-base-shoutem-theme/],
           use: [
             {
               loader: 'babel-loader'

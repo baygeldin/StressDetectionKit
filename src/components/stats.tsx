@@ -1,19 +1,12 @@
 import React from 'react';
-import { observer } from 'mobx-react/native';
+import { observer, inject } from 'mobx-react/native';
 import { Text, View } from 'react-native';
 import { SensorData } from 'react-native-sensors';
 import Component from 'lib/component';
-import { StressLevels, StressMark, HeartrateMark } from 'lib/types';
 
-type Props = {
-  accelerometer: SensorData[];
-  gyroscope: SensorData[];
-  heartrate: HeartrateMark[];
-  stress: StressMark[];
-};
-
+@inject('store')
 @observer
-class Stats extends Component<Props, {}> {
+class Stats extends Component<{}, {}> {
   render() {
     return (
       <View
@@ -28,23 +21,35 @@ class Stats extends Component<Props, {}> {
         }}
       >
         <View>
-          <Text style={{ textAlign: 'left' }}>Accelerometer</Text>
-          <Text style={{ textAlign: 'left' }}>Gyroscope</Text>
-          <Text style={{ textAlign: 'left' }}>Heartrate</Text>
-          <Text style={{ textAlign: 'left' }}>Stress</Text>
+          <Text style={{ textAlign: 'left' }}>Accelerometer Queue</Text>
+          <Text style={{ textAlign: 'left' }}>Gyroscope Queue</Text>
+          <Text style={{ textAlign: 'left' }}>Pulse Queue</Text>
+          <Text style={{ textAlign: 'left' }}>RR Intervals Queue</Text>
+          <Text style={{ textAlign: 'left' }}>Percieved Stress</Text>
+          <Text style={{ textAlign: 'left' }}>Collected Chunks</Text>
+          <Text style={{ textAlign: 'left' }}>Current Samples</Text>
         </View>
         <View>
           <Text style={{ textAlign: 'right', fontWeight: 'bold' }}>
-            {this.props.accelerometer.length}
+            {this.store.accelerometerBuffer.length}
           </Text>
           <Text style={{ textAlign: 'right', fontWeight: 'bold' }}>
-            {this.props.gyroscope.length}
+            {this.store.gyroscopeBuffer.length}
           </Text>
           <Text style={{ textAlign: 'right', fontWeight: 'bold' }}>
-            {this.props.heartrate.length}
+            {this.store.pulseBuffer.length}
           </Text>
           <Text style={{ textAlign: 'right', fontWeight: 'bold' }}>
-            {this.props.stress.length}
+            {this.store.pulseBuffer.length}
+          </Text>
+          <Text style={{ textAlign: 'right', fontWeight: 'bold' }}>
+            {this.store.percievedStress.length}
+          </Text>
+          <Text style={{ textAlign: 'right', fontWeight: 'bold' }}>
+            {this.store.chunksCollected}
+          </Text>
+          <Text style={{ textAlign: 'right', fontWeight: 'bold' }}>
+            {this.store.currentSamples.length}
           </Text>
         </View>
       </View>
