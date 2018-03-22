@@ -1,5 +1,4 @@
 import React, { Props } from 'react';
-import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react/native';
 import {
   FlatList,
@@ -10,36 +9,22 @@ import {
 } from 'react-native';
 import {
   Container,
-  Header,
   Content,
   Text,
   List,
-  ListItem,
   Separator,
   Left,
   Icon,
-  Body,
-  Card,
-  CardItem
+  Body
 } from 'native-base';
 import { Device } from 'lib/device-kit';
 import Component from 'lib/component';
+import { deviceTitle } from 'lib/helpers';
+import DevicesList from 'components/devices-list';
+import Calibration from 'components/calibration';
+import ListItem from 'components/list-item';
 
-class SettingsListItem extends Component<{ onPress?: () => void }, {}> {
-  render() {
-    return (
-      <ListItem
-        icon
-        style={{ marginVertical: 10 }}
-        onPress={this.props.onPress}
-      >
-        {this.props.children}
-      </ListItem>
-    );
-  }
-}
-
-@inject('store')
+@inject('store', 'ui')
 @observer
 export default class extends Component<{}, {}> {
   static navigationOptions = {
@@ -47,70 +32,9 @@ export default class extends Component<{}, {}> {
   };
 
   render() {
-    const currentDevice = this.store.currentDevice;
-    const onDeviceRemove = () => {
-      this.store.removeDevice();
-      this.store.restartScan();
-    };
-
-    // const deviceInfo = currentDevice ? (
-    //   <Row styleName="small">
-    //     <View styleName="vertical">
-    //       <Subtitle>{currentDevice.name}</Subtitle>
-    //       <Text numberOfLines={1}>
-    //         {`${currentDevice.modelName} by ${currentDevice.manufacturer}`}
-    //       </Text>
-    //     </View>
-    //     <Button styleName="right-icon" onPress={onDeviceRemove}>
-    //       <Icon name="remove" size={20} />
-    //     </Button>
-    //   </Row>
-    // ) : (
-    //   <Text styleName="h-center" style={{ marginVertical: 12 }}>
-    //     Please, choose a device from available devices.
-    //   </Text>
-    // );
-
-    // const devices = toJS(this.store.devices);
-
-    // const availableDevices =
-    //   devices.length > 0 ? (
-    //     <ListView
-    //       data={toJS(this.store.devices)}
-    //       renderRow={(device: Device) => {
-    //         return (
-    //           <TouchableHighlight onPress={() => this.store.setDevice(device)}>
-    //             <Row styleName="small">
-    //               <View styleName="vertical">
-    //                 <Subtitle>{device.name}</Subtitle>
-    //                 <Text numberOfLines={1}>
-    //                   {`${device.modelName} by ${device.manufacturer}`}
-    //                 </Text>
-    //               </View>
-    //               <Divider styleName="line" />
-    //             </Row>
-    //           </TouchableHighlight>
-    //         );
-    //       }}
-    //     />
-    //   ) : (
-    //     <Text styleName="h-center" style={{ marginVertical: 12 }}>
-    //       Scanning for devices. No devices found yet.
-    //     </Text>
-    //   );
-    // <View>
-    //   <Divider styleName="section-header">
-    //     <Caption>CURRENT DEVICE</Caption>
-    //   </Divider>
-    //   {deviceInfo}
-    //   <Divider styleName="section-header">
-    //     <Caption>AVAILABLE DEVICES</Caption>
-    //   </Divider>
-    //   {availableDevices}
-    // </View>
-    const kek = this.store.currentDevice
-      ? this.store.currentDevice.modelName
-      : 'kek';
+    const title = this.store.currentDevice
+      ? deviceTitle(this.store.currentDevice)
+      : 'Select an HRM device';
 
     return (
       <Container>
@@ -118,79 +42,101 @@ export default class extends Component<{}, {}> {
           <Modal
             animationType="slide"
             transparent={false}
-            visible={this.state.modalVisible}
-            onRequestClose={() => {
-              alert('Modal has been closed.');
-            }}
+            visible={this.store.scanning}
+            onRequestClose={this.store.stopScan}
           >
-            <View style={{ marginTop: 22 }}>
-              <View>
-                <Text>Hello World!</Text>
-
-                <TouchableHighlight
-                  onPress={() => {
-                    this.setModalVisible(!this.state.modalVisible);
-                  }}
-                >
-                  <Text>Hide Modal</Text>
-                </TouchableHighlight>
-              </View>
-            </View>
+            <DevicesList />
+          </Modal>
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={this.store.calibrating}
+            onRequestClose={this.store.stopCalibration}
+          >
+            <Calibration />
           </Modal>
           <Separator bordered>
             <Text>DEVICES</Text>
           </Separator>
-          <SettingsListItem
-            onPress={() => {
-              this.setModalVisible(true);
-            }}
-          >
+          <ListItem>
             <Left>
               <Icon name="watch" />
             </Left>
             <Body>
-              <Text>Current Device</Text>
-              <Text note>{kek}</Text>
+              <Text>Current device</Text>
+              <Text note>{title}</Text>
             </Body>
-          </SettingsListItem>
-          <SettingsListItem>
+          </ListItem>
+          <ListItem onPress={this.store.startScan}>
+            <Left>
+              <Icon name="bluetooth" />
+            </Left>
+            <Body>
+              <Text>Select a device</Text>
+              <Text note>Choose from available devices</Text>
+            </Body>
+          </ListItem>
+          <ListItem onPress={this.store.removeDevice}>
+            <Left>
+              <Icon name="trash" />
+            </Left>
+            <Body>
+              <Text>Remove the device</Text>
+              <Text note>Unpair the current device</Text>
+            </Body>
+          </ListItem>
+          <Separator bordered>
+            <Text>CALIBRATION</Text>
+          </Separator>
+          <ListItem>
             <Left>
               <Icon name="pulse" />
             </Left>
             <Body>
-              <Text>Calibration</Text>
-              <Text note>Baseline HRV is 80. Acceletometer error is 10.</Text>
+              <Text>Baseline HRV</Text>
+              <Text note>{this.store.baselineHrv}</Text>
             </Body>
-          </SettingsListItem>
+          </ListItem>
+          <ListItem>
+            <Left>
+              <Icon name="move" />
+            </Left>
+            <Body>
+              <Text>Acceletometer error</Text>
+              <Text note>{this.store.accelerometerError}</Text>
+            </Body>
+          </ListItem>
+          <ListItem onPress={this.store.startCalibration}>
+            <Left>
+              <Icon name="options" />
+            </Left>
+            <Body>
+              <Text>Calibrate</Text>
+              <Text note>Identify baseline values</Text>
+            </Body>
+          </ListItem>
+          <ListItem>
+            <Left>
+              <Icon name="trash" />
+            </Left>
+            <Body>
+              <Text>Reset</Text>
+              <Text note>Reset to default settings</Text>
+            </Body>
+          </ListItem>
           <Separator bordered>
             <Text>MISCELLANEOUS</Text>
           </Separator>
-          <SettingsListItem>
+          <ListItem>
             <Left>
               <Icon name="information-circle" />
             </Left>
             <Body>
               <Text>How To Use</Text>
             </Body>
-          </SettingsListItem>
+          </ListItem>
         </Content>
       </Container>
     );
-  }
-
-  state = {
-    modalVisible: false
-  };
-
-  setModalVisible(visible: boolean) {
-    this.setState({ modalVisible: visible });
-  }
-
-  componentDidMount() {
-    this.store.startScan();
-  }
-
-  componentWillUnmount() {
-    this.store.stopScan();
   }
 }

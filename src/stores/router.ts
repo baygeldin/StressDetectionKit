@@ -37,4 +37,9 @@ export default class Router {
   goToSettings() {
     this.goTo('Settings');
   }
+
+  @action.bound
+  goToDeveloperScreen() {
+    this.goTo('Developer');
+  }
 }

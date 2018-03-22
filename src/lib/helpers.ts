@@ -1,4 +1,5 @@
 import { StressLevels } from 'lib/types';
+import { Device } from 'lib/device-kit';
 import {
   NONE_STRESS_COLOR,
   LOW_STRESS_COLOR,
@@ -25,4 +26,8 @@ export function stressColor(level: StressLevels) {
     case 'high':
       return HIGH_STRESS_COLOR;
   }
+}
+
+export function deviceTitle(device: Device) {
+  return `${device.name} by ${device.manufacturer}`;
 }

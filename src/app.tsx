@@ -6,19 +6,23 @@ import { observer, Provider } from 'mobx-react/native';
 import DeviceKit from 'lib/device-kit';
 import Router from 'stores/router';
 import Store from 'stores/main';
+import Ui from 'stores/ui';
 import HomeScreen from 'screens/home';
 import SettingsScreen from 'screens/settings';
+import DeveloperScreen from 'screens/developer';
 
 configure({ enforceActions: true });
 
 const RootNavigator = StackNavigator({
   Home: { screen: HomeScreen },
-  Settings: { screen: SettingsScreen }
+  Settings: { screen: SettingsScreen },
+  Developer: { screen: DeveloperScreen }
 });
 
 const sdk = new DeviceKit();
 const store = new Store(sdk);
 const router = new Router(RootNavigator.router);
+const ui = new Ui();
 
 @observer
 export default class extends Component<any, any> {
@@ -26,7 +30,7 @@ export default class extends Component<any, any> {
     if (!store.initialized) return <View />;
 
     return (
-      <Provider router={router} store={store} sdk={sdk}>
+      <Provider router={router} store={store} sdk={sdk} ui={ui}>
         <RootNavigator navigation={addNavigationHelpers(router)} />
       </Provider>
     );

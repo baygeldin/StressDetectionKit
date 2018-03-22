@@ -17,7 +17,6 @@
     "bundle": "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
   },
   "dependencies": {
-    "@shoutem/ui": "^0.23.4",
     "denque": "^1.2.3",
     "mobx": "^4.1.0",
     "mobx-react": "^5.0.0",
@@ -27,7 +26,8 @@
     "react-native": "0.50.4",
     "react-native-elements": "^0.18.5",
     "react-native-fs": "^2.9.11",
-    "react-native-sensors": "git://github.com/baygeldin/react-native-sensors.git#fix_startupdates",
+    "react-native-progress": "^3.4.0",
+    "react-native-sensors": "^3.0.0-2",
     "react-native-vector-icons": "^4.4.2",
     "react-navigation": "^1.0.0-beta.21",
     "xmldom": "^0.1.27"

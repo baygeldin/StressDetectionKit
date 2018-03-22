@@ -9,9 +9,9 @@ class CollectionButton extends Component<{}, {}> {
   render() {
     const collecting = this.store.collecting;
     const action = collecting
-      ? () => this.store.startCollection()
-      : () => this.store.stopCollection();
-    const title = collecting ? 'Start Collection' : 'Stop Collection';
+      ? () => this.store.stopCollection()
+      : () => this.store.startCollection();
+    const title = collecting ? 'Stop Collection' : 'Start Collection';
 
     return <Button onPress={action} title={title} />;
   }

@@ -13,7 +13,7 @@ import {
 import CogButton from 'components/cog-button';
 import CollectionButton from 'components/collection-button';
 
-@inject('store')
+@inject('store', 'router')
 @observer
 export default class extends Component<{}, {}> {
   static navigationOptions = {
@@ -40,10 +40,14 @@ export default class extends Component<{}, {}> {
           justifyContent: 'space-between'
         }}
       >
-        <View style={{ flex: 1, justifyContent: 'center' }}>{content}</View>
         <View style={{ height: 50 }}>
           <CollectionButton />
+          <Button
+            onPress={() => this.router.goToDeveloperScreen()}
+            title="lalala"
+          />
         </View>
+        <View style={{ flex: 1, justifyContent: 'center' }}>{content}</View>
       </View>
     );
   }
