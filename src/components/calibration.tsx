@@ -11,6 +11,7 @@ import {
   Button,
   Icon
 } from 'native-base';
+import moment from 'moment';
 import { Divider } from 'react-native-elements';
 import { Bar, Circle } from 'react-native-progress';
 import Component from 'lib/component';
@@ -20,6 +21,10 @@ import { Device } from 'lib/device-kit';
 @observer
 class Calibration extends Component<{}, {}> {
   render() {
+    const timeRemaining = moment
+      .duration(this.store.calibrationTimeRemaining)
+      .humanize();
+
     return (
       <Container>
         <Content padder>
@@ -32,13 +37,18 @@ class Calibration extends Component<{}, {}> {
           >
             <Icon name="options" style={{ fontSize: 60, color: 'black' }} />
             <Text style={{ textAlign: 'center', marginTop: 10 }}>
-              Put your phone down, relax and wait for calibration to finish.
+              Put your phone down, relax and wait for the calibration to finish.
             </Text>
           </View>
           <Divider style={{ marginBottom: 15 }} />
-          <Bar progress={0.3} width={null} borderColor="lightgrey" />
+          <Bar
+            progress={this.store.calibrationProgress}
+            useNativeDriver={true}
+            width={null}
+            borderColor="lightgrey"
+          />
           <Text style={{ textAlign: 'center', marginTop: 10 }}>
-            Remaining time: ...eeeh.
+            The calibration will finish in {timeRemaining}.
           </Text>
         </Content>
         <Footer>

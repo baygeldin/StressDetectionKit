@@ -8,7 +8,10 @@ module.exports = ({ platform }, defaults) => {
       rules: [
         {
           test: /\.jsx?$/,
-          include: [/node_modules\/native-base-shoutem-theme/],
+          include: [
+            /node_modules\/native-base-shoutem-theme/,
+            /node_modules\/react-native-vector-icons/
+          ],
           use: [
             {
               loader: 'babel-loader'

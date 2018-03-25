@@ -1,5 +1,5 @@
 import remotedev from 'mobx-remotedev';
-import { observable, action, computed, toJS } from 'mobx';
+import { observable, action, computed, toJS, runInAction } from 'mobx';
 import {
   Accelerometer,
   Gyroscope,
@@ -9,6 +9,7 @@ import {
 import RNFS from 'react-native-fs';
 import { DOMParser } from 'xmldom';
 import Denque from 'denque';
+import { clearInterval, setInterval } from 'timers';
 import { Device, Reading } from 'lib/device-kit';
 import DeviceKit from 'lib/device-kit';
 import {
@@ -16,7 +17,14 @@ import {
   WINDOW_SIZE,
   STEP_SIZE,
   CHUNK_LENGTH,
-  SENSOR_UPDATE_INTERVAL
+  SENSOR_UPDATE_INTERVAL,
+  CALIBRATION_LENGTH,
+  CALIBRATION_UPDATE_INTERVAL,
+  CALIBRATION_PADDING,
+  DEFAULT_ACCELEROMETER_ERROR,
+  DEFAULT_BASELINE_RMSSD,
+  ACCELEROMETER_ERROR_KEY,
+  BASELINE_RMSSD_KEY
 } from 'lib/constants';
 import { chunkArray } from 'lib/helpers';
 import {
@@ -28,37 +36,46 @@ import {
   StressMark,
   Sensor
 } from 'lib/types';
-import { clearInterval, setInterval } from 'timers';
+import { calcAccelerometerVariance, calcRmssd } from 'lib/features';
+import { getFloat, setFloat } from 'lib/storage';
 
 //@remotedev
 export default class Main {
+  // State
   @observable initialized = false;
   @observable collecting = false;
   @observable scanning = false;
   @observable calibrating = false;
 
+  // Devices
   @observable.shallow devices: Device[] = [];
   @observable.ref currentDevice?: Device;
 
+  // Perceived stress
   @observable.shallow percievedStress: StressMark[] = [];
   @observable currentPercievedStressLevel: StressLevels = 'none';
   @observable percievedStressStartedAt: number;
 
+  // Collection
   @observable collectionStartedAt: number;
-
   @observable.shallow pulseBuffer: PulseMark[] = [];
   @observable.shallow rrIntervalsBuffer: RrIntervalMark[] = [];
   @observable.shallow accelerometerBuffer: SensorData[] = [];
   @observable.shallow gyroscopeBuffer: SensorData[] = [];
 
+  // Chunks
   private chunksQueue = new Denque<Chunk>([]);
   @observable chunksCollected = 0;
 
+  // Samples
   @observable.shallow currentSamples: Sample[] = [];
 
-  @observable baselineHrv = 80;
-  @observable accelerometerError = 1.5;
+  // Calibration
+  @observable baselineRmssd: number;
+  @observable accelerometerError: number;
+  @observable calibrationTimePassed: number;
 
+  // Internal logic
   private accelerometer: SensorObservable;
   private gyroscope: SensorObservable;
 
@@ -71,20 +88,38 @@ export default class Main {
     return this.currentSamples[this.currentSamples.length - 1];
   }
 
-  @action.bound
-  initialize(key: string) {
-    this.sdk
-      .register(key)
-      .then(() => this.sdk.fetchDevices())
-      .then(
-        action('initialize', (devices: Device[]) => {
-          this.initialized = true;
+  @computed
+  get calibrationProgress() {
+    console.log(
+      'computed',
+      this.calibrationTimePassed,
+      this.calibrationTimePassed / CALIBRATION_LENGTH
+    );
+    return this.calibrationTimePassed / CALIBRATION_LENGTH;
+  }
 
-          if (devices[0]) {
-            this.currentDevice = devices[0];
-          }
-        })
-      );
+  @computed
+  get calibrationTimeRemaining() {
+    return CALIBRATION_LENGTH - this.calibrationTimePassed;
+  }
+
+  async initialize(key: string) {
+    await this.sdk.register(key);
+    const devices = await this.sdk.fetchDevices();
+    const baselineRmssd = await getFloat(BASELINE_RMSSD_KEY);
+    const accelerometerError = await getFloat(ACCELEROMETER_ERROR_KEY);
+
+    runInAction('initialize', () => {
+      this.initialized = true;
+
+      if (devices[0]) {
+        this.currentDevice = devices[0];
+      }
+
+      this.accelerometerError =
+        accelerometerError || DEFAULT_ACCELEROMETER_ERROR;
+      this.baselineRmssd = baselineRmssd || DEFAULT_BASELINE_RMSSD;
+    });
   }
 
   @action.bound
@@ -92,13 +127,23 @@ export default class Main {
     if (this.calibrating) return;
 
     this.calibrating = true;
-
+    this.calibrationTimePassed = 0;
+    this.flushBuffers();
     this.startSensors();
-    // this.timer = setTimeout(() => {
-    //   this.flushBuffers()
-    //   this.timer = setInterval(() => {}, CHUNK_LENGTH)
-    // }, CHUNK_LENGTH)
-    //this.timer = setTimeout(() => {}, CHUNK_LENGTH * (WINDOW_SIZE + STEP_SIZE));
+
+    this.timer = setInterval(
+      action('updateCalibrationProgress', () => {
+        if (!this.calibrating) return;
+
+        this.calibrationTimePassed += CALIBRATION_UPDATE_INTERVAL;
+        if (this.calibrationTimePassed >= CALIBRATION_LENGTH) {
+          this.stopCalibration();
+          this.computeBaselineValues();
+          this.flushBuffers();
+        }
+      }),
+      CALIBRATION_UPDATE_INTERVAL
+    );
   }
 
   @action.bound
@@ -106,9 +151,15 @@ export default class Main {
     if (!this.calibrating) return;
 
     this.calibrating = false;
-
     this.stopSensors();
-    //clearTimeout(this.timer);
+    clearInterval(this.timer);
+  }
+
+  @action.bound
+  resetBaselineValues() {
+    this.accelerometerError = DEFAULT_ACCELEROMETER_ERROR;
+    this.baselineRmssd = DEFAULT_BASELINE_RMSSD;
+    this.persistBaselineValues();
   }
 
   @action.bound
@@ -120,6 +171,7 @@ export default class Main {
     const timestamp = Date.now();
     this.percievedStressStartedAt = timestamp;
     this.collectionStartedAt = timestamp;
+    this.flushBuffers();
     this.startSensors();
     this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
   }
@@ -229,14 +281,17 @@ export default class Main {
     this.gyroscope.stop();
   }
 
+  @action.bound
   private pushChunk() {
     this.chunksQueue.push({
-      rrIntervals: this.rrIntervalsBuffer.splice(0),
-      pulse: this.pulseBuffer.splice(0),
-      gyroscope: this.gyroscopeBuffer.splice(0),
-      accelerometer: this.accelerometerBuffer.splice(0),
+      rrIntervals: this.rrIntervalsBuffer,
+      pulse: this.pulseBuffer,
+      gyroscope: this.gyroscopeBuffer,
+      accelerometer: this.accelerometerBuffer,
       timestamp: Date.now()
     });
+
+    this.flushBuffers();
 
     this.chunksCollected++;
 
@@ -255,10 +310,12 @@ export default class Main {
     }
   }
 
+  @action.bound
   private pushSample() {
     // TODO: calculate activityIndex and HRV
-    const hrv = Math.floor(Math.random() * 100);
+    const rmssd = Math.floor(Math.random() * 100);
     const activityIndex = Math.floor(Math.random() * 50);
+    const rmssdDiff = rmssd - this.baselineRmssd;
 
     const state =
       this.currentPercievedStressLevel === 'medium' ||
@@ -267,12 +324,14 @@ export default class Main {
     this.currentSamples.push({
       state,
       activityIndex,
-      hrv,
+      rmssd,
+      rmssdDiff,
       stress: this.currentPercievedStressLevel,
       timestamp: Date.now()
     });
   }
 
+  @action.bound
   private processReading(reading: Reading) {
     const doc = new DOMParser().parseFromString(reading.data);
 
@@ -349,6 +408,38 @@ export default class Main {
       });
   }
 
+  @action.bound
+  private computeBaselineValues() {
+    if (this.accelerometerBuffer.length) {
+      this.accelerometerError = calcAccelerometerVariance(
+        this.accelerometerBuffer.splice(0)
+      );
+    }
+
+    if (this.rrIntervalsBuffer.length) {
+      const rrIntervals = this.rrIntervalsBuffer
+        .splice(0)
+        .sort((a, b) => a.timestamp - b.timestamp);
+      const lastTimestamp = rrIntervals[rrIntervals.length - 1].timestamp;
+      const actualStart =
+        lastTimestamp - CALIBRATION_LENGTH + CALIBRATION_PADDING;
+      this.baselineRmssd = calcRmssd(
+        rrIntervals.filter(m => m.timestamp > actualStart)
+      );
+    }
+
+    this.persistBaselineValues();
+  }
+
+  private persistBaselineValues() {
+    Promise.all([
+      setFloat(ACCELEROMETER_ERROR_KEY, this.accelerometerError),
+      setFloat(BASELINE_RMSSD_KEY, this.baselineRmssd)
+    ]).catch(err => {
+      console.error(err);
+    });
+  }
+
   private persistChunks() {
     return this.persist(`${Date.now()}.json`, this.chunksQueue.toArray());
   }
@@ -362,11 +453,13 @@ export default class Main {
     return this.persist('stress.json', this.percievedStress);
   }
 
+  @action.bound
   private flushSamples() {
     this.currentSamples = [];
     this.percievedStress = [];
   }
 
+  @action.bound
   private flushBuffers() {
     this.accelerometerBuffer = [];
     this.gyroscopeBuffer = [];

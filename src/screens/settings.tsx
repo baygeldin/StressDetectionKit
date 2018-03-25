@@ -5,7 +5,8 @@ import {
   SectionList,
   TouchableHighlight,
   Modal,
-  View
+  View,
+  Alert
 } from 'react-native';
 import {
   Container,
@@ -76,7 +77,7 @@ export default class extends Component<{}, {}> {
               <Text note>Choose from available devices</Text>
             </Body>
           </ListItem>
-          <ListItem onPress={this.store.removeDevice}>
+          <ListItem onPress={() => this.confirmDeviceRemoval()}>
             <Left>
               <Icon name="trash" />
             </Left>
@@ -94,7 +95,7 @@ export default class extends Component<{}, {}> {
             </Left>
             <Body>
               <Text>Baseline HRV</Text>
-              <Text note>{this.store.baselineHrv}</Text>
+              <Text note>{Math.round(this.store.baselineRmssd)}</Text>
             </Body>
           </ListItem>
           <ListItem>
@@ -103,7 +104,7 @@ export default class extends Component<{}, {}> {
             </Left>
             <Body>
               <Text>Acceletometer error</Text>
-              <Text note>{this.store.accelerometerError}</Text>
+              <Text note>{this.store.accelerometerError.toPrecision(4)}</Text>
             </Body>
           </ListItem>
           <ListItem onPress={this.store.startCalibration}>
@@ -115,7 +116,7 @@ export default class extends Component<{}, {}> {
               <Text note>Identify baseline values</Text>
             </Body>
           </ListItem>
-          <ListItem>
+          <ListItem onPress={() => this.confirmCalibrationReset()}>
             <Left>
               <Icon name="trash" />
             </Left>
@@ -127,7 +128,7 @@ export default class extends Component<{}, {}> {
           <Separator bordered>
             <Text>MISCELLANEOUS</Text>
           </Separator>
-          <ListItem>
+          <ListItem onPress={() => this.showHelp()}>
             <Left>
               <Icon name="information-circle" />
             </Left>
@@ -137,6 +138,35 @@ export default class extends Component<{}, {}> {
           </ListItem>
         </Content>
       </Container>
+    );
+  }
+
+  confirmAction(msg: string, fn: () => void) {
+    Alert.alert('Are you sure?', msg, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'OK', onPress: fn }
+    ]);
+  }
+
+  confirmDeviceRemoval() {
+    this.confirmAction(
+      'Current device will be unpaired.',
+      this.store.removeDevice
+    );
+  }
+
+  confirmCalibrationReset() {
+    this.confirmAction(
+      'Baseline values will reset.',
+      this.store.resetBaselineValues
+    );
+  }
+
+  showHelp() {
+    Alert.alert(
+      'How To Use',
+      'First calibrate the baselines values: put on your HRM, put your phone down and sit still. You should do it right after you wake up to get best results. Stress will be detected relative to these baseline values.',
+      [{ text: 'Got it' }]
     );
   }
 }
