@@ -25,7 +25,7 @@ import DevicesList from 'components/devices-list';
 import Calibration from 'components/calibration';
 import ListItem from 'components/list-item';
 
-@inject('store', 'ui')
+@inject('store', 'ui', 'router')
 @observer
 export default class extends Component<{}, {}> {
   static navigationOptions = {
@@ -36,6 +36,17 @@ export default class extends Component<{}, {}> {
     const title = this.store.currentDevice
       ? deviceTitle(this.store.currentDevice)
       : 'Select an HRM device';
+
+    const developer = __DEV__ ? (
+      <ListItem onPress={this.router.goToDeveloperScreen}>
+        <Left>
+          <Icon name="code" />
+        </Left>
+        <Body>
+          <Text>Developer Mode</Text>
+        </Body>
+      </ListItem>
+    ) : null;
 
     return (
       <Container>
@@ -128,6 +139,7 @@ export default class extends Component<{}, {}> {
           <Separator bordered>
             <Text>MISCELLANEOUS</Text>
           </Separator>
+          {developer}
           <ListItem onPress={() => this.showHelp()}>
             <Left>
               <Icon name="information-circle" />

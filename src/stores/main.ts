@@ -90,11 +90,6 @@ export default class Main {
 
   @computed
   get calibrationProgress() {
-    console.log(
-      'computed',
-      this.calibrationTimePassed,
-      this.calibrationTimePassed / CALIBRATION_LENGTH
-    );
     return this.calibrationTimePassed / CALIBRATION_LENGTH;
   }
 
@@ -139,7 +134,6 @@ export default class Main {
         if (this.calibrationTimePassed >= CALIBRATION_LENGTH) {
           this.stopCalibration();
           this.computeBaselineValues();
-          this.flushBuffers();
         }
       }),
       CALIBRATION_UPDATE_INTERVAL
@@ -185,14 +179,15 @@ export default class Main {
     this.stopSensors();
     clearInterval(this.timer);
 
+    const { samples, stress } = this.flushSamples();
+
     if (__DEV__) {
-      Promise.all([this.persistSamples(), this.persistStress()])
-        .then(this.flushSamples)
-        .catch(err => {
-          console.error(err);
-        });
-    } else {
-      this.flushSamples();
+      Promise.all([
+        this.persistSamples(samples),
+        this.persistStress(stress)
+      ]).catch(err => {
+        console.error(err);
+      });
     }
   }
 
@@ -283,15 +278,9 @@ export default class Main {
 
   @action.bound
   private pushChunk() {
-    this.chunksQueue.push({
-      rrIntervals: this.rrIntervalsBuffer,
-      pulse: this.pulseBuffer,
-      gyroscope: this.gyroscopeBuffer,
-      accelerometer: this.accelerometerBuffer,
-      timestamp: Date.now()
-    });
-
-    this.flushBuffers();
+    this.chunksQueue.push(
+      Object.assign(this.flushBuffers(), { timestamp: Date.now() })
+    );
 
     this.chunksCollected++;
 
@@ -301,12 +290,12 @@ export default class Main {
       }
 
       if (__DEV__ && this.chunksCollected % WINDOW_SIZE === 0) {
-        this.persistChunks().catch(err => {
+        this.persistChunks(this.chunksQueue.toArray()).catch(err => {
           console.error(err);
         });
       }
 
-      this.chunksQueue.unshift();
+      this.chunksQueue.shift();
     }
   }
 
@@ -410,21 +399,21 @@ export default class Main {
 
   @action.bound
   private computeBaselineValues() {
-    if (this.accelerometerBuffer.length) {
-      this.accelerometerError = calcAccelerometerVariance(
-        this.accelerometerBuffer.splice(0)
-      );
+    const buffers = this.flushBuffers();
+
+    if (buffers.accelerometer.length) {
+      const error = calcAccelerometerVariance(buffers.accelerometer);
+      this.accelerometerError = error;
     }
 
-    if (this.rrIntervalsBuffer.length) {
-      const rrIntervals = this.rrIntervalsBuffer
-        .splice(0)
-        .sort((a, b) => a.timestamp - b.timestamp);
+    if (buffers.rrIntervals.length) {
+      const rrIntervals = buffers.rrIntervals.sort(
+        (a, b) => a.timestamp - b.timestamp
+      );
       const lastTimestamp = rrIntervals[rrIntervals.length - 1].timestamp;
-      const actualStart =
-        lastTimestamp - CALIBRATION_LENGTH + CALIBRATION_PADDING;
+      const start = lastTimestamp - CALIBRATION_LENGTH + CALIBRATION_PADDING;
       this.baselineRmssd = calcRmssd(
-        rrIntervals.filter(m => m.timestamp > actualStart)
+        rrIntervals.filter(m => m.timestamp > start)
       );
     }
 
@@ -440,31 +429,35 @@ export default class Main {
     });
   }
 
-  private persistChunks() {
-    return this.persist(`${Date.now()}.json`, this.chunksQueue.toArray());
+  private persistChunks(chunks: Chunk[]) {
+    return this.persist(`${Date.now()}.json`, chunks);
   }
 
-  private persistSamples() {
+  private persistSamples(samples: Sample[]) {
     // TODO: remove unreliable samples
-    return this.persist('stress.json', this.currentSamples);
+    return this.persist('stress.json', samples);
   }
 
-  private persistStress() {
-    return this.persist('stress.json', this.percievedStress);
+  private persistStress(stress: StressMark[]) {
+    return this.persist('stress.json', stress);
   }
 
   @action.bound
   private flushSamples() {
-    this.currentSamples = [];
-    this.percievedStress = [];
+    return {
+      samples: this.currentSamples.splice(0),
+      stress: this.percievedStress.splice(0)
+    };
   }
 
   @action.bound
   private flushBuffers() {
-    this.accelerometerBuffer = [];
-    this.gyroscopeBuffer = [];
-    this.pulseBuffer = [];
-    this.rrIntervalsBuffer = [];
+    return {
+      accelerometer: this.accelerometerBuffer.splice(0),
+      gyroscope: this.gyroscopeBuffer.splice(0),
+      pulse: this.pulseBuffer.splice(0),
+      rrIntervals: this.rrIntervalsBuffer.splice(0)
+    };
   }
 
   // Helpers
@@ -485,12 +478,10 @@ export default class Main {
       this.collectionStartedAt
     }`;
 
-    const serialized = toJS(data);
-
     return RNFS.mkdir(folder).then(() =>
       RNFS.writeFile(
         `${folder}/${path}`,
-        JSON.stringify(serialized),
+        JSON.stringify(data),
         'ascii' // No idea why utf8 doesn't work here
       )
     );
