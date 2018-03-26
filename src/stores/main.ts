@@ -1,4 +1,3 @@
-import remotedev from 'mobx-remotedev';
 import { observable, action, computed, toJS, runInAction } from 'mobx';
 import {
   Accelerometer,
@@ -39,7 +38,6 @@ import {
 import { calcAccelerometerVariance, calcRmssd } from 'lib/features';
 import { getFloat, setFloat } from 'lib/storage';
 
-//@remotedev
 export default class Main {
   // State
   @observable initialized = false;

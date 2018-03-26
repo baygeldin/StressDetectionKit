@@ -2,12 +2,16 @@ import React from 'react';
 import { View } from 'react-native';
 import { observer, inject } from 'mobx-react/native';
 import { Container, Content, Text, Footer, FooterTab, Icon } from 'native-base';
+import { Bar } from 'react-native-progress';
 import Component from 'lib/component';
 import { APP_NAME, DATE_FORMAT, WINDOW_SIZE, STEP_SIZE } from 'lib/constants';
 import CogButton from 'components/cog-button';
 import CollectionButton from 'components/collection-button';
+import InitialContent from 'components/initial-content';
+import GatheringContent from 'components/gathering-content';
+import MainContent from 'components/main-content';
 
-@inject('store')
+@inject('store', 'ui')
 @observer
 export default class extends Component<{}, {}> {
   static navigationOptions = {
@@ -16,17 +20,19 @@ export default class extends Component<{}, {}> {
   };
 
   render() {
-    const collecting = this.store.collecting;
-    //(this.store.chunksCollected % (WINDOW_SIZE+STEP_SIZE)) / (WINDOW_SIZE+STEP_SIZE); it's progress, but maybe I should extract it to constants
-    const content = collecting
-      ? 'this.store.sampleProgress.toString()'
-      : 'Hello! Start collection first!';
+    let content: JSX.Element;
+
+    if (!this.store.collecting) {
+      content = <InitialContent />;
+    } else if (!this.ui.gatheredEnoughData) {
+      content = <GatheringContent />;
+    } else {
+      content = <MainContent />;
+    }
 
     return (
       <Container>
-        <Content padder>
-          <Text style={{ textAlign: 'center', marginTop: 10 }}>{content}</Text>
-        </Content>
+        <Content padder>{content}</Content>
         <Footer>
           <FooterTab>
             <CollectionButton />

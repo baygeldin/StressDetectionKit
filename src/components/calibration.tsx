@@ -13,7 +13,7 @@ import {
 } from 'native-base';
 import moment from 'moment';
 import { Divider } from 'react-native-elements';
-import { Bar, Circle } from 'react-native-progress';
+import { Bar } from 'react-native-progress';
 import Component from 'lib/component';
 import { Device } from 'lib/device-kit';
 

@@ -29,3 +29,6 @@ export const DEFAULT_ACCELEROMETER_ERROR = 0.025; // in m/s^2
 // Storage keys
 export const BASELINE_RMSSD_KEY = 'baselineRmssd';
 export const ACCELEROMETER_ERROR_KEY = 'accelerometerError';
+
+// Views
+export const CHUNKS_REQUIRED = WINDOW_SIZE + STEP_SIZE;

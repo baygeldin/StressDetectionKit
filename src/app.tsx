@@ -22,7 +22,7 @@ const RootNavigator = StackNavigator({
 const sdk = new DeviceKit();
 const store = new Store(sdk);
 const router = new Router(RootNavigator.router);
-const ui = new Ui();
+const ui = new Ui(store);
 
 @observer
 export default class extends Component<any, any> {
