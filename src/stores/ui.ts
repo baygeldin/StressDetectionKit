@@ -1,30 +1,35 @@
 import { observable, action, computed } from 'mobx';
 import Store from 'stores/main';
-import { CHUNKS_REQUIRED } from 'lib/constants';
+import { CHUNKS_REQUIRED, WINDOW_LENGTH } from 'lib/constants';
+import { chunkByPattern } from 'lib/helpers';
 
 export default class Ui {
   constructor(private store: Store) {}
 
-  // An opimization to unsubscribe @computed once the gathering is done
-  private dataGatheringCompleted = false;
-
   @computed
   get gatheredEnoughData() {
-    if (this.dataGatheringCompleted) return true;
     return this.store.chunksCollected >= CHUNKS_REQUIRED;
   }
 
   @computed
   get dataGatheringProgress() {
-    if (this.dataGatheringCompleted) return 1;
     return (this.store.chunksCollected % CHUNKS_REQUIRED) / CHUNKS_REQUIRED;
   }
 
+  // NOTE:
+  // This will be re-evaluated on each sample (if it's currently used in active components of course).
+  // This could get huge when there're a lot of samples collected.
+  // So, if you really want to optimize it, use lazy-arrays and show only topmost entries in your views.
   @computed
   get stressSegments() {
-    // split samples by stress state, assign start and end
-    // then if the topmost segment is bad, show STRESSED, if not show OK
-    // also show duration.
-    return null;
+    const groups = chunkByPattern(this.store.currentSamples, s => s.state);
+    return groups.map(g => {
+      const start = g[0].timestamp - WINDOW_LENGTH;
+      const end = g[groups.length - 1].timestamp;
+      const duration = end - start;
+      const state = g[0].state;
+
+      return { start, end, duration, state };
+    });
   }
 }

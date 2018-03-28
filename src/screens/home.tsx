@@ -32,7 +32,7 @@ export default class extends Component<{}, {}> {
 
     return (
       <Container>
-        <Content padder>{content}</Content>
+        <Content>{content}</Content>
         <Footer>
           <FooterTab>
             <CollectionButton />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react/native';
-import { View } from 'react-native';
+import { View, ART } from 'react-native';
 import { Text } from 'native-base';
 import Component from 'lib/component';
 

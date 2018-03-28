@@ -10,6 +10,7 @@ import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.sensors.RNSensorsPackage;
+import com.horcrux.svg.SvgPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +30,8 @@ public class MainApplication extends Application implements ReactApplication {
                     new RNFSPackage(),
                     new VectorIconsPackage(),
                     new DeviceKitPackage(),
-                    new RNSensorsPackage()
+                    new RNSensorsPackage(),
+                    new SvgPackage()
             );
         }
 

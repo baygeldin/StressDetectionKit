@@ -25,7 +25,7 @@ import {
   ACCELEROMETER_ERROR_KEY,
   BASELINE_RMSSD_KEY
 } from 'lib/constants';
-import { chunkArray } from 'lib/helpers';
+import { chunkBySize } from 'lib/helpers';
 import {
   Chunk,
   Sample,
@@ -466,8 +466,8 @@ export default class Main {
 
   private processStream(originalPoints: number[], originalQuality: number[]) {
     // Apply quality and split the stream to points
-    const points = chunkArray(originalPoints, 2);
-    const quality = chunkArray(originalQuality, 2);
+    const points = chunkBySize(originalPoints, 2);
+    const quality = chunkBySize(originalQuality, 2);
     return points.filter((p, i) => quality[i][0] === 255);
   }
 
