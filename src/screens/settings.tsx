@@ -145,7 +145,7 @@ export default class extends Component<{}, {}> {
               <Icon name="information-circle" />
             </Left>
             <Body>
-              <Text>How To Use</Text>
+              <Text>About</Text>
             </Body>
           </ListItem>
         </Content>
@@ -176,8 +176,8 @@ export default class extends Component<{}, {}> {
 
   showHelp() {
     Alert.alert(
-      'How To Use',
-      'First calibrate the baselines values: put on your HRM, put your phone down and sit still. You should do it right after you wake up to get best results. Stress will be detected relative to these baseline values.',
+      'About',
+      'First calibrate the baselines values. Put on your HRM, put your phone down and sit still. You should do it right after you wake up to get best results. Stress will be detected relative to these baseline values.\n\nApp icon is made by Roundicons.',
       [{ text: 'Got it' }]
     );
   }
