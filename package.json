@@ -1,5 +1,5 @@
 {
-  "name": "ReactiveDeviceKit",
+  "name": "StressDetectionKit",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -29,6 +29,7 @@
     "react-native-fs": "^2.9.11",
     "react-native-progress": "^3.4.0",
     "react-native-sensors": "3.0.0-2",
+    "react-native-splash-screen": "^3.0.6",
     "react-native-svg": "^6.3.1",
     "react-native-vector-icons": "^4.4.2",
     "react-navigation": "^1.0.0-beta.21",

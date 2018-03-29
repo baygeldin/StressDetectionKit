@@ -3,6 +3,7 @@ import { View, BackHandler, PermissionsAndroid, Alert } from 'react-native';
 import { StackNavigator, addNavigationHelpers } from 'react-navigation';
 import { observable, action, configure } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
+import SplashScreen from 'react-native-splash-screen';
 import DeviceKit from 'lib/device-kit';
 import Router from 'stores/router';
 import Store from 'stores/main';
@@ -27,7 +28,7 @@ const ui = new Ui(store);
 @observer
 export default class extends Component<any, any> {
   render() {
-    if (!store.initialized) return <View />;
+    if (!store.initialized) return null;
 
     return (
       <Provider router={router} store={store} sdk={sdk} ui={ui}>
@@ -40,7 +41,9 @@ export default class extends Component<any, any> {
     const key = process.env.MEDM_DEVICEKIT_LICENSE_KEY;
 
     if (key) {
-      store.initialize(key);
+      store.initialize(key).then(() => {
+        SplashScreen.hide();
+      });
     } else {
       throw new Error('MEDM_DEVICEKIT_LICENSE_KEY is not provided!');
     }

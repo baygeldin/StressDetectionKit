@@ -99,7 +99,7 @@ android {
     buildToolsVersion "24.0.0"
 
     defaultConfig {
-        applicationId "com.reactivedevicekit"
+        applicationId "com.stressdetectionkit"
         minSdkVersion 17
         targetSdkVersion 23
         versionCode 1
@@ -148,6 +148,7 @@ dependencies {
     compile project(':react-native-vector-icons')
     compile project(':react-native-sensors')
     compile project(':react-native-svg')
+    compile project(':react-native-splash-screen')
     compile fileTree(dir: "libs", include: ["*.jar"])
     compile "com.android.support:appcompat-v7:24.2.1"
     compile "com.facebook.react:react-native:+"  // From node_modules
