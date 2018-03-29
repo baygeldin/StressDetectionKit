@@ -43,25 +43,25 @@ export default class extends Component<any, any> {
     if (key) {
       store.initialize(key).then(() => {
         SplashScreen.hide();
+
+        PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+        ]).then(permissions => {
+          if (!Object.values(permissions).every(p => p === 'granted')) {
+            Alert.alert(
+              'Permissions Not Granted',
+              'Requested permissions are required for the app to work properly. Please, grant them next time.',
+              [{ text: 'OK' }],
+              { cancelable: false }
+            );
+          }
+        });
       });
     } else {
       throw new Error('MEDM_DEVICEKIT_LICENSE_KEY is not provided!');
     }
-
-    PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-    ]).then(permissions => {
-      if (!Object.values(permissions).every(p => p === 'granted')) {
-        Alert.alert(
-          'Permissions Not Granted',
-          'Requested permissions are required for the app to work properly. Please, grant them next time.',
-          [{ text: 'OK' }],
-          { cancelable: false }
-        );
-      }
-    });
 
     BackHandler.addEventListener('hardwareBackPress', () => {
       if (router.state.index === 0) {
