@@ -9,7 +9,7 @@ import Component from 'lib/component';
 class InitialContent extends Component<{}, {}> {
   render() {
     return (
-      <Content contentContainerStyle={{ justifyContent: 'center', flex: 1 }}>
+      <Content padder contentContainerStyle={{ justifyContent: 'center', flex: 1 }}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Icon name="heart-pulse" size={80} color="black" />
         </View>

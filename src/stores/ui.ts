@@ -1,10 +1,15 @@
 import { observable, action, computed } from 'mobx';
 import Store from 'stores/main';
-import { CHUNKS_REQUIRED, WINDOW_LENGTH } from 'lib/constants';
+import { CHUNKS_REQUIRED, WINDOW_LENGTH, CALIBRATION_LENGTH } from 'lib/constants';
 import { chunkByPattern } from 'lib/helpers';
 
 export default class Ui {
   constructor(private store: Store) {}
+
+  @computed
+  get calibrationProgress() {
+    return this.store.calibrationTimePassed / CALIBRATION_LENGTH;
+  }
 
   @computed
   get gatheredEnoughData() {

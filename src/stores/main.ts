@@ -5,12 +5,9 @@ import {
   SensorData,
   SensorObservable
 } from 'react-native-sensors';
-import RNFS from 'react-native-fs';
-import { DOMParser } from 'xmldom';
 import Denque from 'denque';
 import { clearInterval, setInterval } from 'timers';
-import { Device, Reading } from 'lib/device-kit';
-import DeviceKit from 'lib/device-kit';
+import DeviceKit, { Device, Reading } from 'lib/device-kit';
 import {
   APP_NAME,
   WINDOW_SIZE,
@@ -25,7 +22,12 @@ import {
   ACCELEROMETER_ERROR_KEY,
   BASELINE_RMSSD_KEY
 } from 'lib/constants';
-import { chunkBySize } from 'lib/helpers';
+import {
+  chunkBySize,
+  readingToStreams,
+  persist,
+  filterSamples
+} from 'lib/helpers';
 import {
   Chunk,
   Sample,
@@ -84,11 +86,6 @@ export default class Main {
   @computed
   get lastSample() {
     return this.currentSamples[this.currentSamples.length - 1];
-  }
-
-  @computed
-  get calibrationProgress() {
-    return this.calibrationTimePassed / CALIBRATION_LENGTH;
   }
 
   @computed
@@ -163,7 +160,9 @@ export default class Main {
     const timestamp = Date.now();
     this.percievedStressStartedAt = timestamp;
     this.collectionStartedAt = timestamp;
+    this.chunksQueue.clear();
     this.flushBuffers();
+    this.flushSamples();
     this.startSensors();
     this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
   }
@@ -181,8 +180,8 @@ export default class Main {
 
     if (__DEV__) {
       Promise.all([
-        this.persistSamples(samples),
-        this.persistStress(stress)
+        this.persist('samples', filterSamples(samples, stress)),
+        this.persist('stress', stress)
       ]).catch(err => {
         console.error(err);
       });
@@ -288,7 +287,9 @@ export default class Main {
       }
 
       if (__DEV__ && this.chunksCollected % WINDOW_SIZE === 0) {
-        this.persistChunks(this.chunksQueue.toArray()).catch(err => {
+        const timestamp = Date.now().toString();
+        const chunks = this.chunksQueue.toArray();
+        this.persist(timestamp, chunks).catch(err => {
           console.error(err);
         });
       }
@@ -320,37 +321,9 @@ export default class Main {
 
   @action.bound
   private processReading(reading: Reading) {
-    const doc = new DOMParser().parseFromString(reading.data);
-
-    // According to MedM there is always only one chunk in the reading
-    const chunk = doc.getElementsByTagName('chunk')[0];
-
-    const start =
-      Date.parse(this.getTextContent(doc, 'measured-at')) +
-      parseInt(this.getTextContent(chunk, 'start'));
-
-    const {
-      pulse,
-      pulse_quality,
-      rr_intervals,
-      rr_intervals_quality
-    } = JSON.parse(this.getTextContent(chunk, 'heartrate')).irregular;
-
-    const pulseStream = this.processStream(pulse, pulse_quality).map(p => ({
-      pulse: p[0],
-      timestamp: start + p[1]
-    }));
-
-    const rrIntervalsStream = this.processStream(
-      rr_intervals,
-      rr_intervals_quality
-    ).map(p => ({
-      rrInterval: p[0],
-      timestamp: start + p[1]
-    }));
-
-    this.pulseBuffer.push(...pulseStream);
-    this.rrIntervalsBuffer.push(...rrIntervalsStream);
+    const stream = readingToStreams(reading);
+    this.pulseBuffer.push(...stream.pulse);
+    this.rrIntervalsBuffer.push(...stream.rrIntervals);
   }
 
   private startHeartrateCollection() {
@@ -427,19 +400,6 @@ export default class Main {
     });
   }
 
-  private persistChunks(chunks: Chunk[]) {
-    return this.persist(`${Date.now()}.json`, chunks);
-  }
-
-  private persistSamples(samples: Sample[]) {
-    // TODO: remove unreliable samples
-    return this.persist('stress.json', samples);
-  }
-
-  private persistStress(stress: StressMark[]) {
-    return this.persist('stress.json', stress);
-  }
-
   @action.bound
   private flushSamples() {
     return {
@@ -458,30 +418,7 @@ export default class Main {
     };
   }
 
-  // Helpers
-
-  private getTextContent(node: Document | Element, tag: string) {
-    return node.getElementsByTagName(tag)[0].textContent!.trim();
-  }
-
-  private processStream(originalPoints: number[], originalQuality: number[]) {
-    // Apply quality and split the stream to points
-    const points = chunkBySize(originalPoints, 2);
-    const quality = chunkBySize(originalQuality, 2);
-    return points.filter((p, i) => quality[i][0] === 255);
-  }
-
-  private persist(path: string, data: any): Promise<void> {
-    const folder = `${RNFS.ExternalStorageDirectoryPath}/${APP_NAME}/${
-      this.collectionStartedAt
-    }`;
-
-    return RNFS.mkdir(folder).then(() =>
-      RNFS.writeFile(
-        `${folder}/${path}`,
-        JSON.stringify(data),
-        'ascii' // No idea why utf8 doesn't work here
-      )
-    );
+  private persist(title: string, data: any) {
+    return persist(this.collectionStartedAt.toString(), `${title}.json`, data);
   }
 }

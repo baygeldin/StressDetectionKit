@@ -1,12 +1,16 @@
 import { Alert } from 'react-native';
+import RNFS from 'react-native-fs';
+import { DOMParser } from 'xmldom';
 import { StressLevels } from 'lib/types';
-import { Device } from 'lib/device-kit';
+import { Device, Reading } from 'lib/device-kit';
 import {
+  APP_NAME,
   NONE_STRESS_COLOR,
   LOW_STRESS_COLOR,
   MEDIUM_STRESS_COLOR,
   HIGH_STRESS_COLOR
 } from 'lib/constants';
+import { Sample, StressMark } from 'lib/types';
 
 export function chunkBySize<T>(array: T[], size: number) {
   const results: T[][] = [];
@@ -58,4 +62,67 @@ export function confirmAction(fn: () => void, msg?: string) {
     { text: 'Cancel', style: 'cancel' },
     { text: 'OK', onPress: fn }
   ]);
+}
+
+// Extract strings from XML
+function getTextContent(node: Document | Element, tag: string) {
+  return node.getElementsByTagName(tag)[0].textContent!.trim();
+}
+
+// Apply quality and split the stream to points
+function processStream(originalPoints: number[], originalQuality: number[]) {
+  const points = chunkBySize(originalPoints, 2);
+  const quality = chunkBySize(originalQuality, 2);
+  return points.filter((p, i) => quality[i][0] === 255);
+}
+
+export function readingToStreams(reading: Reading) {
+  const doc = new DOMParser().parseFromString(reading.data);
+
+  // According to MedM there is always only one chunk in the reading
+  const chunk = doc.getElementsByTagName('chunk')[0];
+
+  const start =
+    Date.parse(getTextContent(doc, 'measured-at')) +
+    parseInt(getTextContent(chunk, 'start'));
+
+  const {
+    pulse,
+    pulse_quality,
+    rr_intervals,
+    rr_intervals_quality
+  } = JSON.parse(getTextContent(chunk, 'heartrate')).irregular;
+
+  const pulseStream = processStream(pulse, pulse_quality).map(p => ({
+    pulse: p[0],
+    timestamp: start + p[1]
+  }));
+
+  const rrIntervalsStream = processStream(
+    rr_intervals,
+    rr_intervals_quality
+  ).map(p => ({
+    rrInterval: p[0],
+    timestamp: start + p[1]
+  }));
+
+  return { pulse: pulseStream, rrIntervals: rrIntervalsStream };
+}
+
+// Persist data to disk to the application folder
+export function persist(
+  folder: string,
+  filename: string,
+  data: any
+): Promise<void> {
+  const path = `${RNFS.ExternalStorageDirectoryPath}/${APP_NAME}/${folder}`;
+  return RNFS.mkdir(path).then(() =>
+    RNFS.writeFile(`${path}/${filename}`, JSON.stringify(data), 'ascii')
+  );
+}
+
+// Filter samples from unreliable samples
+export function filterSamples(samples: Sample[], stress: StressMark[]) {
+  // TODO
+  return samples;
 }

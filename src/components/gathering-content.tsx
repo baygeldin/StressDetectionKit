@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react/native';
 import { Text, Content } from 'native-base';
-import { Bar } from 'react-native-progress';
+import { Circle } from 'react-native-progress';
 import Component from 'lib/component';
 
 @inject('ui')
@@ -9,16 +9,18 @@ import Component from 'lib/component';
 class GatheringContent extends Component<{}, {}> {
   render() {
     return (
-      <Content contentContainerStyle={{ justifyContent: 'center', flex: 1 }}>
-        <Text style={{ textAlign: 'center', marginTop: 10 }}>
-          Gathering data.
-        </Text>
-        <Bar
+      <Content
+        padder
+        contentContainerStyle={{ justifyContent: 'center', flex: 1 }}
+      >
+        <Circle
           progress={this.ui.dataGatheringProgress}
-          useNativeDriver={true}
-          width={null}
-          borderColor="lightgrey"
+          showsText={true}
+          size={80}
         />
+        <Text style={{ textAlign: 'center', marginTop: 10 }}>
+          Gathering initial data. Hang on!
+        </Text>
       </Content>
     );
   }

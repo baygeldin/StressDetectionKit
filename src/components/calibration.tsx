@@ -17,7 +17,7 @@ import { Bar } from 'react-native-progress';
 import Component from 'lib/component';
 import { Device } from 'lib/device-kit';
 
-@inject('store')
+@inject('store', 'ui')
 @observer
 class Calibration extends Component<{}, {}> {
   render() {
@@ -42,7 +42,7 @@ class Calibration extends Component<{}, {}> {
           </View>
           <Divider style={{ marginBottom: 15 }} />
           <Bar
-            progress={this.store.calibrationProgress}
+            progress={this.ui.calibrationProgress}
             useNativeDriver={true}
             width={null}
             borderColor="lightgrey"
