@@ -20,7 +20,7 @@ import {
 } from 'native-base';
 import { Device } from 'lib/device-kit';
 import Component from 'lib/component';
-import { deviceTitle } from 'lib/helpers';
+import { deviceTitle, confirmAction } from 'lib/helpers';
 import DevicesList from 'components/devices-list';
 import Calibration from 'components/calibration';
 import ListItem from 'components/list-item';
@@ -153,24 +153,14 @@ export default class extends Component<{}, {}> {
     );
   }
 
-  confirmAction(msg: string, fn: () => void) {
-    Alert.alert('Are you sure?', msg, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'OK', onPress: fn }
-    ]);
-  }
-
   confirmDeviceRemoval() {
-    this.confirmAction(
-      'Current device will be unpaired.',
-      this.store.removeDevice
-    );
+    confirmAction(this.store.removeDevice, 'Current device will be unpaired.');
   }
 
   confirmCalibrationReset() {
-    this.confirmAction(
-      'Baseline values will reset.',
-      this.store.resetBaselineValues
+    confirmAction(
+      this.store.resetBaselineValues,
+      'Baseline values will reset.'
     );
   }
 

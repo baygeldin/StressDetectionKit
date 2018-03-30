@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { StressLevels } from 'lib/types';
 import { Device } from 'lib/device-kit';
 import {
@@ -50,4 +51,11 @@ export function stressColor(level: StressLevels) {
 
 export function deviceTitle(device: Device) {
   return `${device.name} by ${device.manufacturer}`;
+}
+
+export function confirmAction(fn: () => void, msg?: string) {
+  Alert.alert('Are you sure?', msg, [
+    { text: 'Cancel', style: 'cancel' },
+    { text: 'OK', onPress: fn }
+  ]);
 }
