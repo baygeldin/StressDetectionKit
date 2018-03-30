@@ -1,18 +1,22 @@
 import React from 'react';
 import { observer } from 'mobx-react/native';
-import { View, Dimensions } from 'react-native';
-import { Text } from 'native-base';
+import { View } from 'react-native';
+import { Text, Content } from 'native-base';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Component from 'lib/component';
 
 @observer
 class InitialContent extends Component<{}, {}> {
   render() {
     return (
-      <View>
-        <Text style={{ textAlign: 'center', marginTop: 10 }}>
-          Start collection first.
+      <Content contentContainerStyle={{ justifyContent: 'center', flex: 1 }}>
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <Icon name="heart-pulse" size={80} color="black" />
+        </View>
+        <Text style={{ textAlign: 'center' }}>
+          Hi! Press start to monitor your stress.
         </Text>
-      </View>
+      </Content>
     );
   }
 }

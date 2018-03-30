@@ -1,7 +1,6 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react/native';
-import { View } from 'react-native';
-import { Text } from 'native-base';
+import { Text, Content } from 'native-base';
 import { Bar } from 'react-native-progress';
 import Component from 'lib/component';
 
@@ -10,7 +9,7 @@ import Component from 'lib/component';
 class GatheringContent extends Component<{}, {}> {
   render() {
     return (
-      <View>
+      <Content contentContainerStyle={{ justifyContent: 'center', flex: 1 }}>
         <Text style={{ textAlign: 'center', marginTop: 10 }}>
           Gathering data.
         </Text>
@@ -20,7 +19,7 @@ class GatheringContent extends Component<{}, {}> {
           width={null}
           borderColor="lightgrey"
         />
-      </View>
+      </Content>
     );
   }
 }

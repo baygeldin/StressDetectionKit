@@ -11,7 +11,7 @@ class CollectionButton extends Component<{}, {}> {
     const action = collecting
       ? this.store.stopCollection
       : this.store.startCollection;
-    const title = collecting ? 'Stop Collection' : 'Start Collection';
+    const title = collecting ? 'Stop monitoring' : 'Start monitoring';
 
     return (
       <Button full primary={!collecting} danger={collecting} onPress={action}>

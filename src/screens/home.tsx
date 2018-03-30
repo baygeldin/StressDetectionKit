@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { observer, inject } from 'mobx-react/native';
-import { Container, Content, Text, Footer, FooterTab, Icon } from 'native-base';
+import { Container, Text, Footer, FooterTab, Icon } from 'native-base';
 import { Bar } from 'react-native-progress';
 import Component from 'lib/component';
 import { APP_NAME, DATE_FORMAT, WINDOW_SIZE, STEP_SIZE } from 'lib/constants';
@@ -32,7 +32,7 @@ export default class extends Component<{}, {}> {
 
     return (
       <Container>
-        <Content>{content}</Content>
+        {content}
         <Footer>
           <FooterTab>
             <CollectionButton />
