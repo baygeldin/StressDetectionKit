@@ -9,6 +9,7 @@ export const DATE_FORMAT = 'h:mm MMMM Do';
 export const CHUNK_LENGTH = 10000; // in ms
 export const STEP_SIZE = 3; // in chunks
 export const WINDOW_SIZE = 30; // in chunks
+export const STEP_LENGTH = STEP_SIZE * CHUNK_LENGTH;
 export const WINDOW_LENGTH = WINDOW_SIZE * CHUNK_LENGTH;
 
 // Calibration config

@@ -23,18 +23,17 @@ export function chunkBySize<T>(array: T[], size: number) {
 }
 
 export function chunkByPattern<T>(array: T[], pattern: (elem: T) => any) {
-  const results: T[][] = [];
+  const results: T[][] = [[array[0]]];
 
-  for (let i = 0; i < array.length; ) {
-    const chunk: T[] = [];
-    const state = pattern(array[i]);
+  for (let i = 1, state = pattern(array[0]); i < array.length; i++) {
+    const current = pattern(array[i]);
 
-    while (state === pattern(array[i]) || isNaN(state)) {
-      chunk.push(array[i]);
-      i++;
+    if (state === current || isNaN(state)) {
+      results[results.length - 1].push(array[i]);
+    } else {
+      state = current;
+      results.push([array[i]]);
     }
-
-    results.push(chunk);
   }
 
   return results;

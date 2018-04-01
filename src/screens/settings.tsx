@@ -23,7 +23,7 @@ import Component from 'lib/component';
 import { deviceTitle, confirmAction } from 'lib/helpers';
 import DevicesList from 'components/devices-list';
 import Calibration from 'components/calibration';
-import ListItem from 'components/list-item';
+import SettingsItem from 'components/settings-item';
 
 @inject('store', 'ui', 'router')
 @observer
@@ -38,14 +38,14 @@ export default class extends Component<{}, {}> {
       : 'Select an HRM device';
 
     const developer = __DEV__ ? (
-      <ListItem onPress={this.router.goToDeveloperScreen}>
+      <SettingsItem onPress={this.router.goToDeveloperScreen}>
         <Left>
           <Icon name="code" />
         </Left>
         <Body>
           <Text>Developer Mode</Text>
         </Body>
-      </ListItem>
+      </SettingsItem>
     ) : null;
 
     return (
@@ -70,7 +70,7 @@ export default class extends Component<{}, {}> {
           <Separator bordered>
             <Text>DEVICES</Text>
           </Separator>
-          <ListItem>
+          <SettingsItem>
             <Left>
               <Icon name="watch" />
             </Left>
@@ -78,8 +78,8 @@ export default class extends Component<{}, {}> {
               <Text>Current device</Text>
               <Text note>{title}</Text>
             </Body>
-          </ListItem>
-          <ListItem onPress={this.store.startScan}>
+          </SettingsItem>
+          <SettingsItem onPress={this.store.startScan}>
             <Left>
               <Icon name="bluetooth" />
             </Left>
@@ -87,8 +87,8 @@ export default class extends Component<{}, {}> {
               <Text>Select a device</Text>
               <Text note>Choose from available devices</Text>
             </Body>
-          </ListItem>
-          <ListItem onPress={() => this.confirmDeviceRemoval()}>
+          </SettingsItem>
+          <SettingsItem onPress={() => this.confirmDeviceRemoval()}>
             <Left>
               <Icon name="trash" />
             </Left>
@@ -96,11 +96,11 @@ export default class extends Component<{}, {}> {
               <Text>Remove the device</Text>
               <Text note>Unpair the current device</Text>
             </Body>
-          </ListItem>
+          </SettingsItem>
           <Separator bordered>
             <Text>CALIBRATION</Text>
           </Separator>
-          <ListItem>
+          <SettingsItem>
             <Left>
               <Icon name="pulse" />
             </Left>
@@ -108,8 +108,8 @@ export default class extends Component<{}, {}> {
               <Text>Baseline HRV</Text>
               <Text note>{Math.round(this.store.baselineRmssd)}</Text>
             </Body>
-          </ListItem>
-          <ListItem>
+          </SettingsItem>
+          <SettingsItem>
             <Left>
               <Icon name="move" />
             </Left>
@@ -117,8 +117,8 @@ export default class extends Component<{}, {}> {
               <Text>Acceletometer error</Text>
               <Text note>{this.store.accelerometerError.toPrecision(4)}</Text>
             </Body>
-          </ListItem>
-          <ListItem onPress={this.store.startCalibration}>
+          </SettingsItem>
+          <SettingsItem onPress={this.store.startCalibration}>
             <Left>
               <Icon name="options" />
             </Left>
@@ -126,8 +126,8 @@ export default class extends Component<{}, {}> {
               <Text>Calibrate</Text>
               <Text note>Identify baseline values</Text>
             </Body>
-          </ListItem>
-          <ListItem onPress={() => this.confirmCalibrationReset()}>
+          </SettingsItem>
+          <SettingsItem onPress={() => this.confirmCalibrationReset()}>
             <Left>
               <Icon name="trash" />
             </Left>
@@ -135,19 +135,19 @@ export default class extends Component<{}, {}> {
               <Text>Reset</Text>
               <Text note>Reset to default settings</Text>
             </Body>
-          </ListItem>
+          </SettingsItem>
           <Separator bordered>
             <Text>MISCELLANEOUS</Text>
           </Separator>
           {developer}
-          <ListItem onPress={() => this.showHelp()}>
+          <SettingsItem onPress={() => this.showHelp()}>
             <Left>
               <Icon name="information-circle" />
             </Left>
             <Body>
               <Text>About</Text>
             </Body>
-          </ListItem>
+          </SettingsItem>
         </Content>
       </Container>
     );
