@@ -1,6 +1,7 @@
 import { Alert } from 'react-native';
 import RNFS from 'react-native-fs';
 import { DOMParser } from 'xmldom';
+import math from 'mathjs';
 import { StressLevels } from 'lib/types';
 import { Device, Reading } from 'lib/device-kit';
 import {
@@ -8,9 +9,11 @@ import {
   NONE_STRESS_COLOR,
   LOW_STRESS_COLOR,
   MEDIUM_STRESS_COLOR,
-  HIGH_STRESS_COLOR
+  HIGH_STRESS_COLOR,
+  STEP_LENGTH,
+  CHUNK_LENGTH
 } from 'lib/constants';
-import { Sample, StressMark } from 'lib/types';
+import { Sample, Chunk, StressMark } from 'lib/types';
 
 export function chunkBySize<T>(array: T[], size: number) {
   const results: T[][] = [];
@@ -124,4 +127,40 @@ export function persist(
 export function filterSamples(samples: Sample[], stress: StressMark[]) {
   // TODO
   return samples;
+}
+
+export function generateChunks(count: number, start: number): Chunk[] {
+  return new Array(count).fill(0).map((c, i) => {
+    const timestamp = start + CHUNK_LENGTH * i;
+
+    return {
+      rrIntervals: [],
+      pulse: [],
+      accelerometer: [],
+      gyroscope: [],
+      timestamp
+    };
+  });
+}
+
+export function generateSamples(count: number, start: number): Sample[] {
+  const baseline = math.floor(math.random(20, 80));
+
+  return new Array(count).fill(0).map((s, i) => {
+    const rmssd = math.floor(math.random(20, 80));
+    const heartrate = math.floor(math.random(60, 120));
+    const activityIndex = math.floor(math.random(0, 30));
+    const state = math.random() >= 0.75;
+    const timestamp = start + STEP_LENGTH * i;
+
+    return {
+      state,
+      activityIndex,
+      rmssd,
+      heartrate,
+      rmssdDiff: rmssd - baseline,
+      stress: 'none' as StressLevels,
+      timestamp
+    };
+  });
 }

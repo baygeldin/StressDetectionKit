@@ -11,7 +11,11 @@ class GatheringContent extends Component<{}, {}> {
     return (
       <Content
         padder
-        contentContainerStyle={{ justifyContent: 'center', flex: 1 }}
+        contentContainerStyle={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          flex: 1
+        }}
       >
         <Circle
           progress={this.ui.dataGatheringProgress}

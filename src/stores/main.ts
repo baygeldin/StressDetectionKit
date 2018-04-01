@@ -20,13 +20,17 @@ import {
   DEFAULT_ACCELEROMETER_ERROR,
   DEFAULT_BASELINE_RMSSD,
   ACCELEROMETER_ERROR_KEY,
-  BASELINE_RMSSD_KEY
+  BASELINE_RMSSD_KEY,
+  WINDOW_LENGTH,
+  STEP_LENGTH
 } from 'lib/constants';
 import {
   chunkBySize,
   readingToStreams,
   persist,
-  filterSamples
+  filterSamples,
+  generateChunks,
+  generateSamples
 } from 'lib/helpers';
 import {
   Chunk,
@@ -160,9 +164,10 @@ export default class Main {
     const timestamp = Date.now();
     this.percievedStressStartedAt = timestamp;
     this.collectionStartedAt = timestamp;
-    this.chunksQueue.clear();
+    this.flushChunks();
     this.flushBuffers();
     this.flushSamples();
+    this.stubInitialCollection(5);
     this.startSensors();
     this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
   }
@@ -300,23 +305,7 @@ export default class Main {
 
   @action.bound
   private pushSample() {
-    // TODO: calculate activityIndex and HRV
-    const rmssd = Math.floor(Math.random() * 100);
-    const activityIndex = Math.floor(Math.random() * 50);
-    const rmssdDiff = rmssd - this.baselineRmssd;
-
-    const state =
-      this.currentPercievedStressLevel === 'medium' ||
-      this.currentPercievedStressLevel === 'high';
-
-    this.currentSamples.push({
-      state,
-      activityIndex,
-      rmssd,
-      rmssdDiff,
-      stress: this.currentPercievedStressLevel,
-      timestamp: Date.now()
-    });
+    this.currentSamples.push(...generateSamples(1, Date.now()));
   }
 
   @action.bound
@@ -416,6 +405,25 @@ export default class Main {
       pulse: this.pulseBuffer.splice(0),
       rrIntervals: this.rrIntervalsBuffer.splice(0)
     };
+  }
+
+  @action.bound
+  private flushChunks() {
+    this.chunksQueue.clear();
+    this.chunksCollected = 0;
+  }
+
+  private stubInitialCollection(samplesCount: number) {
+    const timestamp = Date.now();
+
+    const chunksStart = timestamp - WINDOW_LENGTH + CHUNK_LENGTH;
+    const chunks = generateChunks(WINDOW_SIZE - 1, chunksStart);
+    this.chunksQueue.splice(0, 0, ...chunks);
+    this.chunksCollected = WINDOW_SIZE + (samplesCount - 1) * STEP_SIZE;
+
+    const samplesStart = timestamp - samplesCount * STEP_LENGTH;
+    const samples = generateSamples(samplesCount, samplesStart);
+    this.currentSamples.splice(0, 0, ...samples);
   }
 
   private persist(title: string, data: any) {

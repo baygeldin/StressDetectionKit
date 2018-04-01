@@ -2,13 +2,14 @@ import { observable, action, computed } from 'mobx';
 import Store from 'stores/main';
 import {
   CHUNKS_REQUIRED,
-  WINDOW_LENGTH,
+  STEP_LENGTH,
   CALIBRATION_LENGTH
 } from 'lib/constants';
 import { chunkByPattern } from 'lib/helpers';
+import { Sample } from 'lib/types';
 
 export default class Ui {
-  @observable timestamp: number;
+  @observable.ref selectedTimestamp: number;
 
   constructor(private store: Store) {}
 
@@ -34,7 +35,7 @@ export default class Ui {
   @computed
   get stressSegments() {
     return chunkByPattern(this.store.currentSamples, s => s.state).map(g => {
-      const start = g[0].timestamp - WINDOW_LENGTH;
+      const start = g[0].timestamp - STEP_LENGTH;
       const end = g[g.length - 1].timestamp;
       const duration = end - start;
       const state = g[0].state;
@@ -43,6 +44,24 @@ export default class Ui {
     });
   }
 
-  @action
-  updateTimestamp() {}
+  @computed
+  get selectedSample() {
+    return (
+      this.store.currentSamples.find(
+        s => s.timestamp >= this.selectedTimestamp
+      ) || this.store.lastSample
+    );
+  }
+
+  @computed
+  get selectedSegment() {
+    return this.stressSegments.find(
+      s => this.selectedSample.timestamp >= s.start
+    );
+  }
+
+  @action.bound
+  selectSample(timestamp: number) {
+    this.selectedTimestamp = timestamp;
+  }
 }

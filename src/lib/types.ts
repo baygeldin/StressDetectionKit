@@ -29,6 +29,7 @@ export interface Chunk {
 export interface Sample {
   state: boolean; // stressed or not
   activityIndex: number; // activity intensity
+  heartrate: number; // mean heartrate
   rmssd: number; // root mean square of the successive differences
   rmssdDiff: number; // RMSSD difference relative to the baseline
   stress: StressLevels; // percieved stress level
