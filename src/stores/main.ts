@@ -168,8 +168,8 @@ export default class Main {
     this.flushBuffers();
     this.flushSamples();
     this.stubInitialCollection(5);
-    this.startSensors();
-    this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
+    // this.startSensors();
+    // this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
   }
 
   @action.bound
@@ -185,8 +185,8 @@ export default class Main {
 
     if (__DEV__) {
       Promise.all([
-        this.persist('samples', filterSamples(samples, stress)),
-        this.persist('stress', stress)
+        // this.persist('samples', filterSamples(samples, stress)),
+        // this.persist('stress', stress)
       ]).catch(err => {
         console.error(err);
       });

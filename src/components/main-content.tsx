@@ -1,8 +1,9 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react/native';
-import { View, StyleSheet, Slider } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text, Content } from 'native-base';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Slider } from 'react-native-elements';
 import { STEP_LENGTH } from 'lib/constants';
 import Component from 'lib/component';
 import Chart from 'components/chart';
