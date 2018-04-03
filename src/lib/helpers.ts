@@ -25,11 +25,14 @@ export function chunkBySize<T>(array: T[], size: number) {
   return results;
 }
 
-export function chunkByPattern<T>(array: T[], pattern: (elem: T) => any) {
+export function chunkByPattern<T>(
+  array: T[],
+  pattern: (elem: T, index: number, array: T[]) => any
+) {
   const results: T[][] = [[array[0]]];
 
-  for (let i = 1, state = pattern(array[0]); i < array.length; i++) {
-    const current = pattern(array[i]);
+  for (let i = 1, state = pattern(array[0], 0, array); i < array.length; i++) {
+    const current = pattern(array[i], i, array);
 
     if (state === current || isNaN(state)) {
       results[results.length - 1].push(array[i]);
