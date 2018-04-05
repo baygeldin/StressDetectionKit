@@ -1,11 +1,12 @@
 import { Accelerometer, Gyroscope, SensorData } from 'react-native-sensors';
 
-export type StressLevels = 'none' | 'low' | 'medium' | 'high';
+export type StressLevel = 'none' | 'low' | 'medium' | 'high';
+export type ChartType = 'hrv' | 'hr' | 'activity';
 
 export interface StressMark {
   start: number;
   end: number;
-  level: StressLevels;
+  level: StressLevel;
 }
 
 export interface PulseMark {
@@ -32,7 +33,7 @@ export interface Sample {
   heartrate: number; // mean heartrate
   rmssd: number; // root mean square of the successive differences
   rmssdDiff: number; // RMSSD difference relative to the baseline
-  stress: StressLevels; // percieved stress level
+  stress: StressLevel; // percieved stress level
   timestamp: number;
 }
 

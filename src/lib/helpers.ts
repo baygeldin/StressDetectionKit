@@ -1,19 +1,18 @@
+import {
+  APP_NAME,
+  HIGH_STRESS_COLOR,
+  LOW_STRESS_COLOR,
+  MEDIUM_STRESS_COLOR,
+  NONE_STRESS_COLOR,
+  CHUNK_LENGTH,
+  STEP_LENGTH
+} from 'lib/constants';
+import { Device, Reading } from 'lib/device-kit';
+import { Chunk, Sample, StressLevel, StressMark } from 'lib/types';
+import math from 'mathjs';
 import { Alert } from 'react-native';
 import RNFS from 'react-native-fs';
 import { DOMParser } from 'xmldom';
-import math from 'mathjs';
-import { StressLevels } from 'lib/types';
-import { Device, Reading } from 'lib/device-kit';
-import {
-  APP_NAME,
-  NONE_STRESS_COLOR,
-  LOW_STRESS_COLOR,
-  MEDIUM_STRESS_COLOR,
-  HIGH_STRESS_COLOR,
-  STEP_LENGTH,
-  CHUNK_LENGTH
-} from 'lib/constants';
-import { Sample, Chunk, StressMark } from 'lib/types';
 
 export function chunkBySize<T>(array: T[], size: number) {
   const results: T[][] = [];
@@ -45,7 +44,7 @@ export function chunkByPattern<T>(
   return results;
 }
 
-export function stressColor(level: StressLevels) {
+export function stressColor(level: StressLevel) {
   switch (level) {
     case 'none':
       return NONE_STRESS_COLOR;
@@ -162,7 +161,7 @@ export function generateSamples(count: number, start: number): Sample[] {
       rmssd,
       heartrate,
       rmssdDiff: rmssd - baseline,
-      stress: 'none' as StressLevels,
+      stress: 'none' as StressLevel,
       timestamp
     };
   });

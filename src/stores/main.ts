@@ -1,48 +1,27 @@
-import { observable, action, computed, toJS, runInAction } from 'mobx';
-import {
-  Accelerometer,
-  Gyroscope,
-  SensorData,
-  SensorObservable
-} from 'react-native-sensors';
 import Denque from 'denque';
-import { clearInterval, setInterval } from 'timers';
-import DeviceKit, { Device, Reading } from 'lib/device-kit';
 import {
-  APP_NAME,
-  WINDOW_SIZE,
-  STEP_SIZE,
-  CHUNK_LENGTH,
-  SENSOR_UPDATE_INTERVAL,
-  CALIBRATION_LENGTH,
-  CALIBRATION_UPDATE_INTERVAL,
-  CALIBRATION_PADDING,
-  DEFAULT_ACCELEROMETER_ERROR,
-  DEFAULT_BASELINE_RMSSD,
   ACCELEROMETER_ERROR_KEY,
   BASELINE_RMSSD_KEY,
+  CALIBRATION_LENGTH,
+  CALIBRATION_PADDING,
+  CALIBRATION_UPDATE_INTERVAL,
+  CHUNK_LENGTH,
+  DEFAULT_ACCELEROMETER_ERROR,
+  DEFAULT_BASELINE_RMSSD,
+  SENSOR_UPDATE_INTERVAL,
+  STEP_LENGTH,
+  STEP_SIZE,
   WINDOW_LENGTH,
-  STEP_LENGTH
+  WINDOW_SIZE,
 } from 'lib/constants';
-import {
-  chunkBySize,
-  readingToStreams,
-  persist,
-  filterSamples,
-  generateChunks,
-  generateSamples
-} from 'lib/helpers';
-import {
-  Chunk,
-  Sample,
-  StressLevels,
-  PulseMark,
-  RrIntervalMark,
-  StressMark,
-  Sensor
-} from 'lib/types';
+import DeviceKit, { Device, Reading } from 'lib/device-kit';
 import { calcAccelerometerVariance, calcRmssd } from 'lib/features';
+import { generateChunks, generateSamples, persist, readingToStreams } from 'lib/helpers';
 import { getFloat, setFloat } from 'lib/storage';
+import { Chunk, PulseMark, RrIntervalMark, Sample, Sensor, StressLevel, StressMark } from 'lib/types';
+import { action, computed, observable, runInAction } from 'mobx';
+import { Accelerometer, Gyroscope, SensorData, SensorObservable } from 'react-native-sensors';
+import { clearInterval, setInterval } from 'timers';
 
 export default class Main {
   // State
@@ -57,7 +36,7 @@ export default class Main {
 
   // Perceived stress
   @observable.shallow percievedStress: StressMark[] = [];
-  @observable currentPercievedStressLevel: StressLevels = 'none';
+  @observable currentPercievedStressLevel: StressLevel = 'none';
   @observable percievedStressStartedAt: number;
 
   // Collection
@@ -249,7 +228,7 @@ export default class Main {
   }
 
   @action.bound
-  changeStressLevel(level: StressLevels) {
+  changeStressLevel(level: StressLevel) {
     if (level === this.currentPercievedStressLevel) return;
 
     const timestamp = Date.now();

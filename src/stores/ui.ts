@@ -1,15 +1,12 @@
-import { observable, action, computed } from 'mobx';
-import Store from 'stores/main';
-import {
-  CHUNKS_REQUIRED,
-  STEP_LENGTH,
-  CALIBRATION_LENGTH
-} from 'lib/constants';
+import { CALIBRATION_LENGTH, CHUNKS_REQUIRED, STEP_LENGTH } from 'lib/constants';
 import { chunkByPattern } from 'lib/helpers';
-import { Sample } from 'lib/types';
+import { ChartType } from 'lib/types';
+import { action, computed, observable } from 'mobx';
+import Store from 'stores/main';
 
 export default class Ui {
   @observable.ref selectedTimestamp: number;
+  @observable currentChart = 'hrv' as ChartType;
 
   constructor(private store: Store) {}
 
@@ -63,5 +60,10 @@ export default class Ui {
   @action.bound
   selectSample(timestamp: number) {
     this.selectedTimestamp = timestamp;
+  }
+
+  @action.bound
+  selectChart(chart: ChartType) {
+    this.currentChart = chart
   }
 }

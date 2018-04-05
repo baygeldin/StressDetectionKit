@@ -44,3 +44,12 @@ export const NONE_STRESS_COLOR = 'lightgreen';
 export const LOW_STRESS_COLOR = 'bisque';
 export const MEDIUM_STRESS_COLOR = 'tomato';
 export const HIGH_STRESS_COLOR = 'crimson';
+
+export const CHART_HEIGHT = 150;
+
+// Colors
+export const GREEN = 'forestgreen';
+export const RED = 'crimson';
+export const BLUE = 'steelblue';
+export const BLACK = 'black';
+export const WHITE = 'white';

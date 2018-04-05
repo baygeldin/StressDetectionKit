@@ -1,11 +1,10 @@
-import React from 'react';
-import { observer, inject } from 'mobx-react/native';
-import { Text, View } from 'react-native';
-import moment from 'moment';
 import Component from 'lib/component';
-import { StressLevels } from 'lib/types';
 import { DATE_FORMAT } from 'lib/constants';
 import { stressColor } from 'lib/helpers';
+import { inject, observer } from 'mobx-react/native';
+import moment from 'moment';
+import React from 'react';
+import { Text, View } from 'react-native';
 
 @inject('store')
 @observer
