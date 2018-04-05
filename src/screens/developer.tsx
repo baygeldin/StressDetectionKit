@@ -1,20 +1,27 @@
-import React from 'react';
-import { Text, View, Button } from 'react-native';
-import { observer, inject } from 'mobx-react/native';
-import Component from 'lib/component';
-import {
-  APP_NAME,
-  DATE_FORMAT,
-  NONE_STRESS_COLOR,
-  LOW_STRESS_COLOR,
-  MEDIUM_STRESS_COLOR,
-  HIGH_STRESS_COLOR
-} from 'lib/constants';
-import CogButton from 'components/cog-button';
+import CollectionButton from 'components/collection-button';
+import Stats from 'components/dev-stats';
 import StressButtons from 'components/stress-buttons';
 import StressInfo from 'components/stress-info';
-import Stats from 'components/stats';
-import CollectionButton from 'components/collection-button';
+import Component from 'lib/component';
+import { inject, observer } from 'mobx-react/native';
+import { Container, Content, Footer, FooterTab, Text } from 'native-base';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  inner: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+});
 
 @inject('store')
 @observer
@@ -26,29 +33,29 @@ export default class extends Component<{}, {}> {
   render() {
     const collecting = this.store.collecting;
     const content = collecting ? (
-      <View style={{ alignItems: 'center' }}>
+      <View style={styles.inner}>
         <Stats />
         <StressButtons />
         <StressInfo />
       </View>
     ) : (
-      <Text>Start data collection first.</Text>
+      <View style={styles.inner}>
+        <Icon name="developer-mode" size={80} color="black" />
+        <Text style={{ textAlign: 'center', marginTop: 10 }}>
+          Hi! Start monitoring to see statistics.
+        </Text>
+      </View>
     );
 
     return (
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}
-      >
-        <View style={{ flex: 1, justifyContent: 'center' }}>{content}</View>
-        <View style={{ height: 50 }}>
-          <CollectionButton />
-        </View>
-      </View>
+      <Container>
+        <Content contentContainerStyle={styles.container}>{content}</Content>
+        <Footer>
+          <FooterTab>
+            <CollectionButton />
+          </FooterTab>
+        </Footer>
+      </Container>
     );
   }
 }

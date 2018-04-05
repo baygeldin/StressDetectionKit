@@ -1,9 +1,8 @@
-import React from 'react';
-import { observer } from 'mobx-react/native';
-import { View } from 'react-native';
-import { Text, Content } from 'native-base';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Component from 'lib/component';
+import { observer } from 'mobx-react/native';
+import { Content, Text } from 'native-base';
+import React from 'react';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 @observer
 class InitialContent extends Component<{}, {}> {

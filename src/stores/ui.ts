@@ -1,4 +1,8 @@
-import { CALIBRATION_LENGTH, CHUNKS_REQUIRED, STEP_LENGTH } from 'lib/constants';
+import {
+  CALIBRATION_LENGTH,
+  CHUNKS_REQUIRED,
+  STEP_LENGTH,
+} from 'lib/constants';
 import { chunkByPattern } from 'lib/helpers';
 import { ChartType } from 'lib/types';
 import { action, computed, observable } from 'mobx';
@@ -64,6 +68,6 @@ export default class Ui {
 
   @action.bound
   selectChart(chart: ChartType) {
-    this.currentChart = chart
+    this.currentChart = chart;
   }
 }

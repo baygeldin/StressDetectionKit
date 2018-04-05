@@ -1,11 +1,12 @@
 import Chart from 'components/chart';
+import Stats from 'components/stats-list';
 import Component from 'lib/component';
 import { BLACK, BLUE, GREEN, RED } from 'lib/constants';
 import { ChartType } from 'lib/types';
 import { inject, observer } from 'mobx-react/native';
 import { Content, Text } from 'native-base';
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const styles = StyleSheet.create({
@@ -99,6 +100,7 @@ class MainContent extends Component<{}, {}> {
           </TouchableOpacity>
         </View>
         <Chart />
+        <Stats />
       </Content>
     );
   }

@@ -1,29 +1,20 @@
-import React, { Props } from 'react';
-import { observer, inject } from 'mobx-react/native';
+import Calibration from 'components/calibration';
+import DevicesList from 'components/devices-list';
+import SettingsItem from 'components/settings-item';
+import Component from 'lib/component';
+import { confirmAction, deviceTitle } from 'lib/helpers';
+import { inject, observer } from 'mobx-react/native';
 import {
-  FlatList,
-  SectionList,
-  TouchableHighlight,
-  Modal,
-  View,
-  Alert
-} from 'react-native';
-import {
+  Body,
   Container,
   Content,
-  Text,
-  List,
-  Separator,
-  Left,
   Icon,
-  Body
+  Left,
+  Separator,
+  Text
 } from 'native-base';
-import { Device } from 'lib/device-kit';
-import Component from 'lib/component';
-import { deviceTitle, confirmAction } from 'lib/helpers';
-import DevicesList from 'components/devices-list';
-import Calibration from 'components/calibration';
-import SettingsItem from 'components/settings-item';
+import React, { Props } from 'react';
+import { Alert, Modal } from 'react-native';
 
 @inject('store', 'ui', 'router')
 @observer

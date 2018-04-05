@@ -1,8 +1,8 @@
-import React from 'react';
-import { observer, inject } from 'mobx-react/native';
-import { Text, Content } from 'native-base';
-import { Circle } from 'react-native-progress';
 import Component from 'lib/component';
+import { inject, observer } from 'mobx-react/native';
+import { Content, Text } from 'native-base';
+import React from 'react';
+import { Circle } from 'react-native-progress';
 
 @inject('ui')
 @observer
