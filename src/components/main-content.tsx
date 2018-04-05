@@ -13,13 +13,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     paddingHorizontal: 5,
-    marginBottom: 10
+    marginBottom: 6
   },
   column: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    flexDirection: 'column',
     borderRightWidth: 0,
+    paddingVertical: 5,
     borderColor: 'grey'
   },
   title: {
@@ -36,6 +38,7 @@ const styles = StyleSheet.create({
   },
   units: {
     fontSize: 12,
+    marginBottom: 4,
     textAlign: 'center',
     color: 'grey'
   },
