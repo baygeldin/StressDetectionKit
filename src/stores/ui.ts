@@ -1,7 +1,7 @@
 import {
   CALIBRATION_LENGTH,
   CHUNKS_REQUIRED,
-  STEP_LENGTH,
+  STEP_LENGTH
 } from 'lib/constants';
 import { chunkByPattern } from 'lib/helpers';
 import { ChartType } from 'lib/types';
@@ -9,7 +9,7 @@ import { action, computed, observable } from 'mobx';
 import Store from 'stores/main';
 
 export default class Ui {
-  @observable.ref selectedTimestamp: number;
+  @observable.ref selectedTimestamp = Infinity;
   @observable currentChart = 'hrv' as ChartType;
 
   constructor(private store: Store) {}
@@ -57,15 +57,20 @@ export default class Ui {
   @computed
   get selectedSegment() {
     return (
-      this.stressSegments.find(
-        s => s.start >= this.selectedTimestamp - STEP_LENGTH
-      ) || this.stressSegments[this.stressSegments.length - 1]
+      this.stressSegments.find(s => s.end >= this.selectedTimestamp) ||
+      this.lastSegment
     );
   }
 
+  @computed
+  get lastSegment() {
+    return this.stressSegments[this.stressSegments.length - 1];
+  }
+
   @action.bound
-  selectSample(timestamp: number) {
-    this.selectedTimestamp = timestamp;
+  selectTimestamp(timestamp: number) {
+    this.selectedTimestamp =
+      timestamp >= this.store.lastSample.timestamp ? Infinity : timestamp;
   }
 
   @action.bound

@@ -5,14 +5,23 @@ import {
   MEDIUM_STRESS_COLOR,
   NONE_STRESS_COLOR,
   CHUNK_LENGTH,
-  STEP_LENGTH
+  STEP_LENGTH,
+  SENSOR_UPDATE_INTERVAL
 } from 'lib/constants';
 import { Device, Reading } from 'lib/device-kit';
-import { Chunk, Sample, StressLevel, StressMark } from 'lib/types';
+import {
+  Chunk,
+  Sample,
+  StressLevel,
+  StressMark,
+  RrIntervalMark,
+  PulseMark
+} from 'lib/types';
 import math from 'mathjs';
 import { Alert } from 'react-native';
 import RNFS from 'react-native-fs';
 import { DOMParser } from 'xmldom';
+import { SensorData } from 'react-native-sensors';
 
 export function chunkBySize<T>(array: T[], size: number) {
   const results: T[][] = [];
@@ -131,38 +140,63 @@ export function filterSamples(samples: Sample[], stress: StressMark[]) {
   return samples;
 }
 
-export function generateChunks(count: number, start: number): Chunk[] {
-  return new Array(count).fill(0).map((c, i) => {
-    const timestamp = start + CHUNK_LENGTH * i;
+function random(from: number, to: number) {
+  return math.floor(math.random(from, to));
+}
 
-    return {
-      rrIntervals: [],
-      pulse: [],
-      accelerometer: [],
-      gyroscope: [],
-      timestamp
-    };
-  });
+export function generateChunk(timestamp: number) {
+  const rrIntervals: RrIntervalMark[] = [];
+  const pulse: PulseMark[] = [];
+  const accelerometer: SensorData[] = [];
+  const gyroscope: SensorData[] = [];
+
+  const start = timestamp - CHUNK_LENGTH;
+  const interval = (timestamp - start) / SENSOR_UPDATE_INTERVAL;
+
+  for (let i = start; i <= timestamp; i += interval) {
+    rrIntervals.push({ rrInterval: random(600, 650), timestamp: i });
+    pulse.push({ pulse: random(50, 120), timestamp: i });
+    accelerometer.push({
+      x: random(0, 15),
+      y: random(0, 15),
+      z: random(0, 15),
+      timestamp: i
+    });
+    gyroscope.push({
+      x: random(0, 15),
+      y: random(0, 15),
+      z: random(0, 15),
+      timestamp: i
+    });
+  }
+
+  return { rrIntervals, pulse, accelerometer, gyroscope, timestamp };
+}
+
+export function generateChunks(count: number, start: number): Chunk[] {
+  return new Array(count)
+    .fill(0)
+    .map((c, i) => generateChunk(start + CHUNK_LENGTH * i));
+}
+
+export function generateSample(baseline: number, timestamp: number) {
+  const rmssd = random(20, 80);
+
+  return {
+    state: math.random() >= 0.75,
+    activityIndex: random(0, 30),
+    rmssd,
+    heartrate: random(60, 120),
+    rmssdDiff: rmssd - baseline,
+    stress: 'none' as StressLevel,
+    timestamp
+  };
 }
 
 export function generateSamples(count: number, start: number): Sample[] {
   const baseline = math.floor(math.random(20, 80));
 
-  return new Array(count).fill(0).map((s, i) => {
-    const rmssd = math.floor(math.random(20, 80));
-    const heartrate = math.floor(math.random(60, 120));
-    const activityIndex = math.floor(math.random(0, 30));
-    const state = math.random() >= 0.75;
-    const timestamp = start + STEP_LENGTH * i;
-
-    return {
-      state,
-      activityIndex,
-      rmssd,
-      heartrate,
-      rmssdDiff: rmssd - baseline,
-      stress: 'none' as StressLevel,
-      timestamp
-    };
-  });
+  return new Array(count)
+    .fill(0)
+    .map((s, i) => generateSample(baseline, start + STEP_LENGTH * i));
 }

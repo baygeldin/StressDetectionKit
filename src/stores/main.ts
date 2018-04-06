@@ -13,14 +13,34 @@ import {
   STEP_SIZE,
   WINDOW_LENGTH,
   WINDOW_SIZE,
+  ACCELERATED_MODE
 } from 'lib/constants';
 import DeviceKit, { Device, Reading } from 'lib/device-kit';
 import { calcAccelerometerVariance, calcRmssd } from 'lib/features';
-import { generateChunks, generateSamples, persist, readingToStreams } from 'lib/helpers';
+import {
+  generateChunks,
+  generateSamples,
+  filterSamples,
+  persist,
+  readingToStreams
+} from 'lib/helpers';
 import { getFloat, setFloat } from 'lib/storage';
-import { Chunk, PulseMark, RrIntervalMark, Sample, Sensor, StressLevel, StressMark } from 'lib/types';
+import {
+  Chunk,
+  PulseMark,
+  RrIntervalMark,
+  Sample,
+  Sensor,
+  StressLevel,
+  StressMark
+} from 'lib/types';
 import { action, computed, observable, runInAction } from 'mobx';
-import { Accelerometer, Gyroscope, SensorData, SensorObservable } from 'react-native-sensors';
+import {
+  Accelerometer,
+  Gyroscope,
+  SensorData,
+  SensorObservable
+} from 'react-native-sensors';
 import { clearInterval, setInterval } from 'timers';
 
 export default class Main {
@@ -146,9 +166,14 @@ export default class Main {
     this.flushChunks();
     this.flushBuffers();
     this.flushSamples();
-    this.stubInitialCollection(5);
-    // this.startSensors();
-    // this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
+
+    if (ACCELERATED_MODE) {
+      this.stubInitialCollection(5);
+    } else {
+      this.startSensors();
+    }
+
+    this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
   }
 
   @action.bound
@@ -162,10 +187,10 @@ export default class Main {
 
     const { samples, stress } = this.flushSamples();
 
-    if (__DEV__) {
+    if (__DEV__ && !ACCELERATED_MODE) {
       Promise.all([
-        // this.persist('samples', filterSamples(samples, stress)),
-        // this.persist('stress', stress)
+        this.persist('samples', filterSamples(samples, stress)),
+        this.persist('stress', stress)
       ]).catch(err => {
         console.error(err);
       });

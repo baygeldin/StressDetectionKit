@@ -144,7 +144,7 @@ class Chart extends Component<{}, {}> {
           trackStyle={styles.track}
           thumbStyle={styles.thumb}
           minimumTrackTintColor={BLUE}
-          onValueChange={v => this.ui.selectSample(v)}
+          onValueChange={v => this.ui.selectTimestamp(v)}
         />
       </View>
     );
