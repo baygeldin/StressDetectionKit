@@ -1,6 +1,8 @@
 import Component from 'lib/component';
+import { GREEN, RED } from 'lib/constants';
 import { inject, observer } from 'mobx-react/native';
-import { Card, CardItem, Left, Right, Text } from 'native-base';
+import moment from 'moment';
+import { Body, Card, CardItem, Left, Right, Text } from 'native-base';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -8,7 +10,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
-    marginHorizontal: 5
+    marginHorizontal: 5,
+    marginTop: -5
+  },
+  timestamp: {
+    fontWeight: 'bold'
+  },
+  value: {
+    fontWeight: 'bold'
   }
 });
 
@@ -16,23 +25,71 @@ const styles = StyleSheet.create({
 @observer
 class StatsList extends Component<{}, {}> {
   render() {
+    const sample = this.ui.selectedSample;
+    const stressed = sample.state;
+    const segment = this.ui.selectedSegment;
+    const duration = moment.utc(segment.duration).format('HH:mm:ss');
+
     return (
       <View style={styles.container}>
         <Card>
-          <CardItem>
+          <CardItem header>
             <Left>
-              <Text>Heart rate variability</Text>
+              <Text style={styles.timestamp}>
+                {moment(sample.timestamp).format('h:mm:ss MMMM Do')}
+              </Text>
             </Left>
             <Right>
-              <Text>80 ms</Text>
+              <Text style={{ color: stressed ? RED : GREEN }}>
+                {stressed ? 'STRESS' : 'REST'}
+              </Text>
             </Right>
           </CardItem>
           <CardItem>
-            <Left>
-              <Text>Heart rate</Text>
-            </Left>
+            <Body>
+              <Text>Heart rate variability</Text>
+              <Text note>RMSSD</Text>
+            </Body>
             <Right>
-              <Text>100 bpm</Text>
+              <Text style={styles.value}>{`${sample.rmssd} ms`}</Text>
+            </Right>
+          </CardItem>
+          <CardItem>
+            <Body>
+              <Text>Heart rate</Text>
+              <Text note>Mean heart rate</Text>
+            </Body>
+            <Right>
+              <Text style={styles.value}>{`${sample.heartrate} bpm`}</Text>
+            </Right>
+          </CardItem>
+          <CardItem>
+            <Body>
+              <Text>Activity index</Text>
+              <Text note>Activity intensity</Text>
+            </Body>
+            <Right>
+              <Text style={styles.value}>{`${
+                sample.activityIndex
+              } m\u00b2 / s`}</Text>
+            </Right>
+          </CardItem>
+          <CardItem>
+            <Body>
+              <Text>HRV difference</Text>
+              <Text note>From the baseline</Text>
+            </Body>
+            <Right>
+              <Text style={styles.value}>{`${sample.rmssdDiff} ms`}</Text>
+            </Right>
+          </CardItem>
+          <CardItem>
+            <Body>
+              <Text>Duration</Text>
+              <Text note>{`${stressed ? 'Stress' : 'Rest'} duration`}</Text>
+            </Body>
+            <Right>
+              <Text style={styles.value}>{duration}</Text>
             </Right>
           </CardItem>
         </Card>

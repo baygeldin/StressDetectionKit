@@ -56,8 +56,10 @@ export default class Ui {
 
   @computed
   get selectedSegment() {
-    return this.stressSegments.find(
-      s => this.selectedSample.timestamp >= s.start
+    return (
+      this.stressSegments.find(
+        s => s.start >= this.selectedTimestamp - STEP_LENGTH
+      ) || this.stressSegments[this.stressSegments.length - 1]
     );
   }
 

@@ -14,11 +14,13 @@
     "reload": "haul reload",
     "reverse": "adb reverse tcp:8081 tcp:8081",
     "pull": "adb pull /sdcard/Stress\\ Detection\\ Kit ./samples",
-    "bundle": "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
+    "bundle":
+      "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
   },
   "dependencies": {
     "d3": "^5.0.0",
     "denque": "^1.2.3",
+    "mathjs": "^4.0.1",
     "mobx": "^4.1.0",
     "mobx-react": "^5.0.0",
     "moment": "^2.21.0",
@@ -54,7 +56,6 @@
     "babel-preset-react-native": "4.0.0",
     "haul": "^1.0.0-beta.11",
     "jest": "21.2.1",
-    "mathjs": "^4.0.1",
     "mobx-remotedev": "^0.2.8",
     "prettier": "^1.10.2",
     "react-test-renderer": "16.0.0",
