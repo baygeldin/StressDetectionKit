@@ -5,7 +5,8 @@ export const DATE_FORMAT = 'h:mm MMMM Do';
 
 /// Developer
 
-export const ACCELERATED_MODE = true;
+export const ACCELERATED_MODE = !!process.env.ACCELERATED;
+export const STUB_SIZE = 5; // in samples
 
 /// Business logic
 

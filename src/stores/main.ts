@@ -1,5 +1,6 @@
 import Denque from 'denque';
 import {
+  ACCELERATED_MODE,
   ACCELEROMETER_ERROR_KEY,
   BASELINE_RMSSD_KEY,
   CALIBRATION_LENGTH,
@@ -9,21 +10,19 @@ import {
   DEFAULT_ACCELEROMETER_ERROR,
   DEFAULT_BASELINE_RMSSD,
   SENSOR_UPDATE_INTERVAL,
-  STEP_LENGTH,
   STEP_SIZE,
-  WINDOW_LENGTH,
-  WINDOW_SIZE,
-  ACCELERATED_MODE
+  STUB_SIZE,
+  WINDOW_SIZE
 } from 'lib/constants';
 import DeviceKit, { Device, Reading } from 'lib/device-kit';
-import { calcAccelerometerVariance, calcRmssd } from 'lib/features';
+import { calcAccelerometerVariance, calcRmssd, calcSample } from 'lib/features';
 import {
+  generateChunk,
   generateChunks,
-  generateSamples,
-  filterSamples,
-  persist,
-  readingToStreams
-} from 'lib/helpers';
+  generateSample,
+  generateSamples
+} from 'lib/generators';
+import { filterSamples, persist, readingToStreams } from 'lib/helpers';
 import { getFloat, setFloat } from 'lib/storage';
 import {
   Chunk,
@@ -166,14 +165,11 @@ export default class Main {
     this.flushChunks();
     this.flushBuffers();
     this.flushSamples();
-
-    if (ACCELERATED_MODE) {
-      this.stubInitialCollection(5);
-    } else {
-      this.startSensors();
-    }
+    this.startSensors();
 
     this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
+
+    if (ACCELERATED_MODE) this.stubInitialCollection(STUB_SIZE);
   }
 
   @action.bound
@@ -271,12 +267,14 @@ export default class Main {
   // Private
 
   private startSensors() {
+    if (ACCELERATED_MODE) return;
     this.startSensorCollection(Accelerometer);
     this.startSensorCollection(Gyroscope);
     this.startHeartrateCollection();
   }
 
   private stopSensors() {
+    if (ACCELERATED_MODE) return;
     this.sdk.stopCollection();
     this.accelerometer.stop();
     this.gyroscope.stop();
@@ -284,21 +282,26 @@ export default class Main {
 
   @action.bound
   private pushChunk() {
-    this.chunksQueue.push(
-      Object.assign(this.flushBuffers(), { timestamp: Date.now() })
-    );
+    const timestamp = Date.now();
+    const chunk = ACCELERATED_MODE
+      ? generateChunk(timestamp)
+      : Object.assign(this.flushBuffers(), { timestamp });
+    this.chunksQueue.push(chunk);
 
     this.chunksCollected++;
 
     if (this.chunksQueue.length === WINDOW_SIZE) {
       if (this.chunksCollected % STEP_SIZE === 0) {
-        this.pushSample();
+        this.pushSample(timestamp);
       }
 
-      if (__DEV__ && this.chunksCollected % WINDOW_SIZE === 0) {
-        const timestamp = Date.now().toString();
+      if (
+        __DEV__ &&
+        !ACCELERATED_MODE &&
+        this.chunksCollected % WINDOW_SIZE === 0
+      ) {
         const chunks = this.chunksQueue.toArray();
-        this.persist(timestamp, chunks).catch(err => {
+        this.persist(timestamp.toString(), chunks).catch(err => {
           console.error(err);
         });
       }
@@ -308,8 +311,17 @@ export default class Main {
   }
 
   @action.bound
-  private pushSample() {
-    this.currentSamples.push(...generateSamples(1, Date.now()));
+  private pushSample(timestamp: number) {
+    const sample = ACCELERATED_MODE
+      ? generateSample(this.baselineRmssd, timestamp)
+      : calcSample(
+          this.chunksQueue.toArray(),
+          this.accelerometerError,
+          this.baselineRmssd,
+          timestamp
+        );
+
+    this.currentSamples.push(sample);
   }
 
   @action.bound
@@ -420,13 +432,11 @@ export default class Main {
   private stubInitialCollection(samplesCount: number) {
     const timestamp = Date.now();
 
-    const chunksStart = timestamp - WINDOW_LENGTH + CHUNK_LENGTH;
-    const chunks = generateChunks(WINDOW_SIZE - 1, chunksStart);
+    const chunks = generateChunks(WINDOW_SIZE - 1, timestamp);
     this.chunksQueue.splice(0, 0, ...chunks);
     this.chunksCollected = WINDOW_SIZE + (samplesCount - 1) * STEP_SIZE;
 
-    const samplesStart = timestamp - samplesCount * STEP_LENGTH;
-    const samples = generateSamples(samplesCount, samplesStart);
+    const samples = generateSamples(samplesCount, timestamp);
     this.currentSamples.splice(0, 0, ...samples);
   }
 

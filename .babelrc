@@ -4,7 +4,7 @@
     [
       "transform-inline-environment-variables",
       {
-        "include": ["MEDM_DEVICEKIT_LICENSE_KEY"]
+        "include": ["MEDM_DEVICEKIT_LICENSE_KEY", "ACCELERATED"]
       }
     ]
   ]

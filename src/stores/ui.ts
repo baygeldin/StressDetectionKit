@@ -3,16 +3,26 @@ import {
   CHUNKS_REQUIRED,
   STEP_LENGTH
 } from 'lib/constants';
-import { chunkByPattern } from 'lib/helpers';
+import { calcOffsets, chunkByPattern } from 'lib/helpers';
 import { ChartType } from 'lib/types';
-import { action, computed, observable } from 'mobx';
+import { action, autorun, computed, observable, runInAction } from 'mobx';
 import Store from 'stores/main';
 
 export default class Ui {
-  @observable.ref selectedTimestamp = Infinity;
-  @observable currentChart = 'hrv' as ChartType;
+  @observable private _selectedSampleOffset?: number;
+  @observable currentChart: ChartType;
 
-  constructor(private store: Store) {}
+  constructor(private store: Store) {
+    autorun(() => {
+      // Reset UI state when collection stops
+      if (!this.store.collecting) {
+        runInAction(() => {
+          this._selectedSampleOffset = undefined;
+          this.currentChart = 'hrv';
+        });
+      }
+    });
+  }
 
   @computed
   get calibrationProgress() {
@@ -35,42 +45,42 @@ export default class Ui {
   // So, if you really want to optimize it, use lazy-arrays and show only topmost entries in your views.
   @computed
   get stressSegments() {
-    return chunkByPattern(this.store.currentSamples, s => s.state).map(g => {
-      const start = g[0].timestamp - STEP_LENGTH;
-      const end = g[g.length - 1].timestamp;
-      const duration = end - start;
+    const chunks = chunkByPattern(this.store.currentSamples, s => s.state);
+    const offsets = calcOffsets(chunks);
+
+    return chunks.map((g, i) => {
+      const from = g[0].timestamp - STEP_LENGTH;
+      const to = g[g.length - 1].timestamp;
+      const duration = to - from;
       const state = g[0].state;
 
-      return { start, end, duration, state };
+      return { offset: offsets[i], from, to, duration, state, samples: g };
     });
   }
 
   @computed
-  get selectedSample() {
-    return (
-      this.store.currentSamples.find(
-        s => s.timestamp >= this.selectedTimestamp
-      ) || this.store.lastSample
-    );
-  }
-
-  @computed
   get selectedSegment() {
-    return (
-      this.stressSegments.find(s => s.end >= this.selectedTimestamp) ||
-      this.lastSegment
-    );
-  }
-
-  @computed
-  get lastSegment() {
-    return this.stressSegments[this.stressSegments.length - 1];
+    return this.stressSegments.find(
+      s => s.offset + s.samples.length - 1 >= this.selectedSampleOffset
+    )!;
   }
 
   @action.bound
-  selectTimestamp(timestamp: number) {
-    this.selectedTimestamp =
-      timestamp >= this.store.lastSample.timestamp ? Infinity : timestamp;
+  selectSample(offset: number) {
+    this._selectedSampleOffset =
+      offset === this.store.currentSamples.length - 1 ? undefined : offset;
+  }
+
+  @computed
+  get selectedSampleOffset() {
+    return this._selectedSampleOffset !== undefined
+      ? this._selectedSampleOffset
+      : this.store.currentSamples.length - 1;
+  }
+
+  @computed
+  get selectedSample() {
+    return this.store.currentSamples[this.selectedSampleOffset];
   }
 
   @action.bound

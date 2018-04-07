@@ -33,7 +33,7 @@ export interface Sample {
   heartrate: number; // mean heartrate
   rmssd: number; // root mean square of the successive differences
   rmssdDiff: number; // RMSSD difference relative to the baseline
-  stress: StressLevel; // percieved stress level
+  stress?: StressLevel; // percieved stress level
   timestamp: number;
 }
 

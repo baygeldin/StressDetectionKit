@@ -27,8 +27,9 @@ class StatsList extends Component<{}, {}> {
   render() {
     const sample = this.ui.selectedSample;
     const stressed = sample.state;
-    const segment = this.ui.selectedSegment;
-    const duration = moment.utc(segment.duration).format('HH:mm:ss');
+    const duration = moment
+      .utc(this.ui.selectedSegment.duration)
+      .format('HH:mm:ss');
 
     return (
       <View style={styles.container}>
