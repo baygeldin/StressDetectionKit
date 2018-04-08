@@ -41,22 +41,29 @@ export function calcSample(
   chunks: Chunk[],
   accelerometerError: number,
   baselineRmssd: number,
+  baselineHeartRate: number,
   timestamp: number
 ): Sample {
   const activityIndex = calcActivityIndex(
     flatten(chunks.map(c => c.accelerometer)),
     accelerometerError
   );
-  const rmssd = calcRmssd(flatten(chunks.map(c => c.rrIntervals)));
+  const rmssd = calcRmssd(
+    flatten(chunks.map(c => c.rrIntervals)).sort(
+      (a, b) => a.timestamp - b.timestamp
+    )
+  );
   const heartrate = calcHeartRate(flatten(chunks.map(c => c.pulse)));
   const rmssdDiff = rmssd - baselineRmssd;
+  const heartrateDiff = heartrate - baselineHeartRate;
   const state = math.random() >= 0.75;
 
   return {
     state,
     activityIndex,
-    rmssd,
     heartrate,
+    heartrateDiff,
+    rmssd,
     rmssdDiff,
     timestamp
   };

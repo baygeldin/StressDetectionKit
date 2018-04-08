@@ -79,6 +79,10 @@ export function confirmAction(fn: () => void, msg?: string) {
   ]);
 }
 
+export function tryLaterAlert() {
+  Alert.alert('Not now', 'Stop stress monitoring first.', [{ text: 'Got it' }]);
+}
+
 // Extract strings from XML
 function getTextContent(node: Document | Element, tag: string) {
   return node.getElementsByTagName(tag)[0].textContent!.trim();

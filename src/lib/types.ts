@@ -31,6 +31,7 @@ export interface Sample {
   state: boolean; // stressed or not
   activityIndex: number; // activity intensity
   heartrate: number; // mean heartrate
+  heartrateDiff: number; // mean heartrate difference relative to baseline
   rmssd: number; // root mean square of the successive differences
   rmssdDiff: number; // RMSSD difference relative to the baseline
   stress?: StressLevel; // percieved stress level

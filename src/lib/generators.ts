@@ -51,24 +51,33 @@ export function generateChunks(count: number, timestamp: number) {
     .map((c, i) => generateChunk(start + CHUNK_LENGTH * i));
 }
 
-export function generateSample(baseline: number, timestamp: number): Sample {
+export function generateSample(
+  baselineRmssd: number,
+  baselineHeartRate: number,
+  timestamp: number
+): Sample {
   const rmssd = random(20, 80);
+  const heartrate = random(60, 120);
 
   return {
     state: math.random() >= 0.75,
     activityIndex: random(0, 30),
     rmssd,
-    heartrate: random(60, 120),
-    rmssdDiff: rmssd - baseline,
+    heartrate,
+    heartrateDiff: heartrate - baselineHeartRate,
+    rmssdDiff: rmssd - baselineRmssd,
     timestamp
   };
 }
 
 export function generateSamples(count: number, timestamp: number) {
   const start = timestamp - WINDOW_LENGTH + CHUNK_LENGTH;
-  const baseline = math.floor(math.random(20, 80));
+  const baselineRmssd = math.floor(math.random(20, 80));
+  const baselineHeartRate = math.floor(random(50, 120));
 
   return new Array(count)
     .fill(0)
-    .map((s, i) => generateSample(baseline, start + STEP_LENGTH * i));
+    .map((s, i) =>
+      generateSample(baselineRmssd, baselineHeartRate, start + STEP_LENGTH * i)
+    );
 }

@@ -2,12 +2,14 @@ import Denque from 'denque';
 import {
   ACCELERATED_MODE,
   ACCELEROMETER_ERROR_KEY,
+  BASELINE_HR_KEY,
   BASELINE_RMSSD_KEY,
   CALIBRATION_LENGTH,
   CALIBRATION_PADDING,
   CALIBRATION_UPDATE_INTERVAL,
   CHUNK_LENGTH,
   DEFAULT_ACCELEROMETER_ERROR,
+  DEFAULT_BASELINE_HR,
   DEFAULT_BASELINE_RMSSD,
   SENSOR_UPDATE_INTERVAL,
   STEP_SIZE,
@@ -15,7 +17,12 @@ import {
   WINDOW_SIZE
 } from 'lib/constants';
 import DeviceKit, { Device, Reading } from 'lib/device-kit';
-import { calcAccelerometerVariance, calcRmssd, calcSample } from 'lib/features';
+import {
+  calcAccelerometerVariance,
+  calcHeartRate,
+  calcRmssd,
+  calcSample
+} from 'lib/features';
 import {
   generateChunk,
   generateChunks,
@@ -74,6 +81,7 @@ export default class Main {
 
   // Calibration
   @observable baselineRmssd: number;
+  @observable baselineHeartRate: number;
   @observable accelerometerError: number;
   @observable calibrationTimePassed: number;
 
@@ -99,6 +107,7 @@ export default class Main {
     await this.sdk.register(key);
     const devices = await this.sdk.fetchDevices();
     const baselineRmssd = await getFloat(BASELINE_RMSSD_KEY);
+    const baselineHeartRate = await getFloat(BASELINE_HR_KEY);
     const accelerometerError = await getFloat(ACCELEROMETER_ERROR_KEY);
 
     runInAction('initialize', () => {
@@ -111,6 +120,7 @@ export default class Main {
       this.accelerometerError =
         accelerometerError || DEFAULT_ACCELEROMETER_ERROR;
       this.baselineRmssd = baselineRmssd || DEFAULT_BASELINE_RMSSD;
+      this.baselineHeartRate = baselineHeartRate || DEFAULT_BASELINE_HR;
     });
   }
 
@@ -126,6 +136,7 @@ export default class Main {
     this.timer = setInterval(
       action('updateCalibrationProgress', () => {
         if (!this.calibrating) return;
+        console.log(this.calibrationTimePassed);
 
         this.calibrationTimePassed += CALIBRATION_UPDATE_INTERVAL;
         if (this.calibrationTimePassed >= CALIBRATION_LENGTH) {
@@ -150,6 +161,7 @@ export default class Main {
   resetBaselineValues() {
     this.accelerometerError = DEFAULT_ACCELEROMETER_ERROR;
     this.baselineRmssd = DEFAULT_BASELINE_RMSSD;
+    this.baselineHeartRate = DEFAULT_BASELINE_HR;
     this.persistBaselineValues();
   }
 
@@ -313,11 +325,12 @@ export default class Main {
   @action.bound
   private pushSample(timestamp: number) {
     const sample = ACCELERATED_MODE
-      ? generateSample(this.baselineRmssd, timestamp)
+      ? generateSample(this.baselineRmssd, this.baselineHeartRate, timestamp)
       : calcSample(
           this.chunksQueue.toArray(),
           this.accelerometerError,
           this.baselineRmssd,
+          this.baselineHeartRate,
           timestamp
         );
 
@@ -391,6 +404,10 @@ export default class Main {
       this.baselineRmssd = calcRmssd(
         rrIntervals.filter(m => m.timestamp > start)
       );
+    }
+
+    if (buffers.pulse.length) {
+      this.baselineRmssd = calcHeartRate(buffers.pulse);
     }
 
     this.persistBaselineValues();

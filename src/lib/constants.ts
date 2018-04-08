@@ -22,18 +22,20 @@ export const CALIBRATION_PADDING =
   CHUNK_LENGTH * (ACCELERATED_MODE ? 1 : STEP_SIZE);
 export const CALIBRATION_LENGTH =
   CALIBRATION_PADDING + CHUNK_LENGTH * (ACCELERATED_MODE ? 2 : WINDOW_SIZE);
-export const CALIBRATION_UPDATE_INTERVAL = 3000; // in ms
+export const CALIBRATION_UPDATE_INTERVAL = ACCELERATED_MODE ? 500 : 3000; // in ms
 
 // Accerelrometer and gyroscope config
 export const SENSOR_UPDATE_INTERVAL = 1000; // in ms
 
 // Default values
-export const DEFAULT_BASELINE_RMSSD = 60; // in ms
+export const DEFAULT_BASELINE_RMSSD = 40; // in ms
+export const DEFAULT_BASELINE_HR = 60; // in bpm
 export const DEFAULT_ACCELEROMETER_ERROR = 0.025; // in m/s^2
 
 /// Storage
 
 export const BASELINE_RMSSD_KEY = 'baselineRmssd';
+export const BASELINE_HR_KEY = 'baselineHeartRate';
 export const ACCELEROMETER_ERROR_KEY = 'accelerometerError';
 
 /// Views

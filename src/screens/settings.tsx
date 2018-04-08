@@ -2,7 +2,7 @@ import Calibration from 'components/calibration';
 import DevicesList from 'components/devices-list';
 import SettingsItem from 'components/settings-item';
 import Component from 'lib/component';
-import { confirmAction, deviceTitle } from 'lib/helpers';
+import { confirmAction, deviceTitle, tryLaterAlert } from 'lib/helpers';
 import { inject, observer } from 'mobx-react/native';
 import {
   Body,
@@ -70,7 +70,7 @@ export default class extends Component<{}, {}> {
               <Text note>{title}</Text>
             </Body>
           </SettingsItem>
-          <SettingsItem onPress={this.store.startScan}>
+          <SettingsItem onPress={() => this.startScan()}>
             <Left>
               <Icon name="bluetooth" />
             </Left>
@@ -97,7 +97,18 @@ export default class extends Component<{}, {}> {
             </Left>
             <Body>
               <Text>Baseline HRV</Text>
-              <Text note>{Math.round(this.store.baselineRmssd)}</Text>
+              <Text note>{`${Math.round(this.store.baselineRmssd)} ms`}</Text>
+            </Body>
+          </SettingsItem>
+          <SettingsItem>
+            <Left>
+              <Icon name="heart" />
+            </Left>
+            <Body>
+              <Text>Baseline HR</Text>
+              <Text note>{`${Math.round(
+                this.store.baselineHeartRate
+              )} bpm`}</Text>
             </Body>
           </SettingsItem>
           <SettingsItem>
@@ -106,10 +117,12 @@ export default class extends Component<{}, {}> {
             </Left>
             <Body>
               <Text>Acceletometer error</Text>
-              <Text note>{this.store.accelerometerError.toPrecision(4)}</Text>
+              <Text note>{`${this.store.accelerometerError.toPrecision(
+                4
+              )} m\u00b2 / s`}</Text>
             </Body>
           </SettingsItem>
-          <SettingsItem onPress={this.store.startCalibration}>
+          <SettingsItem onPress={() => this.startCalibration()}>
             <Left>
               <Icon name="options" />
             </Left>
@@ -145,14 +158,29 @@ export default class extends Component<{}, {}> {
   }
 
   confirmDeviceRemoval() {
-    confirmAction(this.store.removeDevice, 'Current device will be unpaired.');
+    this.store.collecting
+      ? tryLaterAlert()
+      : confirmAction(
+          this.store.removeDevice,
+          'Current device will be unpaired.'
+        );
   }
 
   confirmCalibrationReset() {
-    confirmAction(
-      this.store.resetBaselineValues,
-      'Baseline values will reset.'
-    );
+    this.store.collecting
+      ? tryLaterAlert()
+      : confirmAction(
+          this.store.resetBaselineValues,
+          'Baseline values will reset.'
+        );
+  }
+
+  startCalibration() {
+    this.store.collecting ? tryLaterAlert() : this.store.startCalibration();
+  }
+
+  startScan() {
+    this.store.collecting ? tryLaterAlert() : this.store.startScan();
   }
 
   showHelp() {
