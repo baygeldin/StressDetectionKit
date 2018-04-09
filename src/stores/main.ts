@@ -136,7 +136,6 @@ export default class Main {
     this.timer = setInterval(
       action('updateCalibrationProgress', () => {
         if (!this.calibrating) return;
-        console.log(this.calibrationTimePassed);
 
         this.calibrationTimePassed += CALIBRATION_UPDATE_INTERVAL;
         if (this.calibrationTimePassed >= CALIBRATION_LENGTH) {
@@ -334,6 +333,12 @@ export default class Main {
           timestamp
         );
 
+    if (__DEV__) {
+      sample.state = ['medium', 'high'].includes(
+        this.currentPercievedStressLevel
+      );
+    }
+
     this.currentSamples.push(sample);
   }
 
@@ -407,7 +412,7 @@ export default class Main {
     }
 
     if (buffers.pulse.length) {
-      this.baselineRmssd = calcHeartRate(buffers.pulse);
+      this.baselineHeartRate = calcHeartRate(buffers.pulse);
     }
 
     this.persistBaselineValues();

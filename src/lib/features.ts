@@ -12,9 +12,11 @@ export function calcAccelerometerVariance(measurements: SensorData[]) {
 
 // Root Mean Square of the Successive Differences
 export function calcRmssd(measurements: RrIntervalMark[]) {
+  console.log(measurements.map(m => m.rrInterval), 'hrv');
   const successiveDiffs = measurements
     .map((m, i, arr) => m.rrInterval - (arr[i - 1] || {}).rrInterval)
     .slice(1);
+  console.log(successiveDiffs);
 
   return math.sqrt(
     math.sum(successiveDiffs.map(m => m * m)) / successiveDiffs.length

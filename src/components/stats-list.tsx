@@ -52,7 +52,9 @@ class StatsList extends Component<{}, {}> {
               <Text note>RMSSD</Text>
             </Body>
             <Right>
-              <Text style={styles.value}>{`${sample.rmssd} ms`}</Text>
+              <Text style={styles.value}>{`${Math.round(
+                sample.rmssd
+              )} ms`}</Text>
             </Right>
           </CardItem>
           <CardItem>
@@ -61,7 +63,9 @@ class StatsList extends Component<{}, {}> {
               <Text note>Mean heart rate</Text>
             </Body>
             <Right>
-              <Text style={styles.value}>{`${sample.heartrate} bpm`}</Text>
+              <Text style={styles.value}>{`${Math.round(
+                sample.heartrate
+              )} bpm`}</Text>
             </Right>
           </CardItem>
           <CardItem>
@@ -70,9 +74,9 @@ class StatsList extends Component<{}, {}> {
               <Text note>Activity intensity</Text>
             </Body>
             <Right>
-              <Text style={styles.value}>{`${
-                sample.activityIndex
-              } m\u00b2 / s`}</Text>
+              <Text style={styles.value}>{`${sample.activityIndex.toFixed(
+                4
+              )} m\u00b2 / s`}</Text>
             </Right>
           </CardItem>
           <CardItem>
@@ -81,7 +85,9 @@ class StatsList extends Component<{}, {}> {
               <Text note>From the baseline</Text>
             </Body>
             <Right>
-              <Text style={styles.value}>{`${sample.rmssdDiff} ms`}</Text>
+              <Text style={styles.value}>{`${Math.round(
+                sample.rmssdDiff
+              )} ms`}</Text>
             </Right>
           </CardItem>
           <CardItem>

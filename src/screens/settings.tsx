@@ -117,7 +117,7 @@ export default class extends Component<{}, {}> {
             </Left>
             <Body>
               <Text>Acceletometer error</Text>
-              <Text note>{`${this.store.accelerometerError.toPrecision(
+              <Text note>{`${this.store.accelerometerError.toFixed(
                 4
               )} m\u00b2 / s`}</Text>
             </Body>
