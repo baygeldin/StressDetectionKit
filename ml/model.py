@@ -7,7 +7,8 @@ from sklearn_porter import Porter
 
 data = pd.read_json('test.json')
 
-x_train, x_test, y_train, y_test = train_test_split(data[['pulse', 'rmssd']], data['state'], test_size=0.33)
+x_train, x_test, y_train, y_test = train_test_split(
+    data[['pulse', 'rmssd']], data['state'], test_size=0.33)
 
 model = svm.SVC()
 model.fit(x_train, y_train)
