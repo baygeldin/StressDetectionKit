@@ -72,4 +72,4 @@ configure.sh
 
 # Data samples
 #
-samples/
+ml/samples/

@@ -96,8 +96,8 @@ export default class extends Component<{}, {}> {
               <Icon name="pulse" />
             </Left>
             <Body>
-              <Text>Baseline HRV</Text>
-              <Text note>{`${Math.round(this.store.baselineRmssd)} ms`}</Text>
+              <Text>Baseline heart rate variability</Text>
+              <Text note>{`${Math.round(this.store.baselineHrv)} ms`}</Text>
             </Body>
           </SettingsItem>
           <SettingsItem>
@@ -105,7 +105,7 @@ export default class extends Component<{}, {}> {
               <Icon name="heart" />
             </Left>
             <Body>
-              <Text>Baseline HR</Text>
+              <Text>Baseline heart rate</Text>
               <Text note>{`${Math.round(
                 this.store.baselineHeartRate
               )} bpm`}</Text>

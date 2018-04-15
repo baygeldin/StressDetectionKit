@@ -22,7 +22,8 @@
       "lib/*": ["src/lib/*"],
       "screens/*": ["src/screens/*"],
       "stores/*": ["src/stores/*"],
-      "components/*": ["src/components/*"]
+      "components/*": ["src/components/*"],
+      "config/*": ["src/config/*"]
     }
   }
 }

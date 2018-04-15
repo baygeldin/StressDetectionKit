@@ -1,6 +1,15 @@
 import { area, curveCardinal, scaleLinear } from 'd3';
 import Component from 'lib/component';
-import { BLUE, CHART_HEIGHT, GREEN, RED, WHITE } from 'lib/constants';
+import {
+  BLUE,
+  CHART_HEIGHT,
+  DEFAULT_ACTIVITY_MIN,
+  DEFAULT_HEARTRATE_MIN,
+  DEFAULT_HRV_MIN,
+  GREEN,
+  RED,
+  WHITE
+} from 'lib/constants';
 import { Sample } from 'lib/types';
 import { inject, observer } from 'mobx-react/native';
 import React from 'react';
@@ -50,18 +59,20 @@ class Area extends Component<{}, {}> {
     const height = CHART_HEIGHT;
 
     let mapper: (s: Sample) => number;
+    let defaultMin: number;
 
     if (this.ui.currentChart === 'hrv') {
-      mapper = s => s.rmssd;
-    } else if (this.ui.currentChart === 'hr') {
-      mapper = s => s.heartrate;
+      mapper = s => s.hrv;
+      defaultMin = DEFAULT_HRV_MIN;
+    } else if (this.ui.currentChart === 'heartRate') {
+      mapper = s => s.heartRate;
+      defaultMin = DEFAULT_HEARTRATE_MIN;
     } else {
       mapper = s => s.activityIndex;
+      defaultMin = DEFAULT_ACTIVITY_MIN;
     }
 
     const data = this.store.currentSamples.map(mapper);
-
-    const max = Math.max(...data);
 
     const x = scaleLinear()
       .domain([0, this.store.currentSamples.length - 1])
@@ -70,7 +81,7 @@ class Area extends Component<{}, {}> {
 
     const y = scaleLinear()
       // Create a 20% buffer at the top
-      .domain([0, max * 1.2])
+      .domain([Math.min(...data, defaultMin), Math.max(...data) * 1.2])
       .range([height, 0]);
 
     const fakeStart = x.invert(0);

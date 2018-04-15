@@ -1,0 +1,5 @@
+{
+  "hrvRatio": [0.5, 1.5],
+  "heartRateRatio": [0.7, 1.3],
+  "activityIndex": [0.0, 2]
+}

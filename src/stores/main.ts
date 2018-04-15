@@ -2,15 +2,15 @@ import Denque from 'denque';
 import {
   ACCELERATED_MODE,
   ACCELEROMETER_ERROR_KEY,
-  BASELINE_HR_KEY,
-  BASELINE_RMSSD_KEY,
+  BASELINE_HEARTRATE_KEY,
+  BASELINE_HRV_KEY,
   CALIBRATION_LENGTH,
   CALIBRATION_PADDING,
   CALIBRATION_UPDATE_INTERVAL,
   CHUNK_LENGTH,
   DEFAULT_ACCELEROMETER_ERROR,
-  DEFAULT_BASELINE_HR,
-  DEFAULT_BASELINE_RMSSD,
+  DEFAULT_BASELINE_HEARTRATE,
+  DEFAULT_BASELINE_HRV,
   SENSOR_UPDATE_INTERVAL,
   STEP_SIZE,
   STUB_SIZE,
@@ -20,8 +20,7 @@ import DeviceKit, { Device, Reading } from 'lib/device-kit';
 import {
   calcAccelerometerVariance,
   calcHeartRate,
-  calcRmssd,
-  calcSample
+  calcRmssd
 } from 'lib/features';
 import {
   generateChunk,
@@ -30,6 +29,7 @@ import {
   generateSamples
 } from 'lib/generators';
 import { filterSamples, persist, readingToStreams } from 'lib/helpers';
+import calcSample from 'lib/sample';
 import { getFloat, setFloat } from 'lib/storage';
 import {
   Chunk,
@@ -43,7 +43,6 @@ import {
 import { action, computed, observable, runInAction } from 'mobx';
 import {
   Accelerometer,
-  Gyroscope,
   SensorData,
   SensorObservable
 } from 'react-native-sensors';
@@ -80,7 +79,7 @@ export default class Main {
   @observable.shallow currentSamples: Sample[] = [];
 
   // Calibration
-  @observable baselineRmssd: number;
+  @observable baselineHrv: number;
   @observable baselineHeartRate: number;
   @observable accelerometerError: number;
   @observable calibrationTimePassed: number;
@@ -106,8 +105,8 @@ export default class Main {
   async initialize(key: string) {
     await this.sdk.register(key);
     const devices = await this.sdk.fetchDevices();
-    const baselineRmssd = await getFloat(BASELINE_RMSSD_KEY);
-    const baselineHeartRate = await getFloat(BASELINE_HR_KEY);
+    const baselineHrv = await getFloat(BASELINE_HRV_KEY);
+    const baselineHeartRate = await getFloat(BASELINE_HEARTRATE_KEY);
     const accelerometerError = await getFloat(ACCELEROMETER_ERROR_KEY);
 
     runInAction('initialize', () => {
@@ -119,8 +118,8 @@ export default class Main {
 
       this.accelerometerError =
         accelerometerError || DEFAULT_ACCELEROMETER_ERROR;
-      this.baselineRmssd = baselineRmssd || DEFAULT_BASELINE_RMSSD;
-      this.baselineHeartRate = baselineHeartRate || DEFAULT_BASELINE_HR;
+      this.baselineHrv = baselineHrv || DEFAULT_BASELINE_HRV;
+      this.baselineHeartRate = baselineHeartRate || DEFAULT_BASELINE_HEARTRATE;
     });
   }
 
@@ -159,8 +158,8 @@ export default class Main {
   @action.bound
   resetBaselineValues() {
     this.accelerometerError = DEFAULT_ACCELEROMETER_ERROR;
-    this.baselineRmssd = DEFAULT_BASELINE_RMSSD;
-    this.baselineHeartRate = DEFAULT_BASELINE_HR;
+    this.baselineHrv = DEFAULT_BASELINE_HRV;
+    this.baselineHeartRate = DEFAULT_BASELINE_HEARTRATE;
     this.persistBaselineValues();
   }
 
@@ -197,7 +196,11 @@ export default class Main {
     if (__DEV__ && !ACCELERATED_MODE) {
       Promise.all([
         this.persist('samples', filterSamples(samples, stress)),
-        this.persist('stress', stress)
+        this.persist('stress', stress),
+        this.persist('baseline', {
+          hrv: this.baselineHrv,
+          heartRate: this.baselineHeartRate
+        })
       ]).catch(err => {
         console.error(err);
       });
@@ -279,16 +282,16 @@ export default class Main {
 
   private startSensors() {
     if (ACCELERATED_MODE) return;
-    this.startSensorCollection(Accelerometer);
-    this.startSensorCollection(Gyroscope);
     this.startHeartrateCollection();
+    this.startSensorCollection(Accelerometer);
+    // this.startSensorCollection(Gyroscope);
   }
 
   private stopSensors() {
     if (ACCELERATED_MODE) return;
     this.sdk.stopCollection();
     this.accelerometer.stop();
-    this.gyroscope.stop();
+    // this.gyroscope.stop();
   }
 
   @action.bound
@@ -324,19 +327,18 @@ export default class Main {
   @action.bound
   private pushSample(timestamp: number) {
     const sample = ACCELERATED_MODE
-      ? generateSample(this.baselineRmssd, this.baselineHeartRate, timestamp)
+      ? generateSample(this.baselineHrv, this.baselineHeartRate, timestamp)
       : calcSample(
           this.chunksQueue.toArray(),
           this.accelerometerError,
-          this.baselineRmssd,
+          this.baselineHrv,
           this.baselineHeartRate,
           timestamp
         );
 
     if (__DEV__) {
-      sample.state = ['medium', 'high'].includes(
-        this.currentPercievedStressLevel
-      );
+      sample.stress = this.currentPercievedStressLevel;
+      sample.state = ['medium', 'high'].includes(sample.stress);
     }
 
     this.currentSamples.push(sample);
@@ -406,7 +408,7 @@ export default class Main {
       );
       const lastTimestamp = rrIntervals[rrIntervals.length - 1].timestamp;
       const start = lastTimestamp - CALIBRATION_LENGTH + CALIBRATION_PADDING;
-      this.baselineRmssd = calcRmssd(
+      this.baselineHrv = calcRmssd(
         rrIntervals.filter(m => m.timestamp > start)
       );
     }
@@ -421,7 +423,7 @@ export default class Main {
   private persistBaselineValues() {
     Promise.all([
       setFloat(ACCELEROMETER_ERROR_KEY, this.accelerometerError),
-      setFloat(BASELINE_RMSSD_KEY, this.baselineRmssd)
+      setFloat(BASELINE_HRV_KEY, this.baselineHrv)
     ]).catch(err => {
       console.error(err);
     });

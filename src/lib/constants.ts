@@ -28,19 +28,23 @@ export const CALIBRATION_UPDATE_INTERVAL = ACCELERATED_MODE ? 500 : 3000; // in 
 export const SENSOR_UPDATE_INTERVAL = 1000; // in ms
 
 // Default values
-export const DEFAULT_BASELINE_RMSSD = 40; // in ms
-export const DEFAULT_BASELINE_HR = 60; // in bpm
+export const DEFAULT_BASELINE_HRV = 40; // in ms
+export const DEFAULT_BASELINE_HEARTRATE = 60; // in bpm
 export const DEFAULT_ACCELEROMETER_ERROR = 0.025; // in m/s^2
 
 /// Storage
 
-export const BASELINE_RMSSD_KEY = 'baselineRmssd';
-export const BASELINE_HR_KEY = 'baselineHeartRate';
+export const BASELINE_HRV_KEY = 'baselineHrv';
+export const BASELINE_HEARTRATE_KEY = 'baselineHeartRate';
 export const ACCELEROMETER_ERROR_KEY = 'accelerometerError';
 
 /// Views
 
+// Charts
 export const CHART_HEIGHT = 150;
+export const DEFAULT_HRV_MIN = 30;
+export const DEFAULT_HEARTRATE_MIN = 50;
+export const DEFAULT_ACTIVITY_MIN = 0.5;
 
 // Chunks required to start showing statistics
 export const CHUNKS_REQUIRED = WINDOW_SIZE + STEP_SIZE;

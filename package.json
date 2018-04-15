@@ -5,6 +5,7 @@
   "scripts": {
     "start": "haul start --platform all",
     "test": "jest",
+    "postinstall": "pipenv install --dev",
     "clean": "rimraf build",
     "build": "npm run clean && npm run tsc --",
     "lint": "tslint src/**/*.ts",
@@ -13,9 +14,16 @@
     "ios": "haul start --platform ios",
     "reload": "haul reload",
     "reverse": "adb reverse tcp:8081 tcp:8081",
-    "pull": "adb pull /sdcard/Stress\\ Detection\\ Kit ./samples",
     "bundle":
-      "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
+      "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
+    "train-model": "pipenv run python ml/model.py -o src/ml/model.pkl --",
+    "port-model":
+      "pipenv run python -m sklearn_porter -i src/ml/model.pkl --js --pipe",
+    "serialize-model":
+      "pipenv run python ml/serialize.py -i src/ml/model.pkl -o src/config/model.json",
+    "pull-samples": "adb pull /sdcard/Stress\\ Detection\\ Kit src/ml/samples",
+    "regenerate-samples": "ts-node src/ml/regenerate.ts",
+    "calc-minmax": "ts-node src/ml/minmax.js -o src/config/minmax.json --"
   },
   "dependencies": {
     "d3": "^5.0.0",
@@ -54,9 +62,9 @@
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-inline-environment-variables": "^0.3.0",
     "babel-preset-react-native": "4.0.0",
+    "commander": "^2.15.1",
     "haul": "^1.0.0-beta.11",
     "jest": "21.2.1",
-    "mobx-remotedev": "^0.2.8",
     "prettier": "^1.10.2",
     "react-test-renderer": "16.0.0",
     "rx": "^4.1.0",

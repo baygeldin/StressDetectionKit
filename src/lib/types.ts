@@ -1,7 +1,7 @@
 import { Accelerometer, Gyroscope, SensorData } from 'react-native-sensors';
 
 export type StressLevel = 'none' | 'low' | 'medium' | 'high';
-export type ChartType = 'hrv' | 'hr' | 'activity';
+export type ChartType = 'hrv' | 'heartRate' | 'activity';
 
 export interface StressMark {
   start: number;
@@ -29,13 +29,12 @@ export interface Chunk {
 
 export interface Sample {
   state: boolean; // stressed or not
+  vector: [number, number, number]; // feature vector for the classificator
   activityIndex: number; // activity intensity
-  heartrate: number; // mean heartrate
-  heartrateDiff: number; // mean heartrate difference relative to baseline
-  rmssd: number; // root mean square of the successive differences
-  rmssdDiff: number; // RMSSD difference relative to the baseline
+  heartRate: number; // mean heart rate
+  hrv: number; // root mean square of RR intervals successive differences
   stress?: StressLevel; // percieved stress level
-  timestamp: number;
+  timestamp: number; // last chunk's timestamp
 }
 
 export type Sensor = typeof Accelerometer | typeof Gyroscope;

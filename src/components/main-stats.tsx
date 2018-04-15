@@ -76,15 +76,17 @@ class MainStats extends Component<{}, {}> {
           onPress={() => this.ui.selectChart('hrv')}
         >
           <Text style={style('title', 'hrv')}>HRV</Text>
-          <Text style={style('value', 'hrv')}>{Math.round(last.rmssd)}</Text>
+          <Text style={style('value', 'hrv')}>{Math.round(last.hrv)}</Text>
           <Text style={styles.units}>ms</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.column}
-          onPress={() => this.ui.selectChart('hr')}
+          onPress={() => this.ui.selectChart('heartRate')}
         >
-          <Text style={style('title', 'hr')}>HR</Text>
-          <Text style={style('value', 'hr')}>{Math.round(last.heartrate)}</Text>
+          <Text style={style('title', 'heartRate')}>HR</Text>
+          <Text style={style('value', 'heartRate')}>
+            {Math.round(last.heartRate)}
+          </Text>
           <Text style={styles.units}>bpm</Text>
         </TouchableOpacity>
         <TouchableOpacity
