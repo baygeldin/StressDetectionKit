@@ -6,7 +6,7 @@
     "jsx": "react",
     "outDir": "build",
     "rootDir": "src",
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": false,
     "noImplicitAny": true,
     "preserveConstEnums": true,
     "allowJs": false,
