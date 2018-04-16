@@ -3,8 +3,9 @@ import { GREEN, RED } from 'lib/constants';
 import { inject, observer } from 'mobx-react/native';
 import moment from 'moment';
 import { Body, Card, CardItem, Left, Right, Text } from 'native-base';
-import React from 'react';
+import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { Moment } from 'moment';
 
 const styles = StyleSheet.create({
   container: {

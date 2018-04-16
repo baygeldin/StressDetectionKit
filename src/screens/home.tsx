@@ -1,15 +1,13 @@
-import React from 'react';
-import { View } from 'react-native';
-import { observer, inject } from 'mobx-react/native';
-import { Container, Text, Footer, FooterTab, Icon } from 'native-base';
-import { Bar } from 'react-native-progress';
-import Component from 'lib/component';
-import { APP_NAME, DATE_FORMAT, WINDOW_SIZE, STEP_SIZE } from 'lib/constants';
 import CogButton from 'components/cog-button';
 import CollectionButton from 'components/collection-button';
-import InitialContent from 'components/initial-content';
 import GatheringContent from 'components/gathering-content';
+import InitialContent from 'components/initial-content';
 import MainContent from 'components/main-content';
+import Component from 'lib/component';
+import { APP_NAME } from 'lib/constants';
+import { inject, observer } from 'mobx-react/native';
+import { Container, Footer, FooterTab } from 'native-base';
+import * as React from 'react';
 
 @inject('store', 'ui')
 @observer

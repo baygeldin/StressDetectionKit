@@ -1,7 +1,7 @@
 import Component from 'lib/component';
 import { BLACK, WHITE } from 'lib/constants';
 import { inject, observer } from 'mobx-react/native';
-import React from 'react';
+import * as React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 @inject('router')

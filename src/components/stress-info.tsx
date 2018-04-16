@@ -3,7 +3,7 @@ import { DATE_FORMAT } from 'lib/constants';
 import { stressColor } from 'lib/helpers';
 import { inject, observer } from 'mobx-react/native';
 import moment from 'moment';
-import React from 'react';
+import * as React from 'react';
 import { Text, View } from 'react-native';
 
 @inject('store')

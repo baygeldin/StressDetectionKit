@@ -5,13 +5,13 @@ import {
   WINDOW_LENGTH
 } from 'lib/constants';
 import { Chunk, PulseMark, RrIntervalMark, Sample } from 'lib/types';
-import math from 'mathjs';
+import { random, floor } from 'mathjs';
 import { SensorData } from 'react-native-sensors';
 
 const typescriptHeroFix = STEP_LENGTH;
 
-function random(from: number, to: number) {
-  return math.floor(math.random(from, to));
+function randomInt(from: number, to: number) {
+  return floor(random(from, to));
 }
 
 export function generateChunk(timestamp: number): Chunk {
@@ -24,18 +24,18 @@ export function generateChunk(timestamp: number): Chunk {
   const interval = (timestamp - start) / SENSOR_UPDATE_INTERVAL;
 
   for (let i = start; i <= timestamp; i += interval) {
-    rrIntervals.push({ rrInterval: random(600, 650), timestamp: i });
-    pulse.push({ pulse: random(50, 120), timestamp: i });
+    rrIntervals.push({ rrInterval: randomInt(600, 650), timestamp: i });
+    pulse.push({ pulse: randomInt(50, 120), timestamp: i });
     accelerometer.push({
-      x: random(0, 15),
-      y: random(0, 15),
-      z: random(0, 15),
+      x: randomInt(0, 15),
+      y: randomInt(0, 15),
+      z: randomInt(0, 15),
       timestamp: i
     });
     gyroscope.push({
-      x: random(0, 15),
-      y: random(0, 15),
-      z: random(0, 15),
+      x: randomInt(0, 15),
+      y: randomInt(0, 15),
+      z: randomInt(0, 15),
       timestamp: i
     });
   }
@@ -56,13 +56,13 @@ export function generateSample(
   baselineHeartRate: number,
   timestamp: number
 ): Sample {
-  const hrv = random(20, 80);
-  const heartRate = random(60, 120);
+  const hrv = randomInt(20, 80);
+  const heartRate = randomInt(60, 120);
 
   return {
-    state: math.random() >= 0.75,
-    vector: [math.random(), math.random(), math.random()],
-    activityIndex: random(0, 30),
+    state: random() >= 0.75,
+    vector: [random(), random(), random()],
+    activityIndex: randomInt(0, 30),
     hrv,
     heartRate,
     timestamp
@@ -71,8 +71,8 @@ export function generateSample(
 
 export function generateSamples(count: number, timestamp: number) {
   const start = timestamp - WINDOW_LENGTH + CHUNK_LENGTH;
-  const baselineHrv = math.floor(math.random(20, 80));
-  const baselineHeartRate = math.floor(random(50, 120));
+  const baselineHrv = floor(random(20, 80));
+  const baselineHeartRate = floor(randomInt(50, 120));
 
   return new Array(count)
     .fill(0)

@@ -5,7 +5,7 @@ import StressInfo from 'components/stress-info';
 import Component from 'lib/component';
 import { inject, observer } from 'mobx-react/native';
 import { Container, Content, Footer, FooterTab, Text } from 'native-base';
-import React from 'react';
+import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 

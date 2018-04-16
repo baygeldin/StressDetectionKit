@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
+import * as React from 'react';
 import { View, BackHandler, PermissionsAndroid, Alert } from 'react-native';
 import { StackNavigator, addNavigationHelpers } from 'react-navigation';
 import { observable, action, configure } from 'mobx';

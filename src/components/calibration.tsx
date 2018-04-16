@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { observer, inject } from 'mobx-react/native';
 import { View } from 'react-native';
 import {

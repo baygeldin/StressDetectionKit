@@ -1,6 +1,6 @@
 // Ported from SciKit-Learn SVC classifier based on sklearn-porter output.
 
-interface SvmParameters {
+export interface SvmParameters {
   nClasses: number;
   nRows: number;
   vectors: number[][];

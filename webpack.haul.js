@@ -42,6 +42,7 @@ module.exports = ({ platform }, defaults) => {
         '.native.ts',
         `.${platform}.tsx`,
         '.native.tsx',
+        '.json',
         ...defaults.resolve.extensions
       ],
       alias: {
@@ -49,7 +50,8 @@ module.exports = ({ platform }, defaults) => {
         lib: path.resolve(__dirname, 'src/lib/'),
         screens: path.resolve(__dirname, 'src/screens/'),
         stores: path.resolve(__dirname, 'src/stores/'),
-        components: path.resolve(__dirname, 'src/components/')
+        components: path.resolve(__dirname, 'src/components/'),
+        config: path.resolve(__dirname, 'src/config/')
       }
     }
   };

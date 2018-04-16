@@ -3,7 +3,7 @@ import { BLACK, BLUE, GREEN, RED } from 'lib/constants';
 import { ChartType } from 'lib/types';
 import { inject, observer } from 'mobx-react/native';
 import { Text } from 'native-base';
-import React from 'react';
+import * as React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 

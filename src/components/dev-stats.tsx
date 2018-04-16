@@ -1,6 +1,6 @@
 import Component from 'lib/component';
 import { inject, observer } from 'mobx-react/native';
-import React from 'react';
+import * as React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 const styles = StyleSheet.create({

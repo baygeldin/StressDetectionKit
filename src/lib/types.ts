@@ -27,9 +27,13 @@ export interface Chunk {
   timestamp: number;
 }
 
+// HRV / baseline HRV, heart rate / baseline heart rate, activity index
+export type FeatureVector = [number, number, number];
+
 export interface Sample {
   state: boolean; // stressed or not
-  vector: [number, number, number]; // feature vector for the classificator
+  vector: FeatureVector; // feature vector for the classificator
+  normalizedVector: FeatureVector; // feature vector that is normalized based on minmax
   activityIndex: number; // activity intensity
   heartRate: number; // mean heart rate
   hrv: number; // root mean square of RR intervals successive differences

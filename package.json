@@ -16,14 +16,15 @@
     "reverse": "adb reverse tcp:8081 tcp:8081",
     "bundle":
       "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
-    "train-model": "pipenv run python ml/model.py -o src/ml/model.pkl --",
+    "train-model": "pipenv run python src/ml/model.py",
     "port-model":
       "pipenv run python -m sklearn_porter -i src/ml/model.pkl --js --pipe",
-    "serialize-model":
-      "pipenv run python ml/serialize.py -i src/ml/model.pkl -o src/config/model.json",
+    "serialize-model": "pipenv run python src/ml/serialize.py",
     "pull-samples": "adb pull /sdcard/Stress\\ Detection\\ Kit src/ml/samples",
-    "regenerate-samples": "ts-node src/ml/regenerate.ts",
-    "calc-minmax": "ts-node src/ml/minmax.js -o src/config/minmax.json --"
+    "regenerate-samples": "npm run ts-node -- src/ml/regenerate.ts",
+    "calc-minmax": "npm run ts-node -- src/ml/minmax.ts",
+    "ts-node":
+      "ts-node -r tsconfig-paths/register -O '{\"module\": \"commonjs\"}'"
   },
   "dependencies": {
     "d3": "^5.0.0",
@@ -69,6 +70,7 @@
     "react-test-renderer": "16.0.0",
     "rx": "^4.1.0",
     "ts-loader": "^3.2.0",
+    "tsconfig-paths": "^3.3.0",
     "tslint": "^5.8.0",
     "tslint-microsoft-contrib": "^5.0.1",
     "tslint-react": "^3.2.0",

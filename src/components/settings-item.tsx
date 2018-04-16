@@ -1,4 +1,5 @@
-import React, { Props } from 'react';
+import { Props } from 'react';
+import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import { ListItem } from 'native-base';
 import Component from 'lib/component';

@@ -4,7 +4,7 @@ import Stats from 'components/stats-list';
 import Component from 'lib/component';
 import { observer } from 'mobx-react/native';
 import { Content } from 'native-base';
-import React from 'react';
+import * as React from 'react';
 
 @observer
 class MainContent extends Component<{}, {}> {

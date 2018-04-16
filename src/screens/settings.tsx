@@ -13,7 +13,8 @@ import {
   Separator,
   Text
 } from 'native-base';
-import React, { Props } from 'react';
+import { Props } from 'react';
+import * as React from 'react';
 import { Alert, Modal } from 'react-native';
 
 @inject('store', 'ui', 'router')

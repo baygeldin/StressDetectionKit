@@ -29,7 +29,7 @@ import {
   generateSamples
 } from 'lib/generators';
 import { filterSamples, persist, readingToStreams } from 'lib/helpers';
-import calcSample from 'lib/sample';
+import { calcSample } from 'lib/sample';
 import { getFloat, setFloat } from 'lib/storage';
 import {
   Chunk,
@@ -170,6 +170,7 @@ export default class Main {
     this.collecting = true;
 
     const timestamp = Date.now();
+    this.currentPercievedStressLevel = 'none';
     this.percievedStressStartedAt = timestamp;
     this.collectionStartedAt = timestamp;
     this.flushChunks();
@@ -187,7 +188,7 @@ export default class Main {
     if (!this.collecting) return;
 
     this.collecting = false;
-    this.changeStressLevel('none');
+    this.pushStressMark(Date.now());
     this.stopSensors();
     clearInterval(this.timer);
 
@@ -197,9 +198,10 @@ export default class Main {
       Promise.all([
         this.persist('samples', filterSamples(samples, stress)),
         this.persist('stress', stress),
-        this.persist('baseline', {
-          hrv: this.baselineHrv,
-          heartRate: this.baselineHeartRate
+        this.persist('baselines', {
+          baselineHrv: this.baselineHrv,
+          baselineHeartRate: this.baselineHeartRate,
+          accelerometerError: this.accelerometerError
         })
       ]).catch(err => {
         console.error(err);
@@ -268,17 +270,21 @@ export default class Main {
 
     const timestamp = Date.now();
 
-    this.percievedStress.push({
-      level: this.currentPercievedStressLevel,
-      start: this.percievedStressStartedAt,
-      end: timestamp
-    });
+    this.pushStressMark(timestamp);
 
     this.percievedStressStartedAt = timestamp;
     this.currentPercievedStressLevel = level;
   }
 
   // Private
+
+  private pushStressMark(timestamp: number) {
+    this.percievedStress.push({
+      level: this.currentPercievedStressLevel,
+      start: this.percievedStressStartedAt,
+      end: timestamp
+    });
+  }
 
   private startSensors() {
     if (ACCELERATED_MODE) return;
@@ -423,7 +429,8 @@ export default class Main {
   private persistBaselineValues() {
     Promise.all([
       setFloat(ACCELEROMETER_ERROR_KEY, this.accelerometerError),
-      setFloat(BASELINE_HRV_KEY, this.baselineHrv)
+      setFloat(BASELINE_HRV_KEY, this.baselineHrv),
+      setFloat(BASELINE_HEARTRATE_KEY, this.baselineHeartRate)
     ]).catch(err => {
       console.error(err);
     });

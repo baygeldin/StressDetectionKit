@@ -12,7 +12,7 @@ import {
 } from 'lib/constants';
 import { Sample } from 'lib/types';
 import { inject, observer } from 'mobx-react/native';
-import React from 'react';
+import * as React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { Slider } from 'react-native-elements';
 import Svg, { Path, Rect } from 'react-native-svg';

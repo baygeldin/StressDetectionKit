@@ -8,7 +8,7 @@ import {
 import { Device, Reading } from 'lib/device-kit';
 import { Sample, StressLevel, StressMark } from 'lib/types';
 import { Alert } from 'react-native';
-import RNFS from 'react-native-fs';
+import * as RNFS from 'react-native-fs';
 import { DOMParser } from 'xmldom';
 
 export function chunkBySize<T>(array: T[], size: number) {
