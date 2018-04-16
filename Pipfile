@@ -5,11 +5,14 @@ name = "pypi"
 
 [dev-packages]
 ipdb = "*"
+pylint = "*"
+"autopep8" = "*"
 
 [packages]
 scikit-learn = "==0.19.*"
 pandas = "==0.22.*"
 sklearn-porter = "==0.6.*"
+fire = "==0.1.*"
 
 [requires]
 python_version = "3.5"
