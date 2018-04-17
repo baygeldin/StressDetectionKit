@@ -1,74 +1,379 @@
-import remotedev from 'mobx-remotedev';
-import { observable, action, toJS } from 'mobx';
+import Denque from 'denque';
+import {
+  ACCELERATED_MODE,
+  ACCELEROMETER_ERROR_KEY,
+  BASELINE_HEARTRATE_KEY,
+  BASELINE_HRV_KEY,
+  CALIBRATION_LENGTH,
+  CALIBRATION_PADDING,
+  CALIBRATION_UPDATE_INTERVAL,
+  CHUNK_LENGTH,
+  DEFAULT_ACCELEROMETER_ERROR,
+  DEFAULT_BASELINE_HEARTRATE,
+  DEFAULT_BASELINE_HRV,
+  SENSOR_UPDATE_INTERVAL,
+  STEP_SIZE,
+  STUB_SIZE,
+  WINDOW_SIZE
+} from 'lib/constants';
+import DeviceKit, { Device, Reading } from 'lib/device-kit';
+import {
+  calcAccelerometerVariance,
+  calcHeartRate,
+  calcRmssd
+} from 'lib/features';
+import {
+  generateChunk,
+  generateChunks,
+  generateSample,
+  generateSamples
+} from 'lib/generators';
+import { filterSamples, persist, readingToStreams } from 'lib/helpers';
+import { calcSample } from 'lib/sample';
+import { getFloat, setFloat } from 'lib/storage';
+import {
+  Chunk,
+  PulseMark,
+  RrIntervalMark,
+  Sample,
+  Sensor,
+  StressLevel,
+  StressMark
+} from 'lib/types';
+import { action, computed, observable, runInAction } from 'mobx';
 import {
   Accelerometer,
-  Gyroscope,
   SensorData,
   SensorObservable
 } from 'react-native-sensors';
-import RNFS from 'react-native-fs';
-import { Device, Reading } from 'lib/device-kit';
-import DeviceKit from 'lib/device-kit';
-import { APP_NAME } from 'lib/constants';
+import { clearInterval, setInterval } from 'timers';
 
-type StressLevels = 'low' | 'medium' | 'high';
-
-interface StressMark {
-  timestamp: number;
-  level: StressLevels;
-}
-
-type Sensor = typeof Accelerometer | typeof Gyroscope;
-
-@remotedev
 export default class Main {
+  // State
   @observable initialized = false;
   @observable collecting = false;
   @observable scanning = false;
+  @observable calibrating = false;
+
+  // Devices
   @observable.shallow devices: Device[] = [];
   @observable.ref currentDevice?: Device;
-  @observable.shallow readings: Reading[] = [];
-  @observable.shallow accelerometerData: SensorData[] = [];
-  @observable.shallow gyroscopeData: SensorData[] = [];
-  @observable.shallow stressMarks: StressMark[] = [];
 
+  // Perceived stress
+  @observable.shallow percievedStress: StressMark[] = [];
+  @observable currentPercievedStressLevel: StressLevel = 'none';
+  @observable percievedStressStartedAt: number;
+
+  // Collection
+  @observable collectionStartedAt: number;
+  @observable.shallow pulseBuffer: PulseMark[] = [];
+  @observable.shallow rrIntervalsBuffer: RrIntervalMark[] = [];
+  @observable.shallow accelerometerBuffer: SensorData[] = [];
+  @observable.shallow gyroscopeBuffer: SensorData[] = [];
+
+  // Chunks
+  private chunksQueue = new Denque<Chunk>([]);
+  @observable chunksCollected = 0;
+
+  // Samples
+  @observable.shallow currentSamples: Sample[] = [];
+
+  // Calibration
+  @observable baselineHrv: number;
+  @observable baselineHeartRate: number;
+  @observable accelerometerError: number;
+  @observable calibrationTimePassed: number;
+
+  // Internal logic
   private accelerometer: SensorObservable;
   private gyroscope: SensorObservable;
 
+  private timer: NodeJS.Timer;
+
   constructor(private sdk: DeviceKit) {}
 
-  initialize(key: string) {
-    this.sdk
-      .register(key)
-      .then(() => this.sdk.fetchDevices())
-      .then(
-        action('initialize', (devices: Device[]) => {
-          this.initialized = true;
-
-          if (devices[0]) {
-            this.currentDevice = devices[0];
-          }
-        })
-      );
+  @computed
+  get lastSample() {
+    return this.currentSamples[this.currentSamples.length - 1];
   }
 
-  @action
+  @computed
+  get calibrationTimeRemaining() {
+    return CALIBRATION_LENGTH - this.calibrationTimePassed;
+  }
+
+  async initialize(key: string) {
+    await this.sdk.register(key);
+    const devices = await this.sdk.fetchDevices();
+    const baselineHrv = await getFloat(BASELINE_HRV_KEY);
+    const baselineHeartRate = await getFloat(BASELINE_HEARTRATE_KEY);
+    const accelerometerError = await getFloat(ACCELEROMETER_ERROR_KEY);
+
+    runInAction('initialize', () => {
+      this.initialized = true;
+
+      if (devices[0]) {
+        this.currentDevice = devices[0];
+      }
+
+      this.accelerometerError =
+        accelerometerError || DEFAULT_ACCELEROMETER_ERROR;
+      this.baselineHrv = baselineHrv || DEFAULT_BASELINE_HRV;
+      this.baselineHeartRate = baselineHeartRate || DEFAULT_BASELINE_HEARTRATE;
+    });
+  }
+
+  @action.bound
+  startCalibration() {
+    if (this.calibrating) return;
+
+    this.calibrating = true;
+    this.calibrationTimePassed = 0;
+    this.flushBuffers();
+    this.startSensors();
+
+    this.timer = setInterval(
+      action('updateCalibrationProgress', () => {
+        if (!this.calibrating) return;
+
+        this.calibrationTimePassed += CALIBRATION_UPDATE_INTERVAL;
+        if (this.calibrationTimePassed >= CALIBRATION_LENGTH) {
+          this.stopCalibration();
+          this.computeBaselineValues();
+        }
+      }),
+      CALIBRATION_UPDATE_INTERVAL
+    );
+  }
+
+  @action.bound
+  stopCalibration() {
+    if (!this.calibrating) return;
+
+    this.calibrating = false;
+    this.stopSensors();
+    clearInterval(this.timer);
+  }
+
+  @action.bound
+  resetBaselineValues() {
+    this.accelerometerError = DEFAULT_ACCELEROMETER_ERROR;
+    this.baselineHrv = DEFAULT_BASELINE_HRV;
+    this.baselineHeartRate = DEFAULT_BASELINE_HEARTRATE;
+    this.persistBaselineValues();
+  }
+
+  @action.bound
   startCollection() {
     if (this.collecting) return;
 
     this.collecting = true;
 
-    this.sdk.on('data', r => this.addReading(r));
-    this.sdk.startCollection();
+    const timestamp = Date.now();
+    this.currentPercievedStressLevel = 'none';
+    this.percievedStressStartedAt = timestamp;
+    this.collectionStartedAt = timestamp;
+    this.flushChunks();
+    this.flushBuffers();
+    this.flushSamples();
+    this.startSensors();
 
+    this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
+
+    if (ACCELERATED_MODE) this.stubInitialCollection(STUB_SIZE);
+  }
+
+  @action.bound
+  stopCollection() {
+    if (!this.collecting) return;
+
+    this.collecting = false;
+    this.pushStressMark(Date.now());
+    this.stopSensors();
+    clearInterval(this.timer);
+
+    const { samples, stress } = this.flushSamples();
+
+    if (__DEV__ && !ACCELERATED_MODE) {
+      Promise.all([
+        this.persist('samples', filterSamples(samples, stress)),
+        this.persist('stress', stress),
+        this.persist('baselines', {
+          baselineHrv: this.baselineHrv,
+          baselineHeartRate: this.baselineHeartRate,
+          accelerometerError: this.accelerometerError
+        })
+      ]).catch(err => {
+        console.error(err);
+      });
+    }
+  }
+
+  @action.bound
+  startScan() {
+    if (this.scanning) return;
+
+    this.scanning = true;
+
+    this.sdk.on('deviceFound', d => this.addDevice(d));
+    this.sdk.startScan();
+  }
+
+  @action.bound
+  stopScan() {
+    if (!this.scanning) return;
+
+    this.scanning = false;
+
+    this.sdk.removeAllListeners('deviceFound');
+    this.sdk.stopScan();
+  }
+
+  @action.bound
+  restartScan() {
+    this.stopScan();
+    this.startScan();
+  }
+
+  @action.bound
+  addDevice(device: Device) {
+    if (!this.devices.find(d => d.id === device.id)) {
+      this.devices.push(device);
+    }
+  }
+
+  @action.bound
+  setDevice(device: Device) {
+    if (this.currentDevice) {
+      this.sdk.removeDevice(this.currentDevice);
+    }
+
+    this.sdk.addDevice(device).then(
+      action('setDevice', () => {
+        this.devices = this.devices.filter(d => d.id !== device!.id);
+        this.currentDevice = device;
+      })
+    );
+  }
+
+  @action.bound
+  removeDevice() {
+    if (this.currentDevice) {
+      this.sdk.removeDevice(this.currentDevice);
+      this.currentDevice = undefined;
+    }
+  }
+
+  @action.bound
+  changeStressLevel(level: StressLevel) {
+    if (level === this.currentPercievedStressLevel) return;
+
+    const timestamp = Date.now();
+
+    this.pushStressMark(timestamp);
+
+    this.percievedStressStartedAt = timestamp;
+    this.currentPercievedStressLevel = level;
+  }
+
+  // Private
+
+  private pushStressMark(timestamp: number) {
+    this.percievedStress.push({
+      level: this.currentPercievedStressLevel,
+      start: this.percievedStressStartedAt,
+      end: timestamp
+    });
+  }
+
+  private startSensors() {
+    if (ACCELERATED_MODE) return;
+    this.startHeartrateCollection();
     this.startSensorCollection(Accelerometer);
-    this.startSensorCollection(Gyroscope);
+    // this.startSensorCollection(Gyroscope);
+  }
+
+  private stopSensors() {
+    if (ACCELERATED_MODE) return;
+    this.sdk.stopCollection();
+    this.accelerometer.stop();
+    // this.gyroscope.stop();
+  }
+
+  @action.bound
+  private pushChunk() {
+    const timestamp = Date.now();
+    const chunk = ACCELERATED_MODE
+      ? generateChunk(timestamp)
+      : Object.assign(this.flushBuffers(), { timestamp });
+    this.chunksQueue.push(chunk);
+
+    this.chunksCollected++;
+
+    if (this.chunksQueue.length === WINDOW_SIZE) {
+      if (this.chunksCollected % STEP_SIZE === 0) {
+        this.pushSample(timestamp);
+      }
+
+      if (
+        __DEV__ &&
+        !ACCELERATED_MODE &&
+        this.chunksCollected % WINDOW_SIZE === 0
+      ) {
+        const chunks = this.chunksQueue.toArray();
+        this.persist(timestamp.toString(), chunks).catch(err => {
+          console.error(err);
+        });
+      }
+
+      this.chunksQueue.shift();
+    }
+  }
+
+  @action.bound
+  private pushSample(timestamp: number) {
+    const sample = ACCELERATED_MODE
+      ? generateSample(this.baselineHrv, this.baselineHeartRate, timestamp)
+      : calcSample(
+          this.chunksQueue.toArray(),
+          this.accelerometerError,
+          this.baselineHrv,
+          this.baselineHeartRate,
+          timestamp
+        );
+
+    if (__DEV__) {
+      sample.stress = this.currentPercievedStressLevel;
+      sample.state = ['medium', 'high'].includes(sample.stress);
+    }
+
+    this.currentSamples.push(sample);
+  }
+
+  @action.bound
+  private processReading(reading: Reading) {
+    const stream = readingToStreams(reading);
+    this.pulseBuffer.push(...stream.pulse);
+    this.rrIntervalsBuffer.push(...stream.rrIntervals);
+  }
+
+  private startHeartrateCollection() {
+    this.sdk.on('data', r => {
+      try {
+        this.processReading(r);
+      } catch (e) {
+        console.error('Reading is corrupted.', e);
+      }
+    });
+
+    this.sdk.startCollection();
   }
 
   private startSensorCollection(sensor: Sensor) {
-    sensor({ updateInterval: 500 })
+    sensor({ updateInterval: SENSOR_UPDATE_INTERVAL })
       .then(observable => {
         const isAccelerometer = sensor === Accelerometer;
+
         if (isAccelerometer) {
           this.accelerometer = observable;
         } else {
@@ -80,8 +385,8 @@ export default class Main {
           : 'addGyroscopeData';
 
         const data = isAccelerometer
-          ? this.accelerometerData
-          : this.gyroscopeData;
+          ? this.accelerometerBuffer
+          : this.gyroscopeBuffer;
 
         observable.subscribe(
           action(actionName, (d: SensorData) => {
@@ -94,115 +399,79 @@ export default class Main {
       });
   }
 
-  @action
-  addReading(reading: Reading) {
-    this.readings.push(reading);
-  }
+  @action.bound
+  private computeBaselineValues() {
+    const buffers = this.flushBuffers();
 
-  @action
-  stopCollection() {
-    if (!this.collecting) return;
-
-    this.collecting = false;
-    this.sdk.stopCollection();
-    this.accelerometer.stop();
-    this.gyroscope.stop();
-
-    if (__DEV__) {
-      this.saveData()
-        .then(() => {
-          console.log('Stream data is written.');
-        })
-        .catch(err => {
-          console.error(err);
-        });
+    if (buffers.accelerometer.length) {
+      const error = calcAccelerometerVariance(buffers.accelerometer);
+      this.accelerometerError = error;
     }
+
+    if (buffers.rrIntervals.length) {
+      const rrIntervals = buffers.rrIntervals.sort(
+        (a, b) => a.timestamp - b.timestamp
+      );
+      const lastTimestamp = rrIntervals[rrIntervals.length - 1].timestamp;
+      const start = lastTimestamp - CALIBRATION_LENGTH + CALIBRATION_PADDING;
+      this.baselineHrv = calcRmssd(
+        rrIntervals.filter(m => m.timestamp > start)
+      );
+    }
+
+    if (buffers.pulse.length) {
+      this.baselineHeartRate = calcHeartRate(buffers.pulse);
+    }
+
+    this.persistBaselineValues();
   }
 
-  private saveData() {
+  private persistBaselineValues() {
+    Promise.all([
+      setFloat(ACCELEROMETER_ERROR_KEY, this.accelerometerError),
+      setFloat(BASELINE_HRV_KEY, this.baselineHrv),
+      setFloat(BASELINE_HEARTRATE_KEY, this.baselineHeartRate)
+    ]).catch(err => {
+      console.error(err);
+    });
+  }
+
+  @action.bound
+  private flushSamples() {
+    return {
+      samples: this.currentSamples.splice(0),
+      stress: this.percievedStress.splice(0)
+    };
+  }
+
+  @action.bound
+  private flushBuffers() {
+    return {
+      accelerometer: this.accelerometerBuffer.splice(0),
+      gyroscope: this.gyroscopeBuffer.splice(0),
+      pulse: this.pulseBuffer.splice(0),
+      rrIntervals: this.rrIntervalsBuffer.splice(0)
+    };
+  }
+
+  @action.bound
+  private flushChunks() {
+    this.chunksQueue.clear();
+    this.chunksCollected = 0;
+  }
+
+  private stubInitialCollection(samplesCount: number) {
     const timestamp = Date.now();
-    const folder = `${
-      RNFS.ExternalStorageDirectoryPath
-    }/${APP_NAME}/${timestamp}`;
 
-    function write(path: string, data: any): Promise<void> {
-      return RNFS.writeFile(
-        `${folder}/${path}`,
-        JSON.stringify(toJS(data)),
-        'ascii' // No idea why utf8 doesn't work here
-      );
-    }
+    const chunks = generateChunks(WINDOW_SIZE - 1, timestamp);
+    this.chunksQueue.splice(0, 0, ...chunks);
+    this.chunksCollected = WINDOW_SIZE + (samplesCount - 1) * STEP_SIZE;
 
-    return RNFS.mkdir(folder).then(() =>
-      Promise.all([
-        write('accelerometer.json', this.accelerometerData),
-        write('gyroscope.json', this.gyroscopeData),
-        write('stress.json', this.stressMarks),
-        write('heartrate.json', this.readings.map(r => r.data))
-      ])
-    );
+    const samples = generateSamples(samplesCount, timestamp);
+    this.currentSamples.splice(0, 0, ...samples);
   }
 
-  @action
-  startScan() {
-    if (this.scanning) return;
-
-    this.sdk.on('deviceFound', d => this.addDevice(d));
-    this.sdk.startScan();
-    this.scanning = true;
-  }
-
-  @action
-  stopScan() {
-    if (!this.scanning) return;
-
-    this.sdk.removeAllListeners('deviceFound');
-    this.sdk.stopScan();
-    this.scanning = false;
-  }
-
-  restartScan() {
-    this.stopScan();
-    this.startScan();
-  }
-
-  @action
-  addDevice(device: Device) {
-    if (!this.devices.find(d => d.id === device.id)) {
-      this.devices.push(device);
-    }
-  }
-
-  setDevice(device: Device | number) {
-    if (this.currentDevice) {
-      this.sdk.removeDevice(this.currentDevice);
-    }
-
-    let newDevice =
-      typeof device === 'number'
-        ? this.devices.find(d => d.id === device)
-        : device;
-
-    if (newDevice) {
-      this.sdk.addDevice(newDevice).then(
-        action('setDevice', () => {
-          this.devices = this.devices.filter(d => d.id !== newDevice!.id);
-          this.currentDevice = newDevice;
-        })
-      );
-    }
-  }
-
-  @action
-  removeDevice() {
-    if (this.currentDevice) {
-      this.sdk.removeDevice(this.currentDevice);
-      this.currentDevice = undefined;
-    }
-  }
-
-  @action
-  addStressMark(level: StressLevels) {
-    this.stressMarks.push({ level, timestamp: Date.now() });
+  private persist(title: string, data: any) {
+    return persist(this.collectionStartedAt.toString(), `${title}.json`, data);
   }
 }

@@ -8,7 +8,10 @@ module.exports = ({ platform }, defaults) => {
       rules: [
         {
           test: /\.jsx?$/,
-          include: [/node_modules\/@shoutem/],
+          include: [
+            /node_modules\/native-base-shoutem-theme/,
+            /node_modules\/react-native-vector-icons/
+          ],
           use: [
             {
               loader: 'babel-loader'
@@ -39,13 +42,16 @@ module.exports = ({ platform }, defaults) => {
         '.native.ts',
         `.${platform}.tsx`,
         '.native.tsx',
+        '.json',
         ...defaults.resolve.extensions
       ],
       alias: {
         ...defaults.resolve.alias,
         lib: path.resolve(__dirname, 'src/lib/'),
         screens: path.resolve(__dirname, 'src/screens/'),
-        stores: path.resolve(__dirname, 'src/stores/')
+        stores: path.resolve(__dirname, 'src/stores/'),
+        components: path.resolve(__dirname, 'src/components/'),
+        config: path.resolve(__dirname, 'src/config/')
       }
     }
   };

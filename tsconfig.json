@@ -17,11 +17,14 @@
     "strictFunctionTypes": true,
     "experimentalDecorators": true,
     "baseUrl": "./",
+    "types": ["node"],
     "paths": {
       "*": ["@types/*"],
       "lib/*": ["src/lib/*"],
       "screens/*": ["src/screens/*"],
-      "stores/*": ["src/stores/*"]
+      "stores/*": ["src/stores/*"],
+      "components/*": ["src/components/*"],
+      "config/*": ["src/config/*"]
     }
   }
 }

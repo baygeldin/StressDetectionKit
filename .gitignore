@@ -30,6 +30,10 @@ build/
 local.properties
 *.iml
 
+# VSCode
+#
+.vscode/
+
 # node.js
 #
 node_modules/
@@ -72,4 +76,8 @@ configure.sh
 
 # Data samples
 #
-samples/
+src/ml/samples/
+
+# Model dump
+#
+src/ml/model.pkl

@@ -1,23 +1,23 @@
-import React from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { toJS } from 'mobx';
-import { observer, inject } from 'mobx-react/native';
-import { FlatList, SectionList, TouchableHighlight } from 'react-native';
-import { List, ListItem } from 'react-native-elements';
-import {
-  Divider,
-  Caption,
-  Button,
-  Row,
-  Text,
-  Subtitle,
-  View,
-  ListView
-} from '@shoutem/ui';
-import { Device } from 'lib/device-kit';
+import Calibration from 'components/calibration';
+import DevicesList from 'components/devices-list';
+import SettingsItem from 'components/settings-item';
 import Component from 'lib/component';
+import { confirmAction, deviceTitle, tryLaterAlert } from 'lib/helpers';
+import { inject, observer } from 'mobx-react/native';
+import {
+  Body,
+  Container,
+  Content,
+  Icon,
+  Left,
+  Separator,
+  Text
+} from 'native-base';
+import { Props } from 'react';
+import * as React from 'react';
+import { Alert, Modal } from 'react-native';
 
-@inject('store')
+@inject('store', 'ui', 'router')
 @observer
 export default class extends Component<{}, {}> {
   static navigationOptions = {
@@ -25,77 +25,170 @@ export default class extends Component<{}, {}> {
   };
 
   render() {
-    let currentDevice = this.store.currentDevice;
-    let onDeviceRemove = () => {
-      this.store.removeDevice();
-      this.store.restartScan();
-    };
+    const title = this.store.currentDevice
+      ? deviceTitle(this.store.currentDevice)
+      : 'Select an HRM device';
 
-    let deviceInfo = currentDevice ? (
-      <Row styleName="small">
-        <View styleName="vertical">
-          <Subtitle>{currentDevice.name}</Subtitle>
-          <Text numberOfLines={1}>
-            {`${currentDevice.modelName} by ${currentDevice.manufacturer}`}
-          </Text>
-        </View>
-        <Button styleName="right-icon" onPress={onDeviceRemove}>
-          <Icon name="remove" size={20} />
-        </Button>
-      </Row>
-    ) : (
-      <Text styleName="h-center" style={{ marginVertical: 12 }}>
-        Please, choose a device from available devices.
-      </Text>
-    );
-
-    let devices = toJS(this.store.devices);
-
-    let availableDevices =
-      devices.length > 0 ? (
-        <ListView
-          data={toJS(this.store.devices)}
-          renderRow={(device: Device) => {
-            return (
-              <TouchableHighlight onPress={() => this.store.setDevice(device)}>
-                <Row styleName="small">
-                  <View styleName="vertical">
-                    <Subtitle>{device.name}</Subtitle>
-                    <Text numberOfLines={1}>
-                      {`${device.modelName} by ${device.manufacturer}`}
-                    </Text>
-                  </View>
-                  <Divider styleName="line" />
-                </Row>
-              </TouchableHighlight>
-            );
-          }}
-        />
-      ) : (
-        <Text styleName="h-center" style={{ marginVertical: 12 }}>
-          Scanning for devices. No devices found yet.
-        </Text>
-      );
+    const developer = __DEV__ ? (
+      <SettingsItem onPress={this.router.goToDeveloperScreen}>
+        <Left>
+          <Icon name="code" />
+        </Left>
+        <Body>
+          <Text>Developer Mode</Text>
+        </Body>
+      </SettingsItem>
+    ) : null;
 
     return (
-      <View>
-        <Divider styleName="section-header">
-          <Caption>CURRENT DEVICE</Caption>
-        </Divider>
-        {deviceInfo}
-        <Divider styleName="section-header">
-          <Caption>AVAILABLE DEVICES</Caption>
-        </Divider>
-        {availableDevices}
-      </View>
+      <Container>
+        <Content>
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={this.store.scanning}
+            onRequestClose={this.store.stopScan}
+          >
+            <DevicesList />
+          </Modal>
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={this.store.calibrating}
+            onRequestClose={this.store.stopCalibration}
+          >
+            <Calibration />
+          </Modal>
+          <Separator bordered>
+            <Text>DEVICES</Text>
+          </Separator>
+          <SettingsItem>
+            <Left>
+              <Icon name="watch" />
+            </Left>
+            <Body>
+              <Text>Current device</Text>
+              <Text note>{title}</Text>
+            </Body>
+          </SettingsItem>
+          <SettingsItem onPress={() => this.startScan()}>
+            <Left>
+              <Icon name="bluetooth" />
+            </Left>
+            <Body>
+              <Text>Select a device</Text>
+              <Text note>Choose from available devices</Text>
+            </Body>
+          </SettingsItem>
+          <SettingsItem onPress={() => this.confirmDeviceRemoval()}>
+            <Left>
+              <Icon name="trash" />
+            </Left>
+            <Body>
+              <Text>Remove the device</Text>
+              <Text note>Unpair the current device</Text>
+            </Body>
+          </SettingsItem>
+          <Separator bordered>
+            <Text>CALIBRATION</Text>
+          </Separator>
+          <SettingsItem>
+            <Left>
+              <Icon name="pulse" />
+            </Left>
+            <Body>
+              <Text>Baseline heart rate variability</Text>
+              <Text note>{`${Math.round(this.store.baselineHrv)} ms`}</Text>
+            </Body>
+          </SettingsItem>
+          <SettingsItem>
+            <Left>
+              <Icon name="heart" />
+            </Left>
+            <Body>
+              <Text>Baseline heart rate</Text>
+              <Text note>{`${Math.round(
+                this.store.baselineHeartRate
+              )} bpm`}</Text>
+            </Body>
+          </SettingsItem>
+          <SettingsItem>
+            <Left>
+              <Icon name="move" />
+            </Left>
+            <Body>
+              <Text>Acceletometer error</Text>
+              <Text note>{`${this.store.accelerometerError.toFixed(
+                4
+              )} m\u00b2 / s`}</Text>
+            </Body>
+          </SettingsItem>
+          <SettingsItem onPress={() => this.startCalibration()}>
+            <Left>
+              <Icon name="options" />
+            </Left>
+            <Body>
+              <Text>Calibrate</Text>
+              <Text note>Identify baseline values</Text>
+            </Body>
+          </SettingsItem>
+          <SettingsItem onPress={() => this.confirmCalibrationReset()}>
+            <Left>
+              <Icon name="trash" />
+            </Left>
+            <Body>
+              <Text>Reset</Text>
+              <Text note>Reset to default settings</Text>
+            </Body>
+          </SettingsItem>
+          <Separator bordered>
+            <Text>MISCELLANEOUS</Text>
+          </Separator>
+          {developer}
+          <SettingsItem onPress={() => this.showHelp()}>
+            <Left>
+              <Icon name="information-circle" />
+            </Left>
+            <Body>
+              <Text>About</Text>
+            </Body>
+          </SettingsItem>
+        </Content>
+      </Container>
     );
   }
 
-  componentDidMount() {
-    this.store.startScan();
+  confirmDeviceRemoval() {
+    this.store.collecting
+      ? tryLaterAlert()
+      : confirmAction(
+          this.store.removeDevice,
+          'Current device will be unpaired.'
+        );
   }
 
-  componentWillUnmount() {
-    this.store.stopScan();
+  confirmCalibrationReset() {
+    this.store.collecting
+      ? tryLaterAlert()
+      : confirmAction(
+          this.store.resetBaselineValues,
+          'Baseline values will reset.'
+        );
+  }
+
+  startCalibration() {
+    this.store.collecting ? tryLaterAlert() : this.store.startCalibration();
+  }
+
+  startScan() {
+    this.store.collecting ? tryLaterAlert() : this.store.startScan();
+  }
+
+  showHelp() {
+    Alert.alert(
+      'About',
+      'First calibrate the baselines values. Put on your HRM, put your phone down and sit still. You should do it right after you wake up to get best results. Stress will be detected relative to these baseline values.\n\nApp icon is made by Roundicons.',
+      [{ text: 'Got it' }]
+    );
   }
 }
