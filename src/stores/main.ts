@@ -448,7 +448,7 @@ export default class Main {
   private flushBuffers() {
     return {
       accelerometer: this.accelerometerBuffer.splice(0),
-      gyroscope: this.gyroscopeBuffer.splice(0),
+      // gyroscope: this.gyroscopeBuffer.splice(0),
       pulse: this.pulseBuffer.splice(0),
       rrIntervals: this.rrIntervalsBuffer.splice(0)
     };

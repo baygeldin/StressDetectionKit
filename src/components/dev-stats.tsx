@@ -30,7 +30,6 @@ class DevStats extends Component<{}, {}> {
       <View style={styles.container}>
         <View>
           <Text style={styles.left}>Accelerometer Queue</Text>
-          <Text style={styles.left}>Gyroscope Queue</Text>
           <Text style={styles.left}>Pulse Queue</Text>
           <Text style={styles.left}>RR Intervals Queue</Text>
           <Text style={styles.left}>Percieved Stress</Text>
@@ -41,9 +40,10 @@ class DevStats extends Component<{}, {}> {
           <Text style={styles.right}>
             {this.store.accelerometerBuffer.length}
           </Text>
-          <Text style={styles.right}>{this.store.gyroscopeBuffer.length}</Text>
           <Text style={styles.right}>{this.store.pulseBuffer.length}</Text>
-          <Text style={styles.right}>{this.store.pulseBuffer.length}</Text>
+          <Text style={styles.right}>
+            {this.store.rrIntervalsBuffer.length}
+          </Text>
           <Text style={styles.right}>{this.store.percievedStress.length}</Text>
           <Text style={styles.right}>{this.store.chunksCollected}</Text>
           <Text style={styles.right}>{this.store.currentSamples.length}</Text>
