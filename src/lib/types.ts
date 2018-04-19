@@ -23,7 +23,6 @@ export interface Chunk {
   rrIntervals: RrIntervalMark[];
   pulse: PulseMark[];
   accelerometer: SensorData[];
-  gyroscope: SensorData[];
   timestamp: number;
 }
 

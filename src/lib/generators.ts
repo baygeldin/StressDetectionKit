@@ -4,8 +4,14 @@ import {
   STEP_LENGTH,
   WINDOW_LENGTH
 } from 'lib/constants';
-import { Chunk, PulseMark, RrIntervalMark, Sample } from 'lib/types';
-import { random, floor } from 'mathjs';
+import {
+  Chunk,
+  FeatureVector,
+  PulseMark,
+  RrIntervalMark,
+  Sample
+} from 'lib/types';
+import { floor, random } from 'mathjs';
 import { SensorData } from 'react-native-sensors';
 
 const typescriptHeroFix = STEP_LENGTH;
@@ -18,7 +24,6 @@ export function generateChunk(timestamp: number): Chunk {
   const rrIntervals: RrIntervalMark[] = [];
   const pulse: PulseMark[] = [];
   const accelerometer: SensorData[] = [];
-  const gyroscope: SensorData[] = [];
 
   const start = timestamp - CHUNK_LENGTH;
   const interval = (timestamp - start) / SENSOR_UPDATE_INTERVAL;
@@ -32,15 +37,9 @@ export function generateChunk(timestamp: number): Chunk {
       z: randomInt(0, 15),
       timestamp: i
     });
-    gyroscope.push({
-      x: randomInt(0, 15),
-      y: randomInt(0, 15),
-      z: randomInt(0, 15),
-      timestamp: i
-    });
   }
 
-  return { rrIntervals, pulse, accelerometer, gyroscope, timestamp };
+  return { rrIntervals, pulse, accelerometer, timestamp };
 }
 
 export function generateChunks(count: number, timestamp: number) {
@@ -58,10 +57,12 @@ export function generateSample(
 ): Sample {
   const hrv = randomInt(20, 80);
   const heartRate = randomInt(60, 120);
+  const vector = [random(), random(), random()] as FeatureVector;
 
   return {
     state: random() >= 0.75,
-    vector: [random(), random(), random()],
+    vector,
+    stdVector: vector,
     activityIndex: randomInt(0, 30),
     hrv,
     heartRate,
