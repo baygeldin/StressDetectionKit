@@ -33,7 +33,7 @@ export type FeatureVector = [number, number, number];
 export interface Sample {
   state: boolean; // stressed or not
   vector: FeatureVector; // feature vector for the classificator
-  normalizedVector: FeatureVector; // feature vector that is normalized based on minmax
+  stdVector: FeatureVector; // standardized feature vector
   activityIndex: number; // activity intensity
   heartRate: number; // mean heart rate
   hrv: number; // root mean square of RR intervals successive differences

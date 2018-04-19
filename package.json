@@ -22,7 +22,7 @@
     "serialize-model": "pipenv run python src/ml/serialize.py",
     "pull-samples": "adb pull /sdcard/Stress\\ Detection\\ Kit src/ml/samples",
     "regenerate-samples": "npm run ts-node -- src/ml/regenerate.ts",
-    "calc-minmax": "npm run ts-node -- src/ml/minmax.ts",
+    "calc-features-meta": "npm run ts-node -- src/ml/features-meta.ts",
     "ts-node":
       "ts-node -r tsconfig-paths/register -O '{\"module\": \"commonjs\"}'"
   },

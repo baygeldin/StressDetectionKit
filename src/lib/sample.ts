@@ -1,16 +1,13 @@
-import { minmax } from 'config/minmax';
+import { properties } from 'config/features';
 import { parameters } from 'config/model';
-import { scaleLinear } from 'd3';
 import Svm, { SvmParameters } from 'lib/classifiers/svm';
 import { calcActivityIndex, calcHeartRate, calcRmssd } from 'lib/features';
 import { Chunk, FeatureVector, Sample } from 'lib/types';
 
 const classifier = new Svm(parameters as SvmParameters);
 
-const normalizers = minmax.map(m =>
-  scaleLinear()
-    .domain(m)
-    .range([0, 1])
+const normalizers = properties.map(p => (value: number) =>
+  (value - p.mean) / p.std
 );
 
 function flatten<T>(array: T[][]) {
@@ -41,16 +38,14 @@ export function calcSample(
     activityIndex
   ] as FeatureVector;
 
-  const normalizedVector = vector.map((f, i) =>
-    normalizers[i](f)
-  ) as FeatureVector;
+  const stdVector = vector.map((f, i) => normalizers[i](f)) as FeatureVector;
 
-  const state = classifier.predict(normalizedVector) === 1;
+  const state = classifier.predict(stdVector) === 1;
 
   return {
     state,
     vector,
-    normalizedVector,
+    stdVector,
     activityIndex,
     heartRate,
     hrv,
