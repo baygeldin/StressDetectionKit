@@ -5,31 +5,47 @@ import { max, min, std, mean } from 'mathjs';
 import { join, resolve } from 'path';
 import { FeatureProps } from 'config/features';
 
-const root = join(__dirname, 'samples');
-const dirs = readdirSync(root)
-  .map(s => parseInt(s))
-  .sort();
-
 const program = new Command();
 
 program
   .option(
-    '-s, --samples [timestamp]',
+    '-s, --samples <entry>',
     'specify samples collection',
-    dirs[dirs.length - 1]
+    (file, files = []) => [...files, file]
   )
   .option(
-    '-o, --output [path]',
+    '-o, --output <path>',
     'specify output file',
     'src/config/features.json'
   )
   .parse(process.argv);
 
-const dest = join(root, program.samples);
+const entries = program.samples as string[];
 
-const samples = JSON.parse(
-  readFileSync(join(dest, 'samples.json'), 'ascii')
-) as Sample[];
+if (typeof entries === 'undefined') {
+  console.error('You have to provide at least one sample.');
+  process.exit(1);
+}
+
+const root = join(__dirname, 'samples');
+const dirs = readdirSync(root);
+
+const absent = entries.find((e: string) => !dirs.includes(e));
+
+if (absent) {
+  console.error(`Samples for "${absent}" don't exist.`);
+  process.exit(1);
+}
+
+function readSamples(entry: string) {
+  return JSON.parse(
+    readFileSync(join(root, entry, 'samples.json'), 'ascii')
+  ) as Sample[];
+}
+
+const samples = entries
+  .map(e => readSamples(e))
+  .reduce((acc, c) => acc.concat(c));
 const vectors = samples.map(s => s.vector);
 const vectorSize = vectors[0].length;
 
