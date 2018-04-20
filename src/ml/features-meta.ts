@@ -5,13 +5,16 @@ import { max, min, std, mean } from 'mathjs';
 import { join, resolve } from 'path';
 import { FeatureProps } from 'config/features';
 
+const ALL = 'all';
+
 const program = new Command();
 
 program
   .option(
     '-s, --samples <entry>',
     'specify samples collection',
-    (file, files = []) => [...files, file]
+    (f, files) => (files === ALL ? [f] : [...files, f]),
+    ALL
   )
   .option(
     '-o, --output <path>',
@@ -20,15 +23,10 @@ program
   )
   .parse(process.argv);
 
-const entries = program.samples as string[];
-
-if (typeof entries === 'undefined') {
-  console.error('You have to provide at least one sample.');
-  process.exit(1);
-}
-
 const root = join(__dirname, 'samples');
 const dirs = readdirSync(root);
+
+const entries = program.samples === ALL ? dirs : (program.samples as string[]);
 
 const absent = entries.find((e: string) => !dirs.includes(e));
 
