@@ -5,31 +5,30 @@ import { calcSample } from 'lib/sample';
 import { Chunk, StressMark } from 'lib/types';
 import { join } from 'path';
 
-const root = join(__dirname, 'samples');
-const dirs = readdirSync(root)
-  .map(s => parseInt(s))
-  .sort();
+const ALL = 'all';
 
 const program = new Command();
 
 program
   .option(
-    '-s, --samples [timestamp]',
+    '-s, --samples <entry>',
     'specify samples collection',
-    dirs[dirs.length - 1]
+    (f, files) => (files === ALL ? [f] : [...files, f]),
+    ALL
   )
   .parse(process.argv);
 
-const dest = join(root, program.samples);
+const root = join(__dirname, 'samples');
+const dirs = readdirSync(root);
 
-function readJson(name: string) {
-  return JSON.parse(readFileSync(join(dest, `${name}.json`), 'ascii'));
+const entries = program.samples === ALL ? dirs : (program.samples as string[]);
+
+const absent = entries.find((e: string) => !dirs.includes(e));
+
+if (absent) {
+  console.error(`Samples for "${absent}" don't exist.`);
+  process.exit(1);
 }
-
-const chunks = readdirSync(dest)
-  .filter(n => n.match(/^\d*\.json$/))
-  .map(n => readJson(n.slice(0, -'.json'.length)) as Chunk[])
-  .reduce((acc, c) => acc.concat(c));
 
 function sample<T>(array: T[], windowSize: number, stepSize: number) {
   const result = [];
@@ -41,23 +40,36 @@ function sample<T>(array: T[], windowSize: number, stepSize: number) {
   return result;
 }
 
-const stress = readJson('stress') as StressMark[];
-const baselines = readJson('baselines');
+for (let e of entries) {
+  const dest = join(root, e);
 
-const { baselineHrv, baselineHeartRate, accelerometerError } = baselines;
+  function readJson(name: string) {
+    return JSON.parse(readFileSync(join(dest, `${name}.json`), 'ascii'));
+  }
 
-const samples = sample(chunks, WINDOW_SIZE, STEP_SIZE).map(c => {
-  const timestamp = c[c.length - 1].timestamp;
-  const stressMark = stress.find(s => s.start <= timestamp)!;
-  const state = ['medium', 'high'].includes(stressMark.level);
+  const chunks = readdirSync(dest)
+    .filter(n => n.match(/^\d*\.json$/))
+    .map(n => readJson(n.slice(0, -'.json'.length)) as Chunk[])
+    .reduce((acc, c) => acc.concat(c));
 
-  return calcSample(
-    c,
-    accelerometerError,
-    baselineHrv,
-    baselineHeartRate,
-    timestamp
-  );
-});
+  const stress = readJson('stress') as StressMark[];
+  const baselines = readJson('baselines');
 
-writeFileSync(join(dest, 'samples.json'), JSON.stringify(samples));
+  const { baselineHrv, baselineHeartRate, accelerometerError } = baselines;
+
+  const samples = sample(chunks, WINDOW_SIZE, STEP_SIZE).map(c => {
+    const timestamp = c[c.length - 1].timestamp;
+    const stressMark = stress.find(s => s.start <= timestamp)!;
+    const state = ['medium', 'high'].includes(stressMark.level);
+
+    return calcSample(
+      c,
+      accelerometerError,
+      baselineHrv,
+      baselineHeartRate,
+      timestamp
+    );
+  });
+
+  writeFileSync(join(dest, 'samples.json'), JSON.stringify(samples));
+}
