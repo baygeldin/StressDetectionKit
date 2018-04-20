@@ -1,32 +1,51 @@
+"""Usage: train-model.py [--samples <entry>]... [--output <path>]
+
+Options:
+
+  -s, --samples          specify samples collection [default: all]
+  -o, --output <path>    specify output file [default: src/ml/model.pkl]
+  -h, --help             output usage information
+"""
+
+from docopt import docopt
 import ipdb
 import os
-from fire import Fire
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.externals import joblib
 from sklearn import svm
 
+arguments = docopt(__doc__)
+options, arguments = arguments
+output = options.output  # pylint: disable=E1101
+entries = arguments.entry  # pylint: disable=E1101
+
 root = os.path.dirname(os.path.realpath(__file__))
 samples_root = os.path.join(root, 'samples')
-samples_list = sorted(os.listdir(samples_root), key=lambda x: int(x))
+samples_list = os.listdir(samples_root)
 
+entries = samples_list if not entries else entries
 
-def train(samples=samples_list[-1], output='src/ml/model.pkl'):
-    samples_path = os.path.join(samples_root, samples, 'samples.json')
-    pkl_path = os.path.normpath(os.path.join(root, '../../', output))
+absent = next((x for x in entries if x not in samples_list), None)
 
-    data = pd.read_json(samples_path)
-    x = pd.DataFrame(data['normalizedVector'].values.tolist())
-    y = data['state']
+if absent:
+    print("Samples for \"%s\" don't exist." % absent)
+    exit(1)
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33)
+samples_paths = [os.path.join(samples_root, e, 'samples.json')
+                 for e in entries]
+samples = pd.concat([pd.read_json(p) for p in samples_paths])
 
-    model = svm.SVC()
-    model.fit(x_train, y_train)
-    joblib.dump(model, pkl_path)
+pkl_path = os.path.normpath(os.path.join(root, '../../', output))
 
-    # ipdb.set_trace()
+x = pd.DataFrame(samples['stdVector'].values.tolist())
+y = samples['state']
 
+x_train, _, y_train, _ = train_test_split(x, y, test_size=0.33)
 
-Fire(train)
+model = svm.SVC()
+model.fit(x_train, y_train)
+joblib.dump(model, pkl_path)
+
+# ipdb.set_trace()
