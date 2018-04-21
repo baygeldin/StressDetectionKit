@@ -36,7 +36,7 @@
     "react-native-elements": "^0.18.5",
     "react-native-fs": "^2.9.11",
     "react-native-progress": "^3.4.0",
-    "react-native-sensors": "3.0.0-2",
+    "react-native-sensors": "3.0.0",
     "react-native-splash-screen": "^3.0.6",
     "react-native-svg": "^6.3.1",
     "react-native-vector-icons": "^4.4.2",
