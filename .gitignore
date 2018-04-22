@@ -81,3 +81,8 @@ src/ml/samples/
 # Model dump
 #
 src/ml/model.pkl
+
+# Build
+#
+android/app/src/main/assets/index.android.bundle
+android/app/src/main/res/drawable-*/node_modules*
