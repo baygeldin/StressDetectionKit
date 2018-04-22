@@ -12,6 +12,8 @@ export function calcAccelerometerVariance(measurements: SensorData[]) {
 
 // Root Mean Square of the Successive Differences
 export function calcRmssd(measurements: RrIntervalMark[]) {
+  if (!measurements.length) return 0;
+
   const successiveDiffs = measurements
     .map((m, i, arr) => m.rrInterval - (arr[i - 1] || {}).rrInterval)
     .slice(1);
@@ -21,7 +23,8 @@ export function calcRmssd(measurements: RrIntervalMark[]) {
 
 // Mean heart rate
 export function calcHeartRate(measurements: PulseMark[]) {
-  return mean(measurements.map(m => m.pulse));
+  if (!measurements.length) return 0;
+  return mean(measurements.map(m => m.pulse)) as number;
 }
 
 // Jiawei Bai et al. An Activity Index for Raw Accelerometry Data and Its Comparison with Other Activity Metrics.

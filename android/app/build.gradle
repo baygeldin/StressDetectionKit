@@ -144,6 +144,7 @@ repositories{
 }
 
 dependencies {
+    compile project(':react-native-background-timer')
     compile project(':react-native-fs')
     compile project(':react-native-vector-icons')
     compile project(':react-native-sensors')

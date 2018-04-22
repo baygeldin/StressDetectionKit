@@ -41,12 +41,12 @@ import {
   StressMark
 } from 'lib/types';
 import { action, computed, observable, runInAction } from 'mobx';
+import BackgroundTimer from 'react-native-background-timer';
 import {
   Accelerometer,
   SensorData,
   SensorObservable
 } from 'react-native-sensors';
-import { clearInterval, setInterval } from 'timers';
 
 export default class Main {
   // State
@@ -132,7 +132,7 @@ export default class Main {
     this.flushBuffers();
     this.startSensors();
 
-    this.timer = setInterval(
+    this.timer = BackgroundTimer.setInterval(
       action('updateCalibrationProgress', () => {
         if (!this.calibrating) return;
 
@@ -152,7 +152,7 @@ export default class Main {
 
     this.calibrating = false;
     this.stopSensors();
-    clearInterval(this.timer);
+    BackgroundTimer.clearInterval(this.timer);
   }
 
   @action.bound
@@ -178,7 +178,10 @@ export default class Main {
     this.flushSamples();
     this.startSensors();
 
-    this.timer = setInterval(() => this.pushChunk(), CHUNK_LENGTH);
+    this.timer = BackgroundTimer.setInterval(
+      () => this.pushChunk(),
+      CHUNK_LENGTH
+    );
 
     if (ACCELERATED_MODE) this.stubInitialCollection(STUB_SIZE);
   }
@@ -190,7 +193,7 @@ export default class Main {
     this.collecting = false;
     this.pushStressMark(Date.now());
     this.stopSensors();
-    clearInterval(this.timer);
+    BackgroundTimer.clearInterval(this.timer);
 
     const { samples, stress } = this.flushSamples();
 
