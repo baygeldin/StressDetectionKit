@@ -69,7 +69,7 @@ export function stressColor(level: StressLevel) {
 }
 
 export function deviceTitle(device: Device) {
-  return `${device.name} by ${device.manufacturer}`;
+  return `${device.modelName} by ${device.manufacturer}`;
 }
 
 export function confirmAction(fn: () => void, msg?: string) {

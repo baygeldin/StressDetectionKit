@@ -48,7 +48,7 @@ class DevicesList extends Component<{}, {}> {
               <ListItem button onPress={() => this.chooseDevice(device)}>
                 <Body>
                   <Text>{deviceTitle(device)}</Text>
-                  <Text note>{device.modelName}</Text>
+                  <Text note>{device.address}</Text>
                 </Body>
               </ListItem>
             )}

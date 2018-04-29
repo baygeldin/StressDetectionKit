@@ -14,6 +14,7 @@ import {
   SENSOR_UPDATE_INTERVAL,
   STEP_SIZE,
   STUB_SIZE,
+  SUPPORTED_HRM_IDS,
   WINDOW_SIZE
 } from 'lib/constants';
 import DeviceKit, { Device, Reading } from 'lib/device-kit';
@@ -217,6 +218,7 @@ export default class Main {
     if (this.scanning) return;
 
     this.scanning = true;
+    this.devices = [];
 
     this.sdk.on('deviceFound', d => this.addDevice(d));
     this.sdk.startScan();
@@ -240,20 +242,19 @@ export default class Main {
 
   @action.bound
   addDevice(device: Device) {
-    if (!this.devices.find(d => d.id === device.id)) {
+    if (
+      SUPPORTED_HRM_IDS.includes(device.id) &&
+      !this.devices.find(d => d.id === device.id)
+    ) {
       this.devices.push(device);
     }
   }
 
-  @action.bound
   setDevice(device: Device) {
-    if (this.currentDevice) {
-      this.sdk.removeDevice(this.currentDevice);
-    }
+    this.removeCurrentDevice();
 
     this.sdk.addDevice(device).then(
       action('setDevice', () => {
-        this.devices = this.devices.filter(d => d.id !== device!.id);
         this.currentDevice = device;
       })
     );
