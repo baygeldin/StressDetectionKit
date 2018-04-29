@@ -260,7 +260,7 @@ export default class Main {
   }
 
   @action.bound
-  removeDevice() {
+  removeCurrentDevice() {
     if (this.currentDevice) {
       this.sdk.removeDevice(this.currentDevice);
       this.currentDevice = undefined;

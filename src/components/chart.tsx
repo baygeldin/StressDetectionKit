@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
 @observer
 class Pin extends Component<{ x: (sampleId: number) => number }, {}> {
   render() {
-    const x = this.props.x(this.ui.selectedSampleOffset);
+    const x = this.props.x(this.ui.sliderOffset);
 
     return <Rect x={x} y={0} width={3} height={CHART_HEIGHT} fill={BLUE} />;
   }
@@ -142,12 +142,15 @@ class Chart extends Component<{}, {}> {
           // Workaround for a bug with slider:
           // the thumb disappears if maximumValue equals value.
           maximumValue={this.store.currentSamples.length - 0.9999}
-          value={this.ui.selectedSampleOffset}
+          value={this.ui.sliderOffset}
           step={1}
           trackStyle={styles.track}
           thumbStyle={styles.thumb}
           minimumTrackTintColor={BLUE}
-          onValueChange={s => this.ui.selectSample(s)}
+          onValueChange={s => this.ui.moveSliderTo(s)}
+          onSlidingComplete={s =>
+            this.ui.selectSample(this.store.currentSamples[s])
+          }
         />
       </View>
     );

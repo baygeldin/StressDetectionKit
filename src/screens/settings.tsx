@@ -162,7 +162,7 @@ export default class extends Component<{}, {}> {
     this.store.collecting
       ? tryLaterAlert()
       : confirmAction(
-          this.store.removeDevice,
+          this.store.removeCurrentDevice,
           'Current device will be unpaired.'
         );
   }

@@ -4,12 +4,14 @@ import {
   STEP_LENGTH
 } from 'lib/constants';
 import { calcOffsets, chunkByPattern } from 'lib/helpers';
-import { ChartType } from 'lib/types';
+import { ChartType, Sample } from 'lib/types';
 import { action, autorun, computed, observable, runInAction } from 'mobx';
 import Store from 'stores/main';
 
 export default class Ui {
-  @observable private _selectedSampleOffset?: number;
+  @observable private _sliderOffset?: number;
+  @observable private _selectedSample?: Sample;
+
   @observable currentChart: ChartType;
 
   constructor(private store: Store) {
@@ -17,7 +19,8 @@ export default class Ui {
       // Reset UI state when collection stops
       if (!this.store.collecting) {
         runInAction(() => {
-          this._selectedSampleOffset = undefined;
+          this._sliderOffset = undefined;
+          this._selectedSample = undefined;
           this.currentChart = 'hrv';
         });
       }
@@ -59,28 +62,36 @@ export default class Ui {
   }
 
   @computed
-  get selectedSegment() {
+  get currentSegment() {
     return this.stressSegments.find(
-      s => s.offset + s.samples.length - 1 >= this.selectedSampleOffset
+      s => s.offset + s.samples.length - 1 >= this.sliderOffset
     )!;
   }
 
   @action.bound
-  selectSample(offset: number) {
-    this._selectedSampleOffset =
+  moveSliderTo(offset: number) {
+    this._sliderOffset =
       offset === this.store.currentSamples.length - 1 ? undefined : offset;
   }
 
   @computed
-  get selectedSampleOffset() {
-    return this._selectedSampleOffset !== undefined
-      ? this._selectedSampleOffset
+  get sliderOffset() {
+    return this._sliderOffset !== undefined
+      ? this._sliderOffset
       : this.store.currentSamples.length - 1;
   }
 
+  @action
+  selectSample(sample: Sample) {
+    this._selectedSample = sample;
+  }
+
   @computed
-  get selectedSample() {
-    return this.store.currentSamples[this.selectedSampleOffset];
+  get currentSample() {
+    return this._sliderOffset !== undefined &&
+      this._selectedSample !== undefined
+      ? this._selectedSample
+      : this.store.lastSample;
   }
 
   @action.bound

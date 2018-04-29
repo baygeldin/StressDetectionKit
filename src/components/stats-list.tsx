@@ -26,10 +26,10 @@ const styles = StyleSheet.create({
 @observer
 class StatsList extends Component<{}, {}> {
   render() {
-    const sample = this.ui.selectedSample;
+    const sample = this.ui.currentSample;
     const stressed = sample.state;
     const duration = moment
-      .utc(this.ui.selectedSegment.duration)
+      .utc(this.ui.currentSegment.duration)
       .format('HH:mm:ss');
 
     return (
