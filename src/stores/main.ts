@@ -29,7 +29,7 @@ import {
   generateSample,
   generateSamples
 } from 'lib/generators';
-import { filterSamples, persist, readingToStreams } from 'lib/helpers';
+import { persist, readingToStreams } from 'lib/helpers';
 import { calcSample } from 'lib/sample';
 import { getFloat, setFloat } from 'lib/storage';
 import {
@@ -200,7 +200,7 @@ export default class Main {
 
     if (__DEV__ && !ACCELERATED_MODE) {
       Promise.all([
-        this.persist('samples', filterSamples(samples, stress)),
+        this.persist('samples', samples),
         this.persist('stress', stress),
         this.persist('baselines', {
           baselineHrv: this.baselineHrv,

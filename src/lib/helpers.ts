@@ -139,9 +139,3 @@ export function persist(
     RNFS.writeFile(`${path}/${filename}`, JSON.stringify(data), 'ascii')
   );
 }
-
-// Filter samples from unreliable samples
-export function filterSamples(samples: Sample[], stress: StressMark[]) {
-  // TODO
-  return samples;
-}
