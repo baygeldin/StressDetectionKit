@@ -10,7 +10,7 @@ import Store from 'stores/main';
 
 export default class Ui {
   @observable private _sliderOffset?: number;
-  @observable private _selectedSample?: Sample;
+  @observable.ref private _currentSample?: Sample;
 
   @observable currentChart: ChartType;
 
@@ -20,7 +20,7 @@ export default class Ui {
       if (!this.store.collecting) {
         runInAction(() => {
           this._sliderOffset = undefined;
-          this._selectedSample = undefined;
+          this._currentSample = undefined;
           this.currentChart = 'hrv';
         });
       }
@@ -63,8 +63,8 @@ export default class Ui {
 
   @computed
   get currentSegment() {
-    return this.stressSegments.find(
-      s => s.offset + s.samples.length - 1 >= this.sliderOffset
+    return this.stressSegments.find(s =>
+      s.samples.includes(this.currentSample)
     )!;
   }
 
@@ -83,14 +83,13 @@ export default class Ui {
 
   @action
   selectSample(sample: Sample) {
-    this._selectedSample = sample;
+    this._currentSample = sample;
   }
 
   @computed
   get currentSample() {
-    return this._sliderOffset !== undefined &&
-      this._selectedSample !== undefined
-      ? this._selectedSample
+    return this._sliderOffset !== undefined && this._currentSample !== undefined
+      ? this._currentSample
       : this.store.lastSample;
   }
 
