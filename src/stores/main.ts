@@ -198,7 +198,7 @@ export default class Main {
 
     const { samples, stress } = this.flushSamples();
 
-    if (__DEV__ && !ACCELERATED_MODE) {
+    if (__DEV__ && !ACCELERATED_MODE && samples.length > 0) {
       Promise.all([
         this.persist('samples', samples),
         this.persist('stress', stress),
