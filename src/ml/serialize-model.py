@@ -1,12 +1,29 @@
+"""Usage: serialize-model.py [--model <path>] [--output <path>]
+
+Options:
+
+  -m, --model <path>     specify model pickle file [default: src/ml/model.pkl]
+  -o, --output <path>    specify output file [default: src/config/model.json]
+  -h, --help             output usage information
+"""
+
+from docopt import docopt
 import ipdb
 import os
 import json
-from fire import Fire
 
 from sklearn.externals import joblib
-from sklearn import svm
+from sklearn.svm import SVC
+
+arguments = docopt(__doc__)
+options, arguments = arguments
+
+output = options.output  # pylint: disable=E1101
+pickle = options.model  # pylint: disable=E1101
 
 root = os.path.dirname(os.path.realpath(__file__))
+pkl_path = os.path.normpath(os.path.join(root, '../../', pickle))
+output_path = os.path.normpath(os.path.join(root, '../../', output))
 
 
 def serialize_svc(clf):
@@ -28,22 +45,14 @@ def serialize_svc(clf):
 
 
 models = [
-    {'name': 'SVC', 'class': svm.SVC, 'serializer': serialize_svc}
+    {'name': 'SVC', 'class': SVC, 'serializer': serialize_svc}
 ]
 
+model = joblib.load(pkl_path)
+entry = next((m for m in models if isinstance(model, m['class'])), None)
+result = {'type': entry['name'], 'parameters': entry['serializer'](model)}
 
-def serialize(pickle='src/ml/model.pkl', output='src/config/model.json'):
-    pkl_path = os.path.normpath(os.path.join(root, '../../', pickle))
-    output_path = os.path.normpath(os.path.join(root, '../../', output))
+with open(output_path, 'w') as f:
+    f.write(json.dumps(result, indent=2, sort_keys=True))
 
-    model = joblib.load(pkl_path)
-    entry = next((m for m in models if isinstance(model, m['class'])), None)
-    result = {'type': entry['name'], 'parameters': entry['serializer'](model)}
-
-    with open(output_path, 'w') as f:
-        f.write(json.dumps(result, indent=2, sort_keys=True))
-
-    # ipdb.set_trace()
-
-
-Fire(serialize)
+# ipdb.set_trace()
