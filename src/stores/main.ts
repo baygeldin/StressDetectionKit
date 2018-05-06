@@ -336,19 +336,33 @@ export default class Main {
 
   @action.bound
   private pushSample(timestamp: number) {
-    const sample = ACCELERATED_MODE
-      ? generateSample(this.baselineHrv, this.baselineHeartRate, timestamp)
-      : calcSample(
-          this.chunksQueue.toArray(),
-          this.accelerometerError,
-          this.baselineHrv,
-          this.baselineHeartRate,
-          timestamp
-        );
+    let sample: Sample;
 
-    if (__DEV__) {
-      sample.stress = this.currentPercievedStressLevel;
-      sample.state = ['medium', 'high'].includes(sample.stress);
+    if (ACCELERATED_MODE) {
+      sample = generateSample(
+        this.baselineHrv,
+        this.baselineHeartRate,
+        timestamp
+      );
+    } else if (__DEV__) {
+      const stress = this.currentPercievedStressLevel;
+      sample = calcSample(
+        this.chunksQueue.toArray(),
+        this.accelerometerError,
+        this.baselineHrv,
+        this.baselineHeartRate,
+        timestamp,
+        ['medium', 'high'].includes(stress)
+      );
+      sample.stress = stress;
+    } else {
+      sample = calcSample(
+        this.chunksQueue.toArray(),
+        this.accelerometerError,
+        this.baselineHrv,
+        this.baselineHeartRate,
+        timestamp
+      );
     }
 
     this.currentSamples.push(sample);

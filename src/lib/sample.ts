@@ -19,7 +19,8 @@ export function calcSample(
   accelerometerError: number,
   baselineHrv: number,
   baselineHeartRate: number,
-  timestamp: number
+  timestamp: number,
+  state?: boolean
 ): Sample {
   const activityIndex = calcActivityIndex(
     flatten(chunks.map(c => c.accelerometer)),
@@ -40,10 +41,8 @@ export function calcSample(
 
   const stdVector = vector.map((f, i) => normalizers[i](f)) as FeatureVector;
 
-  const state = classifier.predict(stdVector) === 1;
-
   return {
-    state,
+    state: state !== undefined ? state : classifier.predict(stdVector) === 1,
     vector,
     stdVector,
     activityIndex,

@@ -59,7 +59,9 @@ for (let e of entries) {
 
   const samples = sample(chunks, WINDOW_SIZE, STEP_SIZE).map(c => {
     const timestamp = c[c.length - 1].timestamp;
-    const stressMark = stress.find(s => s.start <= timestamp)!;
+    const stressMark = stress.find(
+      s => s.start <= timestamp && s.end > timestamp
+    )!;
     const state = ['medium', 'high'].includes(stressMark.level);
 
     return calcSample(
@@ -67,7 +69,8 @@ for (let e of entries) {
       accelerometerError,
       baselineHrv,
       baselineHeartRate,
-      timestamp
+      timestamp,
+      state
     );
   });
 
