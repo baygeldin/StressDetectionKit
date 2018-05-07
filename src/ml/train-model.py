@@ -72,9 +72,9 @@ scorer = {
     'precision_true': make_scorer(precision_score, pos_label=True),
     'recall_false': make_scorer(recall_score, pos_label=False),
     'recall_true': make_scorer(recall_score, pos_label=True),
-    'f1_total': make_scorer(f1_score),
-    'precision_total': make_scorer(precision_score),
-    'recall_total': make_scorer(recall_score)
+    'f1_total': make_scorer(f1_score, average='weighted'),
+    'precision_total': make_scorer(precision_score, average='weighted'),
+    'recall_total': make_scorer(recall_score, average='weighted')
 }
 
 cv_results = cross_validate(model, x_test, y_test, cv=kfolds, scoring=scorer)
