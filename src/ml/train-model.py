@@ -88,13 +88,14 @@ def confidence_interval(scores):
 
 
 df = [[confidence_interval(cv_results["test_%s_%s" % (row, col)])
-       for row in ['precision', 'recall', 'f1']] for col in ['true', 'false', 'total']]
-print(pd.DataFrame(df, [True, False, 'Total'], ['Precision', 'Recall', 'F1']))
+       for row in ['precision', 'recall', 'f1']] for col in ['false', 'true', 'total']]
+print(pd.DataFrame(df, ['False', 'True', 'Total'],
+                   ['Precision', 'Recall', 'F1']))
 
 # Confusion matrix
 df = confusion_matrix(y_test, cv_predict)
-rows = ['True (actual)', 'False (actual)']
-cols = ['True (predicted)', 'False (predicted)']
+rows = ['False (actual)', 'True (actual)']
+cols = ['False (predicted)', 'True (predicted)']
 print(pd.DataFrame(df, rows, cols))
 
 # Model persistence
