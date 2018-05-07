@@ -85,4 +85,5 @@ src/ml/model.pkl
 # Build
 #
 android/app/src/main/assets/index.android.bundle
+android/app/src/main/assets/index.android.bundle.map
 android/app/src/main/res/drawable-*/node_modules*
