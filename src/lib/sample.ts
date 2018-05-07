@@ -1,6 +1,6 @@
 import { properties } from 'config/features';
 import { parameters } from 'config/model';
-import Svm, { SvmParameters } from 'lib/classifiers/svm';
+import Svm, { SvmParameters } from 'lib/svm';
 import { calcActivityIndex, calcHeartRate, calcRmssd } from 'lib/features';
 import { Chunk, FeatureVector, Sample } from 'lib/types';
 
