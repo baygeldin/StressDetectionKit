@@ -132,21 +132,24 @@ export default class Main {
 
     this.calibrating = true;
     this.calibrationTimePassed = 0;
-    this.flushBuffers();
     this.startSensors();
 
-    this.timer = BackgroundTimer.setInterval(
-      action('updateCalibrationProgress', () => {
-        if (!this.calibrating) return;
+    this.timer = BackgroundTimer.setTimeout(() => {
+      this.flushBuffers(); // Flush initial data as it might mess up results
+      this.timer = BackgroundTimer.setInterval(
+        action('updateCalibrationProgress', () => {
+          if (!this.calibrating) return;
 
-        this.calibrationTimePassed += CALIBRATION_UPDATE_INTERVAL;
-        if (this.calibrationTimePassed >= CALIBRATION_LENGTH) {
-          this.stopCalibration();
-          this.computeBaselineValues();
-        }
-      }),
-      CALIBRATION_UPDATE_INTERVAL
-    );
+          this.calibrationTimePassed += CALIBRATION_UPDATE_INTERVAL;
+
+          if (this.calibrationTimePassed >= CALIBRATION_LENGTH) {
+            this.stopCalibration();
+            this.computeBaselineValues();
+          }
+        }),
+        CALIBRATION_UPDATE_INTERVAL
+      );
+    }, CALIBRATION_PADDING);
   }
 
   @action.bound
@@ -438,11 +441,7 @@ export default class Main {
       const rrIntervals = buffers.rrIntervals.sort(
         (a, b) => a.timestamp - b.timestamp
       );
-      const lastTimestamp = rrIntervals[rrIntervals.length - 1].timestamp;
-      const start = lastTimestamp - CALIBRATION_LENGTH + CALIBRATION_PADDING;
-      this.baselineHrv = calcRmssd(
-        rrIntervals.filter(m => m.timestamp > start)
-      );
+      this.baselineHrv = calcRmssd(rrIntervals);
     }
 
     if (buffers.pulse.length) {
