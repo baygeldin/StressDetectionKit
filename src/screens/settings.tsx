@@ -2,6 +2,7 @@ import Calibration from 'components/calibration';
 import DevicesList from 'components/devices-list';
 import SettingsItem from 'components/settings-item';
 import Component from 'lib/component';
+import { TESTING_MODE } from 'lib/constants';
 import { confirmAction, deviceTitle, tryLaterAlert } from 'lib/helpers';
 import { inject, observer } from 'mobx-react/native';
 import {
@@ -29,16 +30,17 @@ export default class extends Component<{}, {}> {
       ? deviceTitle(this.store.currentDevice)
       : 'Select an HRM device';
 
-    const developer = __DEV__ ? (
-      <SettingsItem onPress={this.router.goToDeveloperScreen}>
-        <Left>
-          <Icon name="code" />
-        </Left>
-        <Body>
-          <Text>Developer Mode</Text>
-        </Body>
-      </SettingsItem>
-    ) : null;
+    const developer =
+      __DEV__ || TESTING_MODE ? (
+        <SettingsItem onPress={this.router.goToDeveloperScreen}>
+          <Left>
+            <Icon name="code" />
+          </Left>
+          <Body>
+            <Text>Developer Mode</Text>
+          </Body>
+        </SettingsItem>
+      ) : null;
 
     return (
       <Container>

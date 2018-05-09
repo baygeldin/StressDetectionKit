@@ -15,6 +15,7 @@ import {
   STEP_SIZE,
   STUB_SIZE,
   SUPPORTED_HRM_IDS,
+  TESTING_MODE,
   WINDOW_SIZE
 } from 'lib/constants';
 import DeviceKit, { Device, Reading } from 'lib/device-kit';
@@ -199,7 +200,7 @@ export default class Main {
 
     const { samples, stress } = this.flushSamples();
 
-    if (__DEV__ && !ACCELERATED_MODE && samples.length > 0) {
+    if ((__DEV__ || TESTING_MODE) && !ACCELERATED_MODE && samples.length > 0) {
       Promise.all([
         this.persist('samples', samples),
         this.persist('stress', stress),
@@ -321,7 +322,7 @@ export default class Main {
       }
 
       if (
-        __DEV__ &&
+        (__DEV__ || TESTING_MODE) &&
         !ACCELERATED_MODE &&
         this.chunksCollected % WINDOW_SIZE === 0
       ) {
