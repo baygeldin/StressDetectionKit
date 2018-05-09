@@ -10,7 +10,8 @@ export const STUB_SIZE = 5; // in samples
 
 /// Business logic
 
-export const SUPPORTED_HRM_IDS = [59, 110, 112]; // Beets BLU, Mio Global, Mobile Action
+// Beets BLU, Zephyr Smart, Mio Global, Mobile Action
+export const SUPPORTED_HRM_IDS = [59, 46, 110, 112];
 
 // Samples config
 export const CHUNK_LENGTH = ACCELERATED_MODE ? 1000 : 10000; // in ms
