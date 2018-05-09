@@ -349,7 +349,7 @@ export default class Main {
         this.baselineHeartRate,
         timestamp
       );
-    } else if (__DEV__) {
+    } else if (__DEV__ && !TESTING_MODE) {
       const stress = this.currentPercievedStressLevel;
       sample = calcSample(
         this.chunksQueue.toArray(),
