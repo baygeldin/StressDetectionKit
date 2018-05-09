@@ -1,7 +1,8 @@
 import { properties } from 'config/features';
 import { parameters } from 'config/model';
-import Svm, { SvmParameters } from 'lib/svm';
+import { STEP_SIZE } from 'lib/constants';
 import { calcActivityIndex, calcHeartRate, calcRmssd } from 'lib/features';
+import Svm, { SvmParameters } from 'lib/svm';
 import { Chunk, FeatureVector, Sample } from 'lib/types';
 
 const classifier = new Svm(parameters as SvmParameters);
@@ -22,16 +23,31 @@ export function calcSample(
   timestamp: number,
   state?: boolean
 ): Sample {
-  const activityIndex = calcActivityIndex(
-    flatten(chunks.map(c => c.accelerometer)),
-    accelerometerError
-  );
+  // Calculate HRV based on whole window (5 minutes)
   const hrv = calcRmssd(
     flatten(chunks.map(c => c.rrIntervals)).sort(
       (a, b) => a.timestamp - b.timestamp
     )
   );
-  const heartRate = calcHeartRate(flatten(chunks.map(c => c.pulse)));
+
+  // Calculate mean HR based on chunks from 2 last steps.
+  const heartRateChunks = chunks.slice(-2 * STEP_SIZE);
+  const heartRate = calcHeartRate(flatten(heartRateChunks.map(c => c.pulse)));
+
+  // Calculate AI based on chunks that account for mean HR.
+  // There is a ~1 chunk delay between sypathetic stimulation and HR increase.
+  const activityIndexChunks = chunks.slice(-2 * STEP_SIZE - 1, -1);
+  const activityIndex = calcActivityIndex(
+    flatten(activityIndexChunks.map(c => c.accelerometer)),
+    accelerometerError
+  );
+
+  // Calculate AI for representation based on chunks from last step.
+  const activityIndexUiChunks = chunks.slice(-STEP_SIZE);
+  const activityIndexUi = calcActivityIndex(
+    flatten(activityIndexUiChunks.map(c => c.accelerometer)),
+    accelerometerError
+  );
 
   const vector = [
     hrv / baselineHrv,
@@ -45,7 +61,7 @@ export function calcSample(
     state: state !== undefined ? state : classifier.predict(stdVector) === 1,
     vector,
     stdVector,
-    activityIndex,
+    activityIndex: activityIndexUi,
     heartRate,
     hrv,
     timestamp
