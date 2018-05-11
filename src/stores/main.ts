@@ -43,7 +43,7 @@ import {
   StressMark
 } from 'lib/types';
 import { action, computed, observable, runInAction } from 'mobx';
-import { Vibration } from 'react-native';
+import { DeviceEventEmitter, NativeModules, Vibration } from 'react-native';
 import BackgroundTimer from 'react-native-background-timer';
 import {
   Accelerometer,
@@ -130,6 +130,12 @@ export default class Main {
   startCalibration() {
     if (this.calibrating) return;
 
+    DeviceEventEmitter.addListener('updateTimer', msg => {
+      console.log(msg);
+    });
+
+    NativeModules.Timer.startService();
+
     this.calibrating = true;
     this.calibrationTimePassed = 0;
     this.startSensors();
@@ -156,6 +162,9 @@ export default class Main {
   stopCalibration() {
     if (!this.calibrating) return;
 
+    DeviceEventEmitter.removeAllListeners('updateTimer');
+    NativeModules.Timer.stopService();
+
     this.calibrating = false;
     this.stopSensors();
     BackgroundTimer.clearInterval(this.timer);
@@ -172,6 +181,12 @@ export default class Main {
   @action.bound
   startCollection() {
     if (this.collecting) return;
+
+    DeviceEventEmitter.addListener('updateTimer', msg => {
+      console.log(msg);
+    });
+
+    NativeModules.Timer.startService();
 
     this.collecting = true;
 
@@ -195,6 +210,9 @@ export default class Main {
   @action.bound
   stopCollection() {
     if (!this.collecting) return;
+
+    DeviceEventEmitter.removeAllListeners('updateTimer');
+    NativeModules.Timer.stopService();
 
     this.collecting = false;
     this.pushStressMark(Date.now());
