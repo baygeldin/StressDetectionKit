@@ -24,6 +24,7 @@ import {
   calcHeartRate,
   calcRmssd
 } from 'lib/features';
+import { startForegroundService, stopForegroundService } from 'lib/foreground';
 import {
   generateChunk,
   generateChunks,
@@ -130,6 +131,8 @@ export default class Main {
   startCalibration() {
     if (this.calibrating) return;
 
+    startForegroundService();
+
     this.calibrating = true;
     this.calibrationTimePassed = 0;
     this.startSensors();
@@ -156,6 +159,8 @@ export default class Main {
   stopCalibration() {
     if (!this.calibrating) return;
 
+    stopForegroundService();
+
     this.calibrating = false;
     this.stopSensors();
     BackgroundTimer.clearInterval(this.timer);
@@ -172,6 +177,8 @@ export default class Main {
   @action.bound
   startCollection() {
     if (this.collecting) return;
+
+    startForegroundService();
 
     this.collecting = true;
 
@@ -195,6 +202,8 @@ export default class Main {
   @action.bound
   stopCollection() {
     if (!this.collecting) return;
+
+    stopForegroundService();
 
     this.collecting = false;
     this.pushStressMark(Date.now());

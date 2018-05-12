@@ -1,21 +1,19 @@
-import * as React from 'react';
-import { observer, inject } from 'mobx-react/native';
-import { View } from 'react-native';
+import Component from 'lib/component';
+import { inject, observer } from 'mobx-react/native';
+import moment from 'moment';
 import {
+  Button,
   Container,
   Content,
-  Text,
-  Body,
   Footer,
   FooterTab,
-  Button,
-  Icon
+  Icon,
+  Text
 } from 'native-base';
-import moment from 'moment';
+import * as React from 'react';
+import { View } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { Bar } from 'react-native-progress';
-import Component from 'lib/component';
-import { Device } from 'lib/device-kit';
 
 @inject('store', 'ui')
 @observer

@@ -5,25 +5,25 @@ import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.medm.devicekit.*
 
-const val MODULE_NAME = "DeviceKit"
-
-const val TAG = "StressDetectionKit"
-
-const val INIT_ERROR = "INIT_ERROR"
-const val PAIR_ERROR = "PAIR_ERROR"
-
-const val EVENT_PREFIX = MODULE_NAME
-const val DATA_EVENT = "data"
-const val DEVICE_FOUND_EVENT = "deviceFound"
-const val DEVICE_CONNECTED_EVENT = "deviceConnected"
-const val DEVICE_DISCONNECTED_EVENT = "deviceDisconnected"
-const val AMBIGUOUS_DEVICE_FOUND_EVENT = "ambiguousDeviceFound"
-const val SCAN_FINISHED_EVENT = "scanFinished"
-const val COLLECTION_FINISHED_EVENT = "collectionFinished"
-
 class DeviceKitModule(
         private val reactContext: ReactApplicationContext
 ) : ReactContextBaseJavaModule(reactContext) {
+    companion object {
+        const val MODULE_NAME = "DeviceKit"
+
+        const val INIT_ERROR = "INIT_ERROR"
+        const val PAIR_ERROR = "PAIR_ERROR"
+
+        const val EVENT_PREFIX = MODULE_NAME
+        const val DATA_EVENT = "data"
+        const val DEVICE_FOUND_EVENT = "deviceFound"
+        const val DEVICE_CONNECTED_EVENT = "deviceConnected"
+        const val DEVICE_DISCONNECTED_EVENT = "deviceDisconnected"
+        const val AMBIGUOUS_DEVICE_FOUND_EVENT = "ambiguousDeviceFound"
+        const val SCAN_FINISHED_EVENT = "scanFinished"
+        const val COLLECTION_FINISHED_EVENT = "collectionFinished"
+    }
+
     override fun getName() = MODULE_NAME
 
     override fun getConstants() = mapOf(
@@ -46,7 +46,7 @@ class DeviceKitModule(
     private var foundDevices = mutableListOf<IDeviceDescription>()
 
     private fun sendEvent(eventName: String, params: Any?) {
-        Log.i(TAG, "Send '$eventName' event.")
+        Log.i(APP_TAG, "Send '$eventName' event.")
         eventEmitter.emit("$EVENT_PREFIX:$eventName", params)
     }
 
@@ -71,7 +71,7 @@ class DeviceKitModule(
 
     @ReactMethod
     fun startScan() {
-        Log.i(TAG, "Start scanning for devices.")
+        Log.i(APP_TAG, "Start scanning for devices.")
         scannerToken = MedMDeviceKit.getScanner().start(object : IScannerCallback {
             override fun onDeviceFound(device: IDeviceDescription) {
                 foundDevices.add(device)
@@ -92,7 +92,7 @@ class DeviceKitModule(
 
     @ReactMethod
     fun stopScan() {
-        Log.i(TAG, "Stop scanning for devices.")
+        Log.i(APP_TAG, "Stop scanning for devices.")
         scannerToken?.stopScan()
     }
 
@@ -110,13 +110,13 @@ class DeviceKitModule(
             }
         }
         val device = foundDevices.find { it.sku == sku }!!
-        Log.i(TAG, "Pair ${device.modelName} device with ${device.sku} SKU.")
+        Log.i(APP_TAG, "Pair ${device.modelName} device with ${device.sku} SKU.")
         cancellationTokens.add(MedMDeviceKit.getDeviceManager().addDevice(device, callback))
     }
 
     @ReactMethod
     fun removeDevice(address: String) {
-        Log.i(TAG, "Remove device with $address address.")
+        Log.i(APP_TAG, "Remove device with $address address.")
         MedMDeviceKit.getDeviceManager().removeDevice(address)
     }
 
@@ -128,13 +128,13 @@ class DeviceKitModule(
 
     @ReactMethod
     fun cancelPairings() {
-        Log.i(TAG, "Cancel all pairings.")
+        Log.i(APP_TAG, "Cancel all pairings.")
         for (token in cancellationTokens) token.cancel()
     }
 
     @ReactMethod
     fun startCollection() {
-        Log.i(TAG, "Start data collection.")
+        Log.i(APP_TAG, "Start data collection.")
         collectionToken = MedMDeviceKit.getCollector().start(
                 object : IDataCallback {
                     override fun onNewData(device: IDeviceDescription?, data: String) {
@@ -163,7 +163,7 @@ class DeviceKitModule(
 
     @ReactMethod
     fun stopCollection() {
-        Log.i(TAG, "Stop data collection.")
+        Log.i(APP_TAG, "Stop data collection.")
         collectionToken?.stopCollect()
     }
 }
