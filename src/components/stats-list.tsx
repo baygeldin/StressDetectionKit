@@ -5,7 +5,6 @@ import moment from 'moment';
 import { Body, Card, CardItem, Left, Right, Text } from 'native-base';
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Moment } from 'moment';
 
 const styles = StyleSheet.create({
   container: {
@@ -73,9 +72,9 @@ class StatsList extends Component<{}, {}> {
               <Text note>Activity intensity</Text>
             </Body>
             <Right>
-              <Text style={styles.value}>{`${sample.activityIndex.toFixed(
-                4
-              )} m\u00b2 / s`}</Text>
+              <Text style={styles.value}>{`${Math.round(
+                sample.activity
+              )} points`}</Text>
             </Right>
           </CardItem>
           <CardItem>

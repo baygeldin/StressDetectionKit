@@ -68,7 +68,7 @@ class Area extends Component<{}, {}> {
       mapper = s => s.heartRate;
       defaultMin = DEFAULT_HEARTRATE_MIN;
     } else {
-      mapper = s => s.activityIndex;
+      mapper = s => s.activity;
       defaultMin = DEFAULT_ACTIVITY_MIN;
     }
 

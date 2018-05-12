@@ -63,7 +63,7 @@ export function generateSample(
     state: random() >= 0.75,
     vector,
     stdVector: vector,
-    activityIndex: randomInt(0, 30),
+    activity: randomInt(0, 100),
     hrv,
     heartRate,
     timestamp

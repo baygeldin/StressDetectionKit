@@ -28,7 +28,10 @@ export const CALIBRATION_LENGTH =
 export const CALIBRATION_UPDATE_INTERVAL = ACCELERATED_MODE ? 500 : 3000; // in ms
 
 // Accerelrometer and gyroscope config
-export const SENSOR_UPDATE_INTERVAL = 1000; // in ms
+// NOTE: In original paper Jiawei Bai et al. used 30Hz update interval.
+// They also placed accerelometer at the iliac crest and secured it with a belt.
+export const SENSOR_UPDATE_INTERVAL = 100; // in ms
+export const MAX_ACTIVITY_INDEX = 2000; // in relative points (empirical observation)
 
 // Default values
 export const DEFAULT_BASELINE_HRV = 40; // in ms

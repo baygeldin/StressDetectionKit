@@ -95,9 +95,9 @@ class MainStats extends Component<{}, {}> {
         >
           <Text style={style('title', 'activity')}>ACTIVITY</Text>
           <Text style={style('value', 'activity')}>
-            {last.activityIndex.toFixed(1)}
+            {Math.round(last.activity)}
           </Text>
-          <Text style={styles.units}>{'m\u00b2 / s'}</Text>
+          <Text style={styles.units}>{'points'}</Text>
         </TouchableOpacity>
       </View>
     );

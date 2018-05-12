@@ -1,12 +1,12 @@
 import { PulseMark, RrIntervalMark } from 'lib/types';
-import { max, mean, sqrt, std, sum } from 'mathjs';
+import { max, mean, sqrt, sum, var as variance } from 'mathjs';
 import { SensorData } from 'react-native-sensors';
 
 export function calcAccelerometerVariance(measurements: SensorData[]) {
   return (
-    std(measurements.map(m => m.x)) +
-    std(measurements.map(m => m.y)) +
-    std(measurements.map(m => m.z))
+    variance(measurements.map(m => m.x)) +
+    variance(measurements.map(m => m.y)) +
+    variance(measurements.map(m => m.z))
   );
 }
 
@@ -29,5 +29,7 @@ export function calcHeartRate(measurements: PulseMark[]) {
 
 // Jiawei Bai et al. An Activity Index for Raw Accelerometry Data and Its Comparison with Other Activity Metrics.
 export function calcActivityIndex(measurements: SensorData[], error: number) {
-  return sqrt(max((calcAccelerometerVariance(measurements) - error) / 3, 0));
+  const fn = (mapper: (m: SensorData) => number) =>
+    (variance(measurements.map(mapper)) - error) / error;
+  return sqrt(max(sum(fn(m => m.x), fn(m => m.y), fn(m => m.z)) / 3, 0));
 }

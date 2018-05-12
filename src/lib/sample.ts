@@ -1,6 +1,7 @@
 import { properties } from 'config/features';
 import { parameters } from 'config/model';
-import { STEP_SIZE } from 'lib/constants';
+import { scaleLinear } from 'd3';
+import { MAX_ACTIVITY_INDEX, STEP_SIZE } from 'lib/constants';
 import { calcActivityIndex, calcHeartRate, calcRmssd } from 'lib/features';
 import Svm, { SvmParameters } from 'lib/svm';
 import { Chunk, FeatureVector, Sample } from 'lib/types';
@@ -14,6 +15,11 @@ const normalizers = properties.map(p => (value: number) =>
 function flatten<T>(array: T[][]) {
   return array.reduce((acc, c) => acc.concat(c));
 }
+
+const activityPoints = scaleLinear()
+  .domain([0, MAX_ACTIVITY_INDEX])
+  .range([0, 100])
+  .clamp(true);
 
 export function calcSample(
   chunks: Chunk[],
@@ -61,7 +67,7 @@ export function calcSample(
     state: state !== undefined ? state : classifier.predict(stdVector) === 1,
     vector,
     stdVector,
-    activityIndex: activityIndexUi,
+    activity: activityPoints(activityIndexUi),
     heartRate,
     hrv,
     timestamp

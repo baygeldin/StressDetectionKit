@@ -33,7 +33,7 @@ export interface Sample {
   state: boolean; // stressed or not
   vector: FeatureVector; // feature vector for the classificator
   stdVector: FeatureVector; // standardized feature vector
-  activityIndex: number; // activity intensity
+  activity: number; // activity intensity
   heartRate: number; // mean heart rate
   hrv: number; // root mean square of RR intervals successive differences
   stress?: StressLevel; // percieved stress level
