@@ -24,6 +24,7 @@ import {
   calcHeartRate,
   calcRmssd
 } from 'lib/features';
+import { startForegroundService, stopForegroundService } from 'lib/foreground';
 import {
   generateChunk,
   generateChunks,
@@ -43,7 +44,7 @@ import {
   StressMark
 } from 'lib/types';
 import { action, computed, observable, runInAction } from 'mobx';
-import { DeviceEventEmitter, NativeModules, Vibration } from 'react-native';
+import { Vibration } from 'react-native';
 import BackgroundTimer from 'react-native-background-timer';
 import {
   Accelerometer,
@@ -130,11 +131,7 @@ export default class Main {
   startCalibration() {
     if (this.calibrating) return;
 
-    DeviceEventEmitter.addListener('updateTimer', msg => {
-      console.log(msg);
-    });
-
-    NativeModules.Timer.startService();
+    startForegroundService();
 
     this.calibrating = true;
     this.calibrationTimePassed = 0;
@@ -162,8 +159,7 @@ export default class Main {
   stopCalibration() {
     if (!this.calibrating) return;
 
-    DeviceEventEmitter.removeAllListeners('updateTimer');
-    NativeModules.Timer.stopService();
+    stopForegroundService();
 
     this.calibrating = false;
     this.stopSensors();
@@ -182,11 +178,7 @@ export default class Main {
   startCollection() {
     if (this.collecting) return;
 
-    DeviceEventEmitter.addListener('updateTimer', msg => {
-      console.log(msg);
-    });
-
-    NativeModules.Timer.startService();
+    startForegroundService();
 
     this.collecting = true;
 
@@ -211,8 +203,7 @@ export default class Main {
   stopCollection() {
     if (!this.collecting) return;
 
-    DeviceEventEmitter.removeAllListeners('updateTimer');
-    NativeModules.Timer.stopService();
+    stopForegroundService();
 
     this.collecting = false;
     this.pushStressMark(Date.now());

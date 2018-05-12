@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Stress Detection Kit</string>
+    <string name="notification_content">Collecting data from sensors</string>
 </resources>

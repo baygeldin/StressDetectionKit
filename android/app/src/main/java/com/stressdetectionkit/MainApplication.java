@@ -36,7 +36,7 @@ public class MainApplication extends Application implements ReactApplication {
                     new RNSensorsPackage(),
                     new SvgPackage(),
                     new SplashScreenReactPackage(),
-                    new TimerPackage()
+                    new ForegroundPackage()
             );
         }
 
