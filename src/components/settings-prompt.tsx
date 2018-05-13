@@ -24,7 +24,8 @@ import {
 const styles = StyleSheet.create({
   dialog: {
     flex: 1,
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   overlay: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -36,7 +37,6 @@ const styles = StyleSheet.create({
   },
   content: {
     elevation: 20,
-    marginTop: 150,
     width: 300,
     backgroundColor: WHITE,
     borderRadius: 2,
