@@ -1,9 +1,10 @@
 import { TESTING_MODE } from 'lib/constants';
 import DeviceKit from 'lib/device-kit';
+import initSideEffects from 'lib/side-effects';
 import { configure } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
-import * as React from 'react';
 import { Component } from 'react';
+import * as React from 'react';
 import { Alert, BackHandler, PermissionsAndroid } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import { addNavigationHelpers, StackNavigator } from 'react-navigation';
@@ -26,6 +27,8 @@ const sdk = new DeviceKit();
 const store = new Store(sdk);
 const router = new Router(RootNavigator.router);
 const ui = new Ui(store);
+
+initSideEffects(ui, store);
 
 @observer
 export default class extends Component<any, any> {

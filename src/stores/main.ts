@@ -210,6 +210,7 @@ export default class Main {
     this.stopSensors();
     BackgroundTimer.clearInterval(this.timer);
 
+    this.flushChunks(); // Keep samples and chunks consistent
     const { samples, stress } = this.flushSamples();
 
     if ((__DEV__ || TESTING_MODE) && !ACCELERATED_MODE && samples.length > 0) {
@@ -396,12 +397,6 @@ export default class Main {
         timestamp
       );
     }
-
-    // Side effect: vibrate when stress starts
-    const stressStarted = this.lastSample
-      ? sample.state && !this.lastSample.state
-      : sample.state;
-    if (stressStarted) Vibration.vibrate(500, false);
 
     this.currentSamples.push(sample);
   }
