@@ -72,7 +72,7 @@ export default class extends Component<{}, {}> {
           <Separator bordered>
             <Text>DEVICES</Text>
           </Separator>
-          <SettingsItem>
+          <SettingsItem onPress={() => this.showDeviceInfo()}>
             <Left>
               <Icon name="watch" />
             </Left>
@@ -211,5 +211,13 @@ export default class extends Component<{}, {}> {
       'First calibrate the baselines values. Put on your HRM, put your phone down and sit still. You should do it right after you wake up to get best results. Stress will be detected relative to these baseline values.\n\nApp icon is made by Roundicons.',
       [{ text: 'Got it' }]
     );
+  }
+
+  showDeviceInfo() {
+    const device = this.store.currentDevice;
+
+    if (device) {
+      Alert.alert(deviceTitle(device), device.address, [{ text: 'Got it' }]);
+    }
   }
 }
