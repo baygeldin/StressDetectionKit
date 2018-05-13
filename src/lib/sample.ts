@@ -26,6 +26,7 @@ export function calcSample(
   accelerometerError: number,
   baselineHrv: number,
   baselineHeartRate: number,
+  age: number,
   timestamp: number,
   state?: boolean
 ): Sample {

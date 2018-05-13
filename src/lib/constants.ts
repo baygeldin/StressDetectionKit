@@ -37,6 +37,7 @@ export const MAX_ACTIVITY_INDEX = STEP_LENGTH / 15; // in relative points (empir
 export const DEFAULT_BASELINE_HRV = 20; // in ms
 export const DEFAULT_BASELINE_HEARTRATE = 60; // in bpm
 export const DEFAULT_ACCELEROMETER_ERROR = 0.025; // in m/s^2
+export const DEFAULT_AGE = 30; // in years
 
 // Units
 export const HEARTRATE_UNITS = 'bpm';
@@ -50,6 +51,7 @@ export const AGE_UNITS = 'years';
 export const BASELINE_HRV_KEY = 'baselineHrv';
 export const BASELINE_HEARTRATE_KEY = 'baselineHeartRate';
 export const ACCELEROMETER_ERROR_KEY = 'accelerometerError';
+export const AGE_KEY = 'age';
 
 /// Views
 

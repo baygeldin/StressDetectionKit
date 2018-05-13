@@ -5,6 +5,7 @@ import SettingsPrompt from 'components/settings-prompt';
 import Component from 'lib/component';
 import {
   ACCELERATION_UNITS,
+  AGE_UNITS,
   HEARTRATE_UNITS,
   HRV_UNITS,
   TESTING_MODE
@@ -101,6 +102,15 @@ export default class extends Component<{}, {}> {
           <Separator bordered>
             <Text>CALIBRATION</Text>
           </Separator>
+          <SettingsItem onPress={() => this.ui.prompt('age')}>
+            <Left>
+              <Icon name="person" />
+            </Left>
+            <Body>
+              <Text>Age</Text>
+              <Text note>{`${Math.round(this.store.age)} ${AGE_UNITS}`}</Text>
+            </Body>
+          </SettingsItem>
           <SettingsItem onPress={() => this.ui.prompt('hrv')}>
             <Left>
               <Icon name="pulse" />

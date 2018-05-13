@@ -2,6 +2,7 @@ import Denque from 'denque';
 import {
   ACCELERATED_MODE,
   ACCELEROMETER_ERROR_KEY,
+  AGE_KEY,
   BASELINE_HEARTRATE_KEY,
   BASELINE_HRV_KEY,
   CALIBRATION_LENGTH,
@@ -9,6 +10,7 @@ import {
   CALIBRATION_UPDATE_INTERVAL,
   CHUNK_LENGTH,
   DEFAULT_ACCELEROMETER_ERROR,
+  DEFAULT_AGE,
   DEFAULT_BASELINE_HEARTRATE,
   DEFAULT_BASELINE_HRV,
   SENSOR_UPDATE_INTERVAL,
@@ -86,6 +88,7 @@ export default class Main {
   @observable baselineHrv: number;
   @observable baselineHeartRate: number;
   @observable accelerometerError: number;
+  @observable age: number;
   @observable calibrationTimePassed: number;
 
   // Internal logic
@@ -112,6 +115,7 @@ export default class Main {
     const baselineHrv = await getFloat(BASELINE_HRV_KEY);
     const baselineHeartRate = await getFloat(BASELINE_HEARTRATE_KEY);
     const accelerometerError = await getFloat(ACCELEROMETER_ERROR_KEY);
+    const age = await getFloat(AGE_KEY);
 
     runInAction('initialize', () => {
       this.initialized = true;
@@ -124,6 +128,7 @@ export default class Main {
         accelerometerError || DEFAULT_ACCELEROMETER_ERROR;
       this.baselineHrv = baselineHrv || DEFAULT_BASELINE_HRV;
       this.baselineHeartRate = baselineHeartRate || DEFAULT_BASELINE_HEARTRATE;
+      this.age = age || DEFAULT_AGE;
     });
   }
 
@@ -220,7 +225,8 @@ export default class Main {
         this.persist('baselines', {
           baselineHrv: this.baselineHrv,
           baselineHeartRate: this.baselineHeartRate,
-          accelerometerError: this.accelerometerError
+          accelerometerError: this.accelerometerError,
+          age: this.age
         })
       ]).catch(err => {
         console.error(err);
@@ -313,6 +319,12 @@ export default class Main {
     this.persistSingleValue(ACCELEROMETER_ERROR_KEY, this.accelerometerError);
   }
 
+  @action.bound
+  setAge(value: number) {
+    this.age = value;
+    this.persistSingleValue(AGE_KEY, this.age);
+  }
+
   // Private
 
   private pushStressMark(timestamp: number) {
@@ -384,6 +396,7 @@ export default class Main {
         this.accelerometerError,
         this.baselineHrv,
         this.baselineHeartRate,
+        this.age,
         timestamp,
         ['medium', 'high'].includes(stress)
       );
@@ -394,6 +407,7 @@ export default class Main {
         this.accelerometerError,
         this.baselineHrv,
         this.baselineHeartRate,
+        this.age,
         timestamp
       );
     }
@@ -477,7 +491,8 @@ export default class Main {
     Promise.all([
       setFloat(ACCELEROMETER_ERROR_KEY, this.accelerometerError),
       setFloat(BASELINE_HRV_KEY, this.baselineHrv),
-      setFloat(BASELINE_HEARTRATE_KEY, this.baselineHeartRate)
+      setFloat(BASELINE_HEARTRATE_KEY, this.baselineHeartRate),
+      setFloat(AGE_KEY, this.age)
     ]).catch(err => {
       console.error(err);
     });

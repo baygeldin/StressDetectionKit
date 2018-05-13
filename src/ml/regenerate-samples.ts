@@ -55,7 +55,7 @@ for (let e of entries) {
   const stress = readJson('stress') as StressMark[];
   const baselines = readJson('baselines');
 
-  const { baselineHrv, baselineHeartRate, accelerometerError } = baselines;
+  const { baselineHrv, baselineHeartRate, accelerometerError, age } = baselines;
 
   const samples = sample(chunks, WINDOW_SIZE, STEP_SIZE).map(c => {
     const timestamp = c[c.length - 1].timestamp;
@@ -69,6 +69,7 @@ for (let e of entries) {
       accelerometerError,
       baselineHrv,
       baselineHeartRate,
+      age,
       timestamp,
       state
     );

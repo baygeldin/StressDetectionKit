@@ -113,8 +113,8 @@ class PromptContent extends Component<{ type: PromptValues }, {}> {
       units = ACCELERATION_UNITS;
     } else if (prompt === 'age') {
       title = 'Age';
-      action = (value: number) => {};
-      value = Math.round(0).toString();
+      action = this.store.setAge;
+      value = Math.round(this.store.age).toString();
       units = AGE_UNITS;
     } else {
       return null;
