@@ -1,17 +1,18 @@
-import { Component } from 'react';
-import * as React from 'react';
-import { View, BackHandler, PermissionsAndroid, Alert } from 'react-native';
-import { StackNavigator, addNavigationHelpers } from 'react-navigation';
-import { observable, action, configure } from 'mobx';
-import { observer, Provider } from 'mobx-react/native';
-import SplashScreen from 'react-native-splash-screen';
+import { TESTING_MODE } from 'lib/constants';
 import DeviceKit from 'lib/device-kit';
-import Router from 'stores/router';
-import Store from 'stores/main';
-import Ui from 'stores/ui';
+import { configure } from 'mobx';
+import { observer, Provider } from 'mobx-react/native';
+import * as React from 'react';
+import { Component } from 'react';
+import { Alert, BackHandler, PermissionsAndroid } from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
+import { addNavigationHelpers, StackNavigator } from 'react-navigation';
+import DeveloperScreen from 'screens/developer';
 import HomeScreen from 'screens/home';
 import SettingsScreen from 'screens/settings';
-import DeveloperScreen from 'screens/developer';
+import Store from 'stores/main';
+import Router from 'stores/router';
+import Ui from 'stores/ui';
 
 configure({ enforceActions: true });
 
@@ -45,11 +46,16 @@ export default class extends Component<any, any> {
       store.initialize(key).then(() => {
         SplashScreen.hide();
 
-        PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-        ]).then(permissions => {
+        const requests = [PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION];
+
+        if (__DEV__ || TESTING_MODE) {
+          requests.push(
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+          );
+        }
+
+        PermissionsAndroid.requestMultiple(requests).then(permissions => {
           if (!Object.values(permissions).every(p => p === 'granted')) {
             Alert.alert(
               'Permissions Not Granted',
