@@ -14,19 +14,15 @@
     "ios": "haul start --platform ios",
     "reload": "haul reload",
     "reverse": "adb reverse tcp:8081 tcp:8081",
-    "bundle":
-      "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
-    "bundle-prod":
-      "haul bundle --dev false --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
+    "bundle": "haul bundle --dev true --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
+    "bundle-prod": "haul bundle --dev false --platform android --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
     "train-model": "pipenv run python src/ml/train-model.py",
-    "port-model":
-      "pipenv run python -m sklearn_porter -i src/ml/model.pkl --js --pipe",
+    "port-model": "pipenv run python -m sklearn_porter -i src/ml/model.pkl --js --pipe",
     "serialize-model": "pipenv run python src/ml/serialize-model.py",
     "pull-samples": "adb pull /sdcard/Stress\\ Detection\\ Kit src/ml/samples",
     "regenerate-samples": "npm run ts-node -- src/ml/regenerate-samples.ts",
     "calc-features-meta": "npm run ts-node -- src/ml/features-meta.ts",
-    "ts-node":
-      "ts-node -r tsconfig-paths/register -O '{\"module\": \"commonjs\"}'"
+    "ts-node": "ts-node -r tsconfig-paths/register -O '{\"module\": \"commonjs\"}'"
   },
   "dependencies": {
     "d3": "^5.0.0",
