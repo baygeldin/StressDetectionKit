@@ -5,6 +5,7 @@ import { MAX_ACTIVITY_INDEX, STEP_SIZE } from 'lib/constants';
 import { calcActivityIndex, calcHeartRate, calcRmssd } from 'lib/features';
 import Svm, { SvmParameters } from 'lib/svm';
 import { Chunk, FeatureVector, Sample } from 'lib/types';
+import { log, subtract } from 'mathjs';
 
 const classifier = new Svm(parameters as SvmParameters);
 
@@ -30,7 +31,7 @@ export function calcSample(
   timestamp: number,
   state?: boolean
 ): Sample {
-  // Calculate HRV based on whole window (5 minutes)
+  // Calculate HRV based on whole window (5 minutes).
   const hrv = calcRmssd(
     flatten(chunks.map(c => c.rrIntervals)).sort(
       (a, b) => a.timestamp - b.timestamp
@@ -56,9 +57,14 @@ export function calcSample(
     accelerometerError
   );
 
+  // Basically, we try to calculate current HRV and heart rate reactivity invariant to a person and compare it with actual activity intensity.
   const vector = [
-    hrv / baselineHrv,
-    heartRate / baselineHeartRate,
+    // Llabre et al. The reliability and specificity of delta versus residualized change as measures of cardiovascular reactivity to behavioral challenges.
+    // Robert J. Ellis et al. Data transforms for spectral analyses of heart rate variability.
+    subtract(log(hrv), log(baselineHrv)),
+    // Mark A. Sarzynski et al. Measured Maximal Heart Rates Compared to Commonly Used Age-Based Prediction Equations in the Heritage Family Study.
+    // Heart rate has a linear relationship with activity intensity until anaerobic threshold. Let's calculate %HR of heart rate reserve as approximation.
+    scaleLinear().domain([baselineHeartRate, 220 - age])(heartRate),
     activityIndex
   ] as FeatureVector;
 
