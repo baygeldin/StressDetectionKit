@@ -4,7 +4,7 @@ import {
   STEP_LENGTH
 } from 'lib/constants';
 import { calcOffsets, chunkByPattern } from 'lib/helpers';
-import { ChartType, Sample } from 'lib/types';
+import { ChartType, PromptValues, Sample } from 'lib/types';
 import { action, autorun, computed, observable, runInAction } from 'mobx';
 import Store from 'stores/main';
 
@@ -13,6 +13,8 @@ export default class Ui {
   @observable.ref private _currentSample?: Sample;
 
   @observable currentChart: ChartType;
+  @observable currentPrompt?: PromptValues;
+  @observable currentPromptInput = '';
 
   constructor(private store: Store) {
     autorun(() => {
@@ -96,5 +98,27 @@ export default class Ui {
   @action.bound
   selectChart(chart: ChartType) {
     this.currentChart = chart;
+  }
+
+  @action.bound
+  prompt(value: PromptValues) {
+    this.currentPrompt = value;
+  }
+
+  @action.bound
+  hidePrompt() {
+    this.currentPrompt = undefined;
+  }
+
+  @action.bound
+  inputPrompt(value: string) {
+    this.currentPromptInput = value;
+  }
+
+  @action.bound
+  submitPrompt(handler: (value: number) => void) {
+    const value = parseFloat(this.currentPromptInput);
+    if (!isNaN(value)) handler(value);
+    this.hidePrompt();
   }
 }

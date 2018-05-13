@@ -1,5 +1,11 @@
 import Component from 'lib/component';
-import { GREEN, RED } from 'lib/constants';
+import {
+  ACTIVITY_UNITS,
+  GREEN,
+  HEARTRATE_UNITS,
+  HRV_UNITS,
+  RED
+} from 'lib/constants';
 import { inject, observer } from 'mobx-react/native';
 import moment from 'moment';
 import { Body, Card, CardItem, Left, Right, Text } from 'native-base';
@@ -52,7 +58,9 @@ class StatsList extends Component<{}, {}> {
               <Text note>RMSSD</Text>
             </Body>
             <Right>
-              <Text style={styles.value}>{`${Math.round(sample.hrv)} ms`}</Text>
+              <Text style={styles.value}>{`${Math.round(
+                sample.hrv
+              )} ${HRV_UNITS}`}</Text>
             </Right>
           </CardItem>
           <CardItem>
@@ -63,7 +71,7 @@ class StatsList extends Component<{}, {}> {
             <Right>
               <Text style={styles.value}>{`${Math.round(
                 sample.heartRate
-              )} bpm`}</Text>
+              )} ${HEARTRATE_UNITS}`}</Text>
             </Right>
           </CardItem>
           <CardItem>
@@ -74,7 +82,7 @@ class StatsList extends Component<{}, {}> {
             <Right>
               <Text style={styles.value}>{`${Math.round(
                 sample.activity
-              )} points`}</Text>
+              )} ${ACTIVITY_UNITS}`}</Text>
             </Right>
           </CardItem>
           <CardItem>

@@ -1,5 +1,14 @@
 import Component from 'lib/component';
-import { BLACK, BLUE, GREEN, RED } from 'lib/constants';
+import {
+  ACTIVITY_UNITS,
+  BLACK,
+  BLUE,
+  GREEN,
+  HEARTRATE_UNITS,
+  HRV_UNITS,
+  RED,
+  GREY
+} from 'lib/constants';
 import { ChartType } from 'lib/types';
 import { inject, observer } from 'mobx-react/native';
 import { Text } from 'native-base';
@@ -21,12 +30,12 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     borderRightWidth: 0,
     paddingVertical: 5,
-    borderColor: 'grey'
+    borderColor: GREY
   },
   title: {
     fontSize: 18,
     textAlign: 'center',
-    color: 'grey',
+    color: GREY,
     fontWeight: 'bold'
   },
   value: {
@@ -39,7 +48,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 4,
     textAlign: 'center',
-    color: 'grey'
+    color: GREY
   },
   highlight: {
     color: BLUE
@@ -77,7 +86,7 @@ class MainStats extends Component<{}, {}> {
         >
           <Text style={style('title', 'hrv')}>HRV</Text>
           <Text style={style('value', 'hrv')}>{Math.round(last.hrv)}</Text>
-          <Text style={styles.units}>ms</Text>
+          <Text style={styles.units}>{HRV_UNITS}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.column}
@@ -87,7 +96,7 @@ class MainStats extends Component<{}, {}> {
           <Text style={style('value', 'heartRate')}>
             {Math.round(last.heartRate)}
           </Text>
-          <Text style={styles.units}>bpm</Text>
+          <Text style={styles.units}>{HEARTRATE_UNITS}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.column}
@@ -97,7 +106,7 @@ class MainStats extends Component<{}, {}> {
           <Text style={style('value', 'activity')}>
             {Math.round(last.activity)}
           </Text>
-          <Text style={styles.units}>{'points'}</Text>
+          <Text style={styles.units}>{ACTIVITY_UNITS}</Text>
         </TouchableOpacity>
       </View>
     );

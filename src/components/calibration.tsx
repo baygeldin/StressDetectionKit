@@ -14,6 +14,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { Bar } from 'react-native-progress';
+import { LIGHT } from 'lib/constants';
 
 @inject('store', 'ui')
 @observer
@@ -43,7 +44,7 @@ class Calibration extends Component<{}, {}> {
             progress={this.ui.calibrationProgress}
             useNativeDriver={true}
             width={null}
-            borderColor="lightgrey"
+            borderColor={LIGHT}
           />
           <Text style={{ textAlign: 'center', marginTop: 10 }}>
             The calibration will finish in {timeRemaining}.

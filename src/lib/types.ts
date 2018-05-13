@@ -2,6 +2,7 @@ import { Accelerometer, Gyroscope, SensorData } from 'react-native-sensors';
 
 export type StressLevel = 'none' | 'low' | 'medium' | 'high';
 export type ChartType = 'hrv' | 'heartRate' | 'activity';
+export type PromptValues = 'hrv' | 'heartRate' | 'accelerometerError' | 'age';
 
 export interface StressMark {
   start: number;

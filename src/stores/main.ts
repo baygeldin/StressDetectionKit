@@ -294,6 +294,24 @@ export default class Main {
     this.currentPercievedStressLevel = level;
   }
 
+  @action.bound
+  setBaselineHrv(value: number) {
+    this.baselineHrv = value;
+    this.persistSingleValue(BASELINE_HRV_KEY, this.baselineHrv);
+  }
+
+  @action.bound
+  setBaselineHeartRate(value: number) {
+    this.baselineHeartRate = value;
+    this.persistSingleValue(BASELINE_HEARTRATE_KEY, this.baselineHeartRate);
+  }
+
+  @action.bound
+  setAccelerometerError(value: number) {
+    this.accelerometerError = value;
+    this.persistSingleValue(ACCELEROMETER_ERROR_KEY, this.accelerometerError);
+  }
+
   // Private
 
   private pushStressMark(timestamp: number) {
@@ -468,6 +486,10 @@ export default class Main {
     ]).catch(err => {
       console.error(err);
     });
+  }
+
+  private persistSingleValue(key: string, value: number) {
+    setFloat(key, value).catch(err => console.error(err));
   }
 
   @action.bound

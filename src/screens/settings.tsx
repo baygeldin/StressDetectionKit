@@ -1,8 +1,14 @@
 import Calibration from 'components/calibration';
 import DevicesList from 'components/devices-list';
 import SettingsItem from 'components/settings-item';
+import SettingsPrompt from 'components/settings-prompt';
 import Component from 'lib/component';
-import { TESTING_MODE } from 'lib/constants';
+import {
+  ACCELERATION_UNITS,
+  HEARTRATE_UNITS,
+  HRV_UNITS,
+  TESTING_MODE
+} from 'lib/constants';
 import { confirmAction, deviceTitle, tryLaterAlert } from 'lib/helpers';
 import { inject, observer } from 'mobx-react/native';
 import {
@@ -61,6 +67,7 @@ export default class extends Component<{}, {}> {
           >
             <Calibration />
           </Modal>
+          <SettingsPrompt />
           <Separator bordered>
             <Text>DEVICES</Text>
           </Separator>
@@ -94,16 +101,18 @@ export default class extends Component<{}, {}> {
           <Separator bordered>
             <Text>CALIBRATION</Text>
           </Separator>
-          <SettingsItem>
+          <SettingsItem onPress={() => this.ui.prompt('hrv')}>
             <Left>
               <Icon name="pulse" />
             </Left>
             <Body>
               <Text>Baseline heart rate variability</Text>
-              <Text note>{`${Math.round(this.store.baselineHrv)} ms`}</Text>
+              <Text note>{`${Math.round(
+                this.store.baselineHrv
+              )} ${HRV_UNITS}`}</Text>
             </Body>
           </SettingsItem>
-          <SettingsItem>
+          <SettingsItem onPress={() => this.ui.prompt('heartRate')}>
             <Left>
               <Icon name="heart" />
             </Left>
@@ -111,10 +120,10 @@ export default class extends Component<{}, {}> {
               <Text>Baseline heart rate</Text>
               <Text note>{`${Math.round(
                 this.store.baselineHeartRate
-              )} bpm`}</Text>
+              )} ${HEARTRATE_UNITS}`}</Text>
             </Body>
           </SettingsItem>
-          <SettingsItem>
+          <SettingsItem onPress={() => this.ui.prompt('accelerometerError')}>
             <Left>
               <Icon name="move" />
             </Left>
@@ -122,7 +131,7 @@ export default class extends Component<{}, {}> {
               <Text>Acceletometer error</Text>
               <Text note>{`${this.store.accelerometerError.toFixed(
                 5
-              )} m\u00b2 / s`}</Text>
+              )} ${ACCELERATION_UNITS}`}</Text>
             </Body>
           </SettingsItem>
           <SettingsItem onPress={() => this.startCalibration()}>

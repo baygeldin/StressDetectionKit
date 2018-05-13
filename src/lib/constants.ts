@@ -34,9 +34,16 @@ export const SENSOR_UPDATE_INTERVAL = 100; // in ms
 export const MAX_ACTIVITY_INDEX = STEP_LENGTH / 15; // in relative points (empirical observation)
 
 // Default values
-export const DEFAULT_BASELINE_HRV = 40; // in ms
+export const DEFAULT_BASELINE_HRV = 20; // in ms
 export const DEFAULT_BASELINE_HEARTRATE = 60; // in bpm
 export const DEFAULT_ACCELEROMETER_ERROR = 0.025; // in m/s^2
+
+// Units
+export const HEARTRATE_UNITS = 'bpm';
+export const ACCELERATION_UNITS = 'm\u00b2 / s';
+export const ACTIVITY_UNITS = 'points';
+export const HRV_UNITS = 'ms';
+export const AGE_UNITS = 'years';
 
 /// Storage
 
@@ -67,3 +74,5 @@ export const RED = 'crimson';
 export const BLUE = 'steelblue';
 export const BLACK = 'black';
 export const WHITE = 'white';
+export const GREY = 'grey';
+export const LIGHT = 'lightgrey';
