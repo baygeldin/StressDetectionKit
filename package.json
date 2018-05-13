@@ -6,6 +6,7 @@
     "start": "haul start --platform all",
     "test": "jest",
     "postinstall": "pipenv install --dev",
+    "release-workaround": "node ./workaround/android-release-gradle-fix.js",
     "clean": "rimraf build",
     "build": "npm run clean && npm run tsc --",
     "lint": "tslint src/**/*.ts",
