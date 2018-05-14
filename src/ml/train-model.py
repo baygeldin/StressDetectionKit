@@ -60,7 +60,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33)
 
 # Hyper-parameters tuning
 param_grid = {
-    'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+    'kernel': ['linear'],
     'gamma': [1e-1, 1e-2, 1e-3, 1e-4],
     'C': [1, 10, 100, 1000]
 }
