@@ -1,9 +1,10 @@
-"""Usage: train-model.py [--samples <entry>]... [--output <path>]
+"""Usage: train-model.py [--samples <entry>]... [--output <path>] [--oversample]
 
 Options:
 
   -s, --samples          specify samples collection [default: all]
   -o, --output <path>    specify output file [default: src/ml/model.pkl]
+  --oversample           generate additional samples
   -h, --help             output usage information
 """
 
@@ -19,12 +20,16 @@ from sklearn.model_selection import cross_validate, cross_val_predict, \
 from sklearn.metrics import f1_score, precision_score, recall_score, \
     confusion_matrix, make_scorer
 from sklearn.externals import joblib
+from imblearn.over_sampling import SMOTE
+
+from sklearn.datasets import make_classification
 
 # Arguments parsing
 arguments = docopt(__doc__)
 options, arguments = arguments
 output = options.output  # pylint: disable=E1101
 entries = arguments.entry  # pylint: disable=E1101
+oversample = options.oversample  # pylint: disable=E1101
 
 root = os.path.dirname(os.path.realpath(__file__))
 samples_root = os.path.join(root, 'samples')
