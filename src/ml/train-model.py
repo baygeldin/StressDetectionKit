@@ -21,8 +21,8 @@ from sklearn.metrics import f1_score, precision_score, recall_score, \
     confusion_matrix, make_scorer
 from sklearn.externals import joblib
 from imblearn.over_sampling import SMOTE
-
-from sklearn.datasets import make_classification
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # Arguments parsing
 arguments = docopt(__doc__)
@@ -43,15 +43,15 @@ if absent:
     print("Samples for \"%s\" don't exist." % absent)
     exit(1)
 
-kfolds = 10
+kfolds = 5
 
 # Samples processing
 samples_paths = [os.path.join(samples_root, e, 'samples.json')
                  for e in entries]
 samples = pd.concat([pd.read_json(p) for p in samples_paths])
 
-x = pd.DataFrame(samples['stdVector'].values.tolist())
-y = samples['state']
+x = np.array(samples['stdVector'].values.tolist())
+y = np.array(samples['state'].values)
 
 if (oversample):
     sm = SMOTE(ratio='all', k_neighbors=3)
@@ -106,6 +106,26 @@ df = confusion_matrix(y_test, cv_predict)
 rows = ['False (actual)', 'True (actual)']
 cols = ['False (predicted)', 'True (predicted)']
 print(pd.DataFrame(df, rows, cols))
+
+# Plot hyperplane for a linear SVM
+
+
+def zGrid(x, y):
+    return (
+        -model.intercept_[0] - model.coef_[0][0] * x - model.coef_[0][1] * y
+    ) / model.coef_[0][2]
+
+
+ax = plt.figure().add_subplot(111, projection='3d')
+space = np.linspace(-2, 2, 10)
+gridX, gridY = np.meshgrid(space, space)
+ax.plot_surface(gridX, gridY, zGrid(gridX, gridY))
+ax.plot3D(x[y == False, 0], x[y == False, 1], x[y == False, 2], 'og')
+ax.plot3D(x[y == True, 0], x[y == True, 1], x[y == True, 2], 'sr')
+ax.set_xlabel('$\Delta$HRV')
+ax.set_ylabel('%HR')
+ax.set_zlabel('AI')
+plt.show()
 
 # Model persistence
 pkl_path = os.path.normpath(os.path.join(root, '../../', output))
