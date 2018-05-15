@@ -53,6 +53,10 @@ samples = pd.concat([pd.read_json(p) for p in samples_paths])
 x = pd.DataFrame(samples['stdVector'].values.tolist())
 y = samples['state']
 
+if (oversample):
+    sm = SMOTE(ratio='all', k_neighbors=3)
+    x, y = sm.fit_sample(x, y)
+
 # Useful when trying to estimate how each feature contribute to the model:
 # x = pd.DataFrame(np.array([np.array(x) for x in samples['stdVector'].values])[:, (0, 1, 2)])
 
