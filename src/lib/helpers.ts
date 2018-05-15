@@ -6,7 +6,7 @@ import {
   NONE_STRESS_COLOR
 } from 'lib/constants';
 import { Device, Reading } from 'lib/device-kit';
-import { Sample, StressLevel, StressMark } from 'lib/types';
+import { StressLevel } from 'lib/types';
 import { Alert } from 'react-native';
 import * as RNFS from 'react-native-fs';
 import { DOMParser } from 'xmldom';

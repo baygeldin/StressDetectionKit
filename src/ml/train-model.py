@@ -58,7 +58,7 @@ if (oversample):
     x, y = sm.fit_sample(x, y)
 
 # Useful when trying to estimate how each feature contribute to the model:
-# x = pd.DataFrame(np.array([np.array(x) for x in samples['stdVector'].values])[:, (0, 1, 2)])
+# x = np.array([np.array(x) for x in samples['stdVector'].values])[:, (0, 1, 2)]
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33)
 
