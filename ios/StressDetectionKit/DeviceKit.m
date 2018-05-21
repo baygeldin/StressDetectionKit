@@ -1,9 +1,9 @@
-#import "React/RCTBridgeModule.h"
-#import "React/RCTEventEmitter.h"
+#import <React/RCTEventEmitter.h>
+#import <React/RCTBridgeModule.h>
 
 @interface RCT_EXTERN_MODULE(DeviceKit, RCTEventEmitter)
 
-RCT_EXTERN_METHOD(init)
+_RCT_EXTERN_REMAP_METHOD(init, initialize, false)
 
 RCT_EXTERN_METHOD(stopScan)
 RCT_EXTERN_METHOD(startScan)

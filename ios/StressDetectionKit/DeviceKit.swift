@@ -44,7 +44,7 @@ class DeviceKit: RCTEventEmitter, ScannerCallback, DataCallback {
     ]
   }
 
-  func init(_ key: String, resolver resolve: RCTPromiseResolveBlock,
+  func initialize(_ key: String, resolver resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     do {
       try MedMDeviceKit.init(key)
@@ -120,7 +120,7 @@ class DeviceKit: RCTEventEmitter, ScannerCallback, DataCallback {
 
   func cancelPairings() {
     print(Constants.APP_TAG, "Cancel all pairings.")
-    for token in cancellationTokens token.cancel()
+    for token in cancellationTokens { token.cancel() }
   }
 
   func onNewData(device: DeviceInfo, data: String) {
