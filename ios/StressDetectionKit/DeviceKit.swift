@@ -29,12 +29,12 @@ class DeviceKit: RCTEventEmitter, ScannerCallback, DataCallback {
 
   private var foundDevices: Array<DeviceInfo> = []
 
-  private func emitEvent(eventName: String, data: NSObject) {
+  private func emitEvent(_ eventName: String, withData data: Any?) {
     print(Constants.APP_TAG, "Send \(eventName) event.")
-    sendEvent(withName: "\(EVENT_PREFIX):\(eventName)", body: [data])
+    sendEvent(withName: "\(DeviceKit.EVENT_PREFIX):\(eventName)", body: data)
   }
 
-  private func mapDeviceDescription(device: DeviceInfo) -> [String: String] {
+  private func mapDeviceDescription(_ device: DeviceInfo) -> [String: Any] {
     return [
       "id": device.sku,
       "address": device.address,
@@ -54,29 +54,45 @@ class DeviceKit: RCTEventEmitter, ScannerCallback, DataCallback {
     }
   }
 
-  func onDeviceFound(device: DeviceInfo) {
-    foundDevices.append(device)
-    emitEvent(DEVICE_FOUND_EVENT, mapDeviceDescription(device))
-  }
-
-  func onAmbiguousDeviceFound(devices: Array<DeviceInfo>) {
-    for d in devices {
-      emitEvent(AMBIGUOUS_DEVICE_FOUND_EVENT, mapDeviceDescription(d))
-    }
-  }
-
-  func onScanFinished() {
-    emitEvent(SCAN_FINISHED_EVENT, nil)
-  }
-
   func startScan() {
     print(Constants.APP_TAG, "Start scanning for devices.")
-    scannerToken = MedMDeviceKit.getScanner().start(self)
+    scannerToken = MedMDeviceKit.getScanner().start(ScanerHandler(
+      onNewDeviceFoundDelegate: {
+        device in
+        self.foundDevices.append(device)
+        self.emitEvent(DeviceKit.DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(device))
+      },
+      onAmbiguousDeviceFoundDelegate: {
+        devices in
+        for d in devices {
+          self.emitEvent(DeviceKit.AMBIGUOUS_DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(d))
+        }
+      },
+      onScanFinishedDelegate: { self.emitEvent(DeviceKit.SCAN_FINISHED_EVENT, withData: nil) }
+    ))
   }
 
   func stopScan() {
     print(Constants.APP_TAG, "Stop scanning for devices.")
     scannerToken?.stopScan()
+  }
+  
+  class ScanerHandler: NSObject, ScannerCallback {
+    var onNewDeviceFoundDelegate: (DeviceInfo) -> ()
+    var onAmbiguousDeviceFoundDelegate: (Array<DeviceInfo>) -> ()
+    var onScanFinishedDelegate: () -> ()
+    
+    func onNewDeviceFound(_ device: DeviceInfo!) { onNewDeviceFoundDelegate(device) }
+    func onAmbiguousDeviceFound(_ devices: Array<DeviceInfo>) { onAmbiguousDeviceFoundDelegate(devices) }
+    func onScanFinished() { onScanFinishedDelegate() }
+    
+    init(onNewDeviceFoundDelegate: @escaping (DeviceInfo) -> (),
+      onAmbiguousDeviceFoundDelegate: @escaping (Array<DeviceInfo>) -> (),
+      onScanFinishedDelegate: @escaping () -> ()) {
+      self.onNewDeviceFoundDelegate = onNewDeviceFoundDelegate
+      self.onAmbiguousDeviceFoundDelegate = onAmbiguousDeviceFoundDelegate
+      self.onScanFinishedDelegate = onScanFinished
+    }
   }
 
   class AddDeviceHandler: AddDeviceCallback {

@@ -69,6 +69,7 @@ haul-debug.log
 # Proprietary
 #
 android/app/libs/MedMDeviceKit.aar
+ios/StressDetectionKit/MedMDeviceKit.framework
 
 # Local setup helper
 #
