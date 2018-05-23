@@ -1,7 +1,9 @@
 import Foundation
 
 @objc(DeviceKit)
-class DeviceKit: RCTEventEmitter, ScannerCallback, DataCallback {
+class DeviceKit: RCTEventEmitter {
+  private typealias `Self` = DeviceKit
+
   static let MODULE_NAME = "DeviceKit"
 
   static let INIT_ERROR = "INIT_ERROR"
@@ -16,22 +18,22 @@ class DeviceKit: RCTEventEmitter, ScannerCallback, DataCallback {
   static let SCAN_FINISHED_EVENT = "scanFinished"
   static let COLLECTION_FINISHED_EVENT = "collectionFinished"
 
-  override func constantsToExport() -> [AnyHashable : Any]! {
+  override func constantsToExport() -> [AnyHashable : Any] {
     return [
       "EVENT_PREFIX": EVENT_PREFIX,
       "EVENTS": supportedEvents()
     ]
   }
 
-  private var scannerToken: ScannerStopToken = nil
-  private var collectionToken: CollectorStopToken = nil
+  private var scannerToken: ScannerStopToken? = nil
+  private var collectionToken: CollectorStopToken? = nil
   private var cancellationTokens: Array<DeviceAddingCancellationToken> = []
 
   private var foundDevices: Array<DeviceInfo> = []
 
   private func emitEvent(_ eventName: String, withData data: Any?) {
     print(Constants.APP_TAG, "Send \(eventName) event.")
-    sendEvent(withName: "\(DeviceKit.EVENT_PREFIX):\(eventName)", body: data)
+    sendEvent(withName: "\(Self.EVENT_PREFIX):\(eventName)", body: data)
   }
 
   private func mapDeviceDescription(_ device: DeviceInfo) -> [String: Any] {
@@ -44,133 +46,176 @@ class DeviceKit: RCTEventEmitter, ScannerCallback, DataCallback {
     ]
   }
 
-  func initialize(_ key: String, resolver resolve: RCTPromiseResolveBlock,
+  func initialize(_ key: String,
+    resolver resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     do {
       try MedMDeviceKit.init(key)
       resolve(nil)
     } catch let error {
-      reject(INIT_ERROR, error)
+      reject(Self.INIT_ERROR, error)
     }
   }
-
-  func startScan() {
-    print(Constants.APP_TAG, "Start scanning for devices.")
-    scannerToken = MedMDeviceKit.getScanner().start(ScanerHandler(
-      onNewDeviceFoundDelegate: {
-        device in
-        self.foundDevices.append(device)
-        self.emitEvent(DeviceKit.DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(device))
-      },
-      onAmbiguousDeviceFoundDelegate: {
-        devices in
-        for d in devices {
-          self.emitEvent(DeviceKit.AMBIGUOUS_DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(d))
-        }
-      },
-      onScanFinishedDelegate: { self.emitEvent(DeviceKit.SCAN_FINISHED_EVENT, withData: nil) }
-    ))
-  }
-
-  func stopScan() {
-    print(Constants.APP_TAG, "Stop scanning for devices.")
-    scannerToken?.stopScan()
-  }
   
-  class ScanerHandler: NSObject, ScannerCallback {
-    var onNewDeviceFoundDelegate: (DeviceInfo) -> ()
-    var onAmbiguousDeviceFoundDelegate: (Array<DeviceInfo>) -> ()
-    var onScanFinishedDelegate: () -> ()
+  private class ScanerHandler: NSObject, ScannerCallback {
+    let onNewDeviceFoundDelegate: (DeviceInfo) -> ()
+    let onAmbiguousDeviceFoundDelegate: (Array<DeviceInfo>) -> ()
+    let onScanFinishedDelegate: () -> ()
     
     func onNewDeviceFound(_ device: DeviceInfo!) { onNewDeviceFoundDelegate(device) }
     func onAmbiguousDeviceFound(_ devices: Array<DeviceInfo>) { onAmbiguousDeviceFoundDelegate(devices) }
     func onScanFinished() { onScanFinishedDelegate() }
     
-    init(onNewDeviceFoundDelegate: @escaping (DeviceInfo) -> (),
-      onAmbiguousDeviceFoundDelegate: @escaping (Array<DeviceInfo>) -> (),
-      onScanFinishedDelegate: @escaping () -> ()) {
-      self.onNewDeviceFoundDelegate = onNewDeviceFoundDelegate
-      self.onAmbiguousDeviceFoundDelegate = onAmbiguousDeviceFoundDelegate
+    init(onNewDeviceFound: @escaping (DeviceInfo) -> (),
+      onAmbiguousDeviceFound: @escaping (Array<DeviceInfo>) -> (),
+      onScanFinished: @escaping () -> ()) {
+      self.onNewDeviceFoundDelegate = onNewDeviceFound
+      self.onAmbiguousDeviceFoundDelegate = onAmbiguousDeviceFound
       self.onScanFinishedDelegate = onScanFinished
     }
   }
 
-  class AddDeviceHandler: AddDeviceCallback {
-    var obj: DeviceKit
-    var resolve: RCTPromiseResolveBlock
-    var reject: RCTPromiseRejectBlock
+  func startScan(resolver resolve: RCTPromiseResolveBlock, 
+    rejecter reject: RCTPromiseRejectBlock) {
+    print(Constants.APP_TAG, "Start scanning for devices.")
+    scannerToken = MedMDeviceKit.getScanner().start(ScanerHandler(
+      onNewDeviceFound: {
+        device in
+        self.foundDevices.append(device)
+        self.emitEvent(Self.DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(device))
+      },
+      onAmbiguousDeviceFound: {
+        devices in
+        for d in devices {
+          self.emitEvent(Self.AMBIGUOUS_DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(d))
+        }
+      },
+      onScanFinished: { self.emitEvent(Self.SCAN_FINISHED_EVENT, withData: nil) }
+    ))
+    resolve(nil)
+  }
 
-    init(object: DeviceKit, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-      self.obj = object
-      self.reject = reject
-      self.resolve = resolve
-    }
+  func stopScan(resolver resolve: RCTPromiseResolveBlock, 
+    rejecter reject: RCTPromiseRejectBlock) {
+    print(Constants.APP_TAG, "Stop scanning for devices.")
+    scannerToken?.stopScan()
+    resolve(nil)
+  }
 
-    func onFailure(device: DeviceInfo) {
-      let deviceString = obj.mapDeviceDescription(device).toString()
-      self.reject(PAIR_ERROR,
-        NSError(userInfo: "The following device could not be paired: \(deviceString)"))
-    }
-
-    func onSuccess(device: DeviceInfo) {
-      self.resolve(nil)
+  private class AddDeviceHandler: AddDeviceCallback {
+    let onSuccessDelegate: (DeviceInfo) -> ()
+    let onFailureDelegate: (DeviceInfo) -> ()
+    
+    func onSuccess(_ device: DeviceInfo!) { onSuccessDelegate(device) }
+    func onFailure(_ device: DeviceInfo!) { onFailureDelegate(device) }
+    
+    init(onSuccess: @escaping (DeviceInfo) -> (),
+      onFailure: @escaping (DeviceInfo) -> ()) {
+      self.onSuccessDelegate = onSuccess
+      self.onFailureDelegate = onFailure
     }
   }
 
-  func addDevice(_ sku: Int, resolver resolve: RCTPromiseResolveBlock, 
+  func addDevice(_ sku: Int,
+    resolver resolve: RCTPromiseResolveBlock, 
     rejecter reject: RCTPromiseRejectBlock) {
-    let handler = AddDeviceHandler(self, resolve, reject)
     print(Constants.APP_TAG, "Pair \(device.modelName) device with \(device.sku) SKU.")
+    let handler = AddDeviceHandler(
+      onSuccess: { resolve(nil) },
+      onFailure: {
+        device in
+        let deviceString = self.mapDeviceDescription(device).toString()
+        reject(Self.PAIR_ERROR,
+          NSError(userInfo: "The following device could not be paired: \(deviceString)"))
+      }
+    )
+    let device = foundDevices.first{ where: { $0.sku == sku } }!
     cancellationTokens.append(MedMDeviceKit.getDeviceManager().addDevice(handler, device))
   }
 
-  func removeDevice(address: String) {
+  func removeDevice(_ address: String,
+    resolver resolve: RCTPromiseResolveBlock, 
+    rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Remove device with \(address) address.")
-    MedMDeviceKit.getDeviceManager().removeDevice(address)
+    MedMDeviceKit.getDeviceManager().removeDeviceByAddress(address)
+    resolve(nil)
   }
 
   func listDevices(resolver resolve: RCTPromiseResolveBlock, 
     rejecter reject: RCTPromiseRejectBlock) {
-      resolve([MedMDeviceKit.getDeviceManager().devicesList.map { mapDeviceDescription($0) }])
+      resolve(MedMDeviceKit.getDeviceManager().devicesList.map { mapDeviceDescription($0) })
   }
 
-  func cancelPairings() {
+  func cancelPairings(resolver resolve: RCTPromiseResolveBlock, 
+    rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Cancel all pairings.")
     for token in cancellationTokens { token.cancel() }
+    resolve(nil)
+  }
+  
+  private class DataHandler: DataCallback {
+    let onNewDataDelegate: (DeviceInfo, String) -> ()
+    let onDataCollectionStoppedDelegate: () -> ()
+    
+    func onNewData(_ device: DeviceInfo!, data: String) { onNewDataDelegate(device, data) }
+    func onDataCollectionStopped() { onDataCollectionStoppedDelegate() }
+    
+    init(onNewData: @escaping (DeviceInfo) -> (),
+      onDataCollectionStopped: @escaping (DeviceInfo) -> ()) {
+      self.onNewDataDelegate = onNewData
+      self.onDataCollectionStoppedDelegate = onDataCollectionStopped
+    }
   }
 
-  func onNewData(device: DeviceInfo, data: String) {
-    let deviceMap = device != nil ? mapDeviceDescription(device) : nil
-    emitEvent(DATA_EVENT, ["data": data, "device": deviceMap])
+  private class DeviceStatusHandler: DeviceStatusCallback {
+    let onConnectedDelegate: (DeviceInfo) -> ()
+    let onDisconnectedDelegate: (DeviceInfo) -> ()
+    
+    func onConnected(_ device: DeviceInfo!) { onConnectedDelegate(device) }
+    func onDisconnected(_ device: DeviceInfo!) { onDisconnectedDelegate(device) }
+    
+    init(onConnected: @escaping (DeviceInfo) -> (),
+      onDisconnected: @escaping (DeviceInfo) -> ()) {
+      self.onConnectedDelegate = onConnected
+      self.onDisconnectedDelegate = onDisconnected
+    }
   }
 
-  func onDataCollectionStopped() {
-    emitEvent(COLLECTION_FINISHED_EVENT, nil)
-  }
-
-  func onConnected(device: DeviceInfo) {
-    emitEvent(DEVICE_CONNECTED_EVENT, mapDeviceDescription(device))
-  }
-
-  func onDisconnected(device: DeviceInfo) {
-    emitEvent(DEVICE_DISCONNECTED_EVENT, mapDeviceDescription(device))
-  }
-
-  func startCollection() {
+  func startCollection(resolver resolve: RCTPromiseResolveBlock, 
+    rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Start data collection.")
-    collectionToken = MedMDeviceKit.getCollector().start(self, self)
+    collectionToken = MedMDeviceKit.getCollector().start(DataHandler(
+      onNewData: {
+        device, data in
+        let deviceMap = device != nil ? self.mapDeviceDescription(device) : nil
+        self.emitEvent(Self.DATA_EVENT, withData: ["data": data, "device": deviceMap])
+      },
+      onDataCollectionStopped: { self.emitEvent(Self.COLLECTION_FINISHED_EVENT, withData: nil) }
+    ), DeviceStatusHandler(
+      onConnected: {
+        device in
+        self.emitEvent(Self.DEVICE_CONNECTED_EVENT, withData: self.mapDeviceDescription(device))
+      },
+      onDisconnected: {
+        device in
+        self.emitEvent(Self.DEVICE_DISCONNECTED_EVENT, withData: self.mapDeviceDescription(device))
+      }
+    ))
+    resolve(nil)
   }
 
-  func stopCollection() {
+  func stopCollection(resolver resolve: RCTPromiseResolveBlock, 
+    rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Stop data collection.")
     collectionToken?.stopCollect()
+    resolve(nil)
   }
 
   override func supportedEvents() -> [String]! {
     return [
-      DATA_EVENT, DEVICE_FOUND_EVENT, DEVICE_CONNECTED_EVENT,
-      DEVICE_DISCONNECTED_EVENT, AMBIGUOUS_DEVICE_FOUND_EVENT,
-      SCAN_FINISHED_EVENT, COLLECTION_FINISHED_EVENT
+      Self.DATA_EVENT, Self.DEVICE_FOUND_EVENT, Self.DEVICE_CONNECTED_EVENT,
+      Self.DEVICE_DISCONNECTED_EVENT, Self.AMBIGUOUS_DEVICE_FOUND_EVENT,
+      Self.SCAN_FINISHED_EVENT, Self.COLLECTION_FINISHED_EVENT
     ]
   }
 
