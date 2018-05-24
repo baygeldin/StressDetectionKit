@@ -38,6 +38,7 @@
     "react-native-background-timer": "^2.0.1",
     "react-native-elements": "^0.18.5",
     "react-native-fs": "^2.9.11",
+    "react-native-permissions": "^1.1.1",
     "react-native-progress": "^3.4.0",
     "react-native-sensors": "3.0.0",
     "react-native-splash-screen": "^3.0.6",

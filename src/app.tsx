@@ -10,6 +10,7 @@ import SplashScreen from 'react-native-splash-screen';
 import { addNavigationHelpers, StackNavigator } from 'react-navigation';
 import DeveloperScreen from 'screens/developer';
 import HomeScreen from 'screens/home';
+import Permissions from 'react-native-permissions'
 import SettingsScreen from 'screens/settings';
 import Store from 'stores/main';
 import Router from 'stores/router';
