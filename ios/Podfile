@@ -4,21 +4,27 @@
 use_frameworks!
 
 target 'StressDetectionKit' do
+  pod 'React', :path => '../node_modules/react-native', :subspecs => [
+    'Core',
+    'CxxBridge',
+    'DevSupport',
+    'RCTText',
+    'ART'
+  ]
+  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
   pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
   pod 'RNFS', :path => '../node_modules/react-native-fs'
   pod 'react-native-background-timer', :path => '../node_modules/react-native-background-timer'
   pod 'RNSensors', :path => '../node_modules/react-native-sensors'
-  pod 'React', path: '../node_modules/react-native', subspecs: [
-    'ART',
-  ]
   pod 'RNSVG', :path => '../node_modules/react-native-svg'
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+  pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions'
 end
 
-# post_install do |installer|
-#   installer.pods_project.targets.each do |target|
-#     if target.name == "React"
-#       target.remove_from_project
-#     end
-#   end
-# end
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    if target.name == "React"
+      target.remove_from_project
+    end
+  end
+end
