@@ -3,8 +3,7 @@
 
 @interface RCT_EXTERN_MODULE(DeviceKit, RCTEventEmitter)
 
-_RCT_EXTERN_REMAP_METHOD(init, initialize, false)
-
+RCT_EXTERN_METHOD(initialize)
 RCT_EXTERN_METHOD(stopScan)
 RCT_EXTERN_METHOD(startScan)
 

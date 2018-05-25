@@ -242,7 +242,7 @@ export default class Main {
     this.devices = [];
 
     this.sdk.on('deviceFound', d => this.addDevice(d));
-    this.sdk.startScan();
+    this.sdk.startScan().catch(e => console.error(e));
   }
 
   @action.bound
@@ -252,7 +252,7 @@ export default class Main {
     this.scanning = false;
 
     this.sdk.removeAllListeners('deviceFound');
-    this.sdk.stopScan();
+    this.sdk.stopScan().catch(e => console.error(e));
   }
 
   @action.bound
@@ -284,7 +284,7 @@ export default class Main {
   @action.bound
   removeCurrentDevice() {
     if (this.currentDevice) {
-      this.sdk.removeDevice(this.currentDevice);
+      this.sdk.removeDevice(this.currentDevice).catch(e => console.error(e));
       this.currentDevice = undefined;
     }
   }
@@ -344,7 +344,7 @@ export default class Main {
 
   private stopSensors() {
     if (ACCELERATED_MODE) return;
-    this.sdk.stopCollection();
+    this.sdk.stopCollection().catch(e => console.error(e));
     this.accelerometer.stop();
     // this.gyroscope.stop();
   }
@@ -431,7 +431,7 @@ export default class Main {
       }
     });
 
-    this.sdk.startCollection();
+    this.sdk.startCollection().catch(e => console.error(e));
   }
 
   private startSensorCollection(sensor: Sensor) {

@@ -1,4 +1,4 @@
-import { NativeModules, DeviceEventEmitter } from 'react-native';
+import { NativeModules, NativeEventEmitter } from 'react-native';
 import { EventEmitter } from 'events';
 
 export interface Device {
@@ -30,6 +30,7 @@ type STATE_EVENTS = SCAN_FINISHED | COLLECTION_FINISHED;
 type EVENTS = DATA | DEVICE_EVENTS | STATE_EVENTS;
 
 const DeviceKitModule = NativeModules.DeviceKit;
+const eventEmitter = new NativeEventEmitter(DeviceKitModule);
 const { EVENT_PREFIX, EVENTS } = DeviceKitModule;
 
 interface DeviceKit {
@@ -51,46 +52,46 @@ class DeviceKit extends EventEmitter {
     super();
 
     for (let e of EVENTS) {
-      DeviceEventEmitter.addListener(`${EVENT_PREFIX}:${e}`, d => {
+      eventEmitter.addListener(`${EVENT_PREFIX}:${e}`, d => {
         d !== null ? this.emit(e, d) : this.emit(e);
       });
     }
   }
 
   register(key: string): Promise<void> {
-    return DeviceKitModule.init(key);
+    return DeviceKitModule.initialize(key);
   }
 
-  startScan() {
-    DeviceKitModule.startScan();
+  startScan(): Promise<void> {
+    return DeviceKitModule.startScan();
   }
 
-  stopScan() {
-    DeviceKitModule.stopScan();
+  stopScan(): Promise<void> {
+    return DeviceKitModule.stopScan();
   }
 
   addDevice(device: Device): Promise<void> {
     return DeviceKitModule.addDevice(device.id);
   }
 
-  removeDevice(device: Device) {
-    DeviceKitModule.removeDevice(device.address);
+  removeDevice(device: Device): Promise<void> {
+    return DeviceKitModule.removeDevice(device.address);
   }
 
   fetchDevices(): Promise<Device[]> {
     return DeviceKitModule.listDevices();
   }
 
-  cancelPairings() {
-    DeviceKitModule.cancelPairings();
+  cancelPairings(): Promise<void> {
+    return DeviceKitModule.cancelPairings();
   }
 
-  startCollection() {
-    DeviceKitModule.startCollection();
+  startCollection(): Promise<void> {
+    return DeviceKitModule.startCollection();
   }
 
-  stopCollection() {
-    DeviceKitModule.stopCollection();
+  stopCollection(): Promise<void> {
+    return DeviceKitModule.stopCollection();
   }
 }
 
