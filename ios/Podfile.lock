@@ -8,7 +8,8 @@ PODS:
   - glog (0.3.4)
   - React (0.55.4):
     - React/Core (= 0.55.4)
-  - react-native-background-timer (2.0.1)
+  - react-native-background-timer (2.0.1):
+    - React
   - react-native-splash-screen (3.0.6):
     - React
   - React/ART (0.55.4):
@@ -33,7 +34,16 @@ PODS:
     - React/PrivateDatabase
   - React/jsinspector (0.55.4)
   - React/PrivateDatabase (0.55.4)
+  - React/RCTActionSheet (0.55.4):
+    - React/Core
+  - React/RCTAnimation (0.55.4):
+    - React/Core
   - React/RCTBlob (0.55.4):
+    - React/Core
+  - React/RCTImage (0.55.4):
+    - React/Core
+    - React/RCTNetwork
+  - React/RCTNetwork (0.55.4):
     - React/Core
   - React/RCTText (0.55.4):
     - React/Core
@@ -54,13 +64,23 @@ PODS:
   - yoga (0.55.4.React)
 
 DEPENDENCIES:
+  - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
+  - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
+  - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - react-native-background-timer (from `../node_modules/react-native-background-timer`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - React/ART (from `../node_modules/react-native`)
   - React/Core (from `../node_modules/react-native`)
   - React/CxxBridge (from `../node_modules/react-native`)
+  - React/cxxreact (from `../node_modules/react-native`)
   - React/DevSupport (from `../node_modules/react-native`)
+  - React/jschelpers (from `../node_modules/react-native`)
+  - React/RCTActionSheet (from `../node_modules/react-native`)
+  - React/RCTAnimation (from `../node_modules/react-native`)
+  - React/RCTImage (from `../node_modules/react-native`)
+  - React/RCTNetwork (from `../node_modules/react-native`)
   - React/RCTText (from `../node_modules/react-native`)
+  - React/RCTWebSocket (from `../node_modules/react-native`)
   - ReactNativePermissions (from `../node_modules/react-native-permissions`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNSensors (from `../node_modules/react-native-sensors`)
@@ -71,11 +91,14 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - boost-for-react-native
-    - DoubleConversion
-    - Folly
-    - glog
 
 EXTERNAL SOURCES:
+  DoubleConversion:
+    :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
+  Folly:
+    :podspec: "../node_modules/react-native/third-party-podspecs/Folly.podspec"
+  glog:
+    :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
   React:
     :path: "../node_modules/react-native"
   react-native-background-timer:
@@ -101,7 +124,7 @@ SPEC CHECKSUMS:
   Folly: 211775e49d8da0ca658aebc8eab89d642935755c
   glog: 1de0bb937dccdc981596d3b5825ebfb765017ded
   React: aa2040dbb6f317b95314968021bd2888816e03d5
-  react-native-background-timer: 8791c4dfed51d12a103b37a9f365117bee6f298f
+  react-native-background-timer: 63dcbf37dbcf294b5c6c071afcdc661fa06a7594
   react-native-splash-screen: 8e3f866dc79bfe533baeffd0a38c33f7a7eae7f8
   ReactNativePermissions: 9f2d9c45c98800795e6c2ed330e25d11a66a8169
   RNFS: bbb1a64eb245763daf34aea86f97c97c4e85f74c
@@ -110,6 +133,6 @@ SPEC CHECKSUMS:
   RNVectorIcons: c0dbfbf6068fefa240c37b0f71bd03b45dddac44
   yoga: a23273df0088bf7f2bb7e5d7b00044ea57a2a54a
 
-PODFILE CHECKSUM: 8681111fbb9efcd0475efafc0ac678399a0b3469
+PODFILE CHECKSUM: 185eb3167a69af69953c4a42c9751c3cafad38ef
 
 COCOAPODS: 1.5.2

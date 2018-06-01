@@ -1,17 +1,29 @@
+plugin 'cocoapods-fix-react-native'
+
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '9.0'
 # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
 use_frameworks!
 
 target 'StressDetectionKit' do
+  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
+  pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
+  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
   pod 'React', :path => '../node_modules/react-native', :subspecs => [
     'Core',
+    'jschelpers',
+    'cxxreact',
     'CxxBridge',
     'DevSupport',
     'RCTText',
+    'RCTImage',
+    'RCTNetwork',
+    'RCTActionSheet',
+    'RCTAnimation',
+    'RCTWebSocket',
     'ART'
   ]
-  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
   pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
   pod 'RNFS', :path => '../node_modules/react-native-fs'
   pod 'react-native-background-timer', :path => '../node_modules/react-native-background-timer'
@@ -19,12 +31,4 @@ target 'StressDetectionKit' do
   pod 'RNSVG', :path => '../node_modules/react-native-svg'
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
   pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions'
-end
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    if target.name == "React"
-      target.remove_from_project
-    end
-  end
 end
