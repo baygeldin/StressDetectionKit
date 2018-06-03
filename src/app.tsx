@@ -45,13 +45,13 @@ export default class extends Component<any, any> {
 
   componentDidMount() {
     const key = process.env.MEDM_DEVICEKIT_LICENSE_KEY;
-
+    
     if (key) {
       store.initialize(key).then(() => {
         SplashScreen.hide();
 
         const requests = Platform.select({
-          ios: [],
+          ios: ['bluetooth'],
           android: ['location']
         });
 

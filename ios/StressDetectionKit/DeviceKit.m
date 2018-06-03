@@ -3,12 +3,31 @@
 
 @interface RCT_EXTERN_MODULE(DeviceKit, RCTEventEmitter)
 
-RCT_EXTERN_METHOD(initialize)
-RCT_EXTERN_METHOD(stopScan)
-RCT_EXTERN_METHOD(startScan)
+RCT_EXTERN_METHOD(
+  initialize: (NSString)key
+  resolver: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
 
-RCT_EXTERN_METHOD(stopCollection)
-RCT_EXTERN_METHOD(startCollection)
+RCT_EXTERN_METHOD(
+  stopScan: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
+  startScan: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
+  stopCollection: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
+  startCollection: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
 
 RCT_EXTERN_METHOD(
   listDevices: (RCTPromiseResolveBlock)resolve
@@ -21,8 +40,15 @@ RCT_EXTERN_METHOD(
   rejecter: (RCTPromiseRejectBlock)reject
 )
 
-RCT_EXTERN_METHOD(removeDevice: (Int)sku)
+RCT_EXTERN_METHOD(
+  removeDevice: (Int)sku
+  resolver: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
 
-RCT_EXTERN_METHOD(cancelPairings)
+RCT_EXTERN_METHOD(
+  cancelPairings: (RCTPromiseResolveBlock)resolve
+  rejecter: (RCTPromiseRejectBlock)reject
+)
 
 @end

@@ -1,5 +1,5 @@
-import { NativeModules, NativeEventEmitter } from 'react-native';
 import { EventEmitter } from 'events';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 
 export interface Device {
   id: number;
@@ -31,7 +31,7 @@ type EVENTS = DATA | DEVICE_EVENTS | STATE_EVENTS;
 
 const DeviceKitModule = NativeModules.DeviceKit;
 const eventEmitter = new NativeEventEmitter(DeviceKitModule);
-const { EVENT_PREFIX, EVENTS } = DeviceKitModule;
+const { EVENTS } = DeviceKitModule;
 
 interface DeviceKit {
   on(event: DATA, fn: (reading: Reading) => void): this;
@@ -52,7 +52,7 @@ class DeviceKit extends EventEmitter {
     super();
 
     for (let e of EVENTS) {
-      eventEmitter.addListener(`${EVENT_PREFIX}:${e}`, d => {
+      eventEmitter.addListener(e, d => {
         d !== null ? this.emit(e, d) : this.emit(e);
       });
     }

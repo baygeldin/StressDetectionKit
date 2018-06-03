@@ -1,5 +1,5 @@
-import { AsyncStorage } from 'react-native';
 import { APP_NAME } from 'lib/constants';
+import { AsyncStorage } from 'react-native';
 
 function _get(name: string, fn: (data: string) => any) {
   return AsyncStorage.getItem(`@${APP_NAME}:${name}`).then(fn, () => undefined);

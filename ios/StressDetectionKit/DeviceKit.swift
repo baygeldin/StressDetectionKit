@@ -1,7 +1,6 @@
 import Foundation
 
-@objc(DeviceKit)
-class DeviceKit: RCTEventEmitter {
+@objc class DeviceKit: RCTEventEmitter {
   private typealias `Self` = DeviceKit
 
   static let MODULE_NAME = "DeviceKit"
@@ -9,7 +8,6 @@ class DeviceKit: RCTEventEmitter {
   static let INIT_ERROR = "INIT_ERROR"
   static let PAIR_ERROR = "PAIR_ERROR"
 
-  static let EVENT_PREFIX = MODULE_NAME
   static let DATA_EVENT = "data"
   static let DEVICE_FOUND_EVENT = "deviceFound"
   static let DEVICE_CONNECTED_EVENT = "deviceConnected"
@@ -20,7 +18,6 @@ class DeviceKit: RCTEventEmitter {
 
   override func constantsToExport() -> [AnyHashable : Any] {
     return [
-      "EVENT_PREFIX": Self.EVENT_PREFIX,
       "EVENTS": supportedEvents()
     ]
   }
@@ -33,7 +30,7 @@ class DeviceKit: RCTEventEmitter {
 
   private func emitEvent(_ eventName: String, withData data: Any?) {
     print(Constants.APP_TAG, "Send \(eventName) event.")
-    sendEvent(withName: "\(Self.EVENT_PREFIX):\(eventName)", body: data)
+    sendEvent(withName: eventName, body: data)
   }
 
   private func mapDeviceDescription(_ device: DeviceInfo) -> [String: Any] {
@@ -58,7 +55,10 @@ class DeviceKit: RCTEventEmitter {
     let onAmbiguousDeviceFoundDelegate: (Array<DeviceInfo>) -> ()
     let onScanFinishedDelegate: () -> ()
     
-    func onNewDeviceFound(_ device: DeviceInfo!) { onNewDeviceFoundDelegate(device) }
+    func onNewDeviceFound(_ device: DeviceInfo!) {
+      print("found device oh yeah")
+      //onNewDeviceFoundDelegate(device)
+    }
     func onAmbiguousDeviceFound(_ devices: Array<DeviceInfo>) { onAmbiguousDeviceFoundDelegate(devices) }
     func onScanFinished() { onScanFinishedDelegate() }
     
@@ -71,7 +71,7 @@ class DeviceKit: RCTEventEmitter {
     }
   }
 
-  func startScan(resolver resolve: RCTPromiseResolveBlock, 
+  func startScan(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Start scanning for devices.")
     scannerToken = MedMDeviceKit.getScanner().start(ScanerHandler(
@@ -91,7 +91,7 @@ class DeviceKit: RCTEventEmitter {
     resolve(nil)
   }
 
-  func stopScan(resolver resolve: RCTPromiseResolveBlock, 
+  func stopScan(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Stop scanning for devices.")
     scannerToken?.stopScan()
@@ -136,12 +136,12 @@ class DeviceKit: RCTEventEmitter {
     resolve(nil)
   }
 
-  func listDevices(resolver resolve: RCTPromiseResolveBlock, 
+  func listDevices(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
       resolve(MedMDeviceKit.getDeviceManager().getDevicesList().map { mapDeviceDescription($0) })
   }
 
-  func cancelPairings(resolver resolve: RCTPromiseResolveBlock, 
+  func cancelPairings(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Cancel all pairings.")
     for token in cancellationTokens { token.cancel() }
@@ -176,7 +176,7 @@ class DeviceKit: RCTEventEmitter {
     }
   }
 
-  func startCollection(resolver resolve: RCTPromiseResolveBlock, 
+  func startCollection(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Start data collection.")
     collectionToken = MedMDeviceKit.getCollector().start(DataHandler(
@@ -200,7 +200,7 @@ class DeviceKit: RCTEventEmitter {
     resolve(nil)
   }
 
-  func stopCollection(resolver resolve: RCTPromiseResolveBlock, 
+  func stopCollection(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Stop data collection.")
     collectionToken?.stopCollect()
