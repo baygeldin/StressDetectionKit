@@ -35,13 +35,13 @@ RCT_EXTERN_METHOD(
 )
 
 RCT_EXTERN_METHOD(
-  addDevice: (Int)sku
+  addDevice: (NSInteger)sku
   resolver: (RCTPromiseResolveBlock)resolve
   rejecter: (RCTPromiseRejectBlock)reject
 )
 
 RCT_EXTERN_METHOD(
-  removeDevice: (Int)sku
+  removeDevice: (NSString)address
   resolver: (RCTPromiseResolveBlock)resolve
   rejecter: (RCTPromiseRejectBlock)reject
 )

@@ -1,6 +1,7 @@
 import Foundation
 
-@objc class DeviceKit: RCTEventEmitter {
+@objc(DeviceKit)
+class DeviceKit: RCTEventEmitter {
   private typealias `Self` = DeviceKit
 
   static let MODULE_NAME = "DeviceKit"
@@ -25,6 +26,11 @@ import Foundation
   private var scannerToken: ScannerStopToken? = nil
   private var collectionToken: CollectorStopToken? = nil
   private var cancellationTokens: Array<DeviceAddingCancellationToken> = []
+  
+  private var scanerHandler: ScannerCallback?
+  private var addDeviceHandler: AddDeviceCallback?
+  private var dataHandler: DataCallback?
+  private var deviceStatusHandler: DeviceStatusCallback?
 
   private var foundDevices: Array<DeviceInfo> = []
 
@@ -55,10 +61,7 @@ import Foundation
     let onAmbiguousDeviceFoundDelegate: (Array<DeviceInfo>) -> ()
     let onScanFinishedDelegate: () -> ()
     
-    func onNewDeviceFound(_ device: DeviceInfo!) {
-      print("found device oh yeah")
-      //onNewDeviceFoundDelegate(device)
-    }
+    func onNewDeviceFound(_ device: DeviceInfo!) { onNewDeviceFoundDelegate(device) }
     func onAmbiguousDeviceFound(_ devices: Array<DeviceInfo>) { onAmbiguousDeviceFoundDelegate(devices) }
     func onScanFinished() { onScanFinishedDelegate() }
     
@@ -74,20 +77,21 @@ import Foundation
   func startScan(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Start scanning for devices.")
-    scannerToken = MedMDeviceKit.getScanner().start(ScanerHandler(
+    scanerHandler = ScanerHandler(
       onNewDeviceFound: {
         device in
         self.foundDevices.append(device)
         self.emitEvent(Self.DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(device))
-      },
+    },
       onAmbiguousDeviceFound: {
         devices in
         for d in devices {
           self.emitEvent(Self.AMBIGUOUS_DEVICE_FOUND_EVENT, withData: self.mapDeviceDescription(d))
         }
-      },
+    },
       onScanFinished: { self.emitEvent(Self.SCAN_FINISHED_EVENT, withData: nil) }
-    ))
+    )
+    scannerToken = MedMDeviceKit.getScanner().start(scanerHandler)
     resolve(nil)
   }
 
@@ -117,7 +121,7 @@ import Foundation
     rejecter reject: @escaping RCTPromiseRejectBlock) {
     let device = foundDevices.first{ $0.sku == NSNumber(value: sku) }!
     print(Constants.APP_TAG, "Pair \(device.modelName) device with \(device.sku) SKU.")
-    let handler = AddDeviceHandler(
+    addDeviceHandler = AddDeviceHandler(
       onSuccess: { device in resolve(nil) },
       onFailure: {
         device in
@@ -125,7 +129,7 @@ import Foundation
         reject(Self.PAIR_ERROR, msg, NSError(domain: "", code: 0, userInfo: [ NSLocalizedDescriptionKey: msg ]))
       }
     )
-    cancellationTokens.append(MedMDeviceKit.getDeviceManager().addDevice(handler, device))
+    cancellationTokens.append(MedMDeviceKit.getDeviceManager().addDevice(addDeviceHandler, device))
   }
 
   func removeDevice(_ address: String,
@@ -179,7 +183,7 @@ import Foundation
   func startCollection(_ resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock) {
     print(Constants.APP_TAG, "Start data collection.")
-    collectionToken = MedMDeviceKit.getCollector().start(DataHandler(
+    dataHandler = DataHandler(
       onNewData: {
         device, reading in
         let deviceMap = device != nil ? self.mapDeviceDescription(device!) : nil
@@ -187,7 +191,8 @@ import Foundation
         self.emitEvent(Self.DATA_EVENT, withData: data)
       },
       onDataCollectionStopped: { self.emitEvent(Self.COLLECTION_FINISHED_EVENT, withData: nil) }
-    ), DeviceStatusHandler(
+    )
+    deviceStatusHandler = DeviceStatusHandler(
       onConnected: {
         device in
         self.emitEvent(Self.DEVICE_CONNECTED_EVENT, withData: self.mapDeviceDescription(device))
@@ -196,7 +201,8 @@ import Foundation
         device in
         self.emitEvent(Self.DEVICE_DISCONNECTED_EVENT, withData: self.mapDeviceDescription(device))
       }
-    ))
+    )
+    collectionToken = MedMDeviceKit.getCollector().start(dataHandler, deviceStatusHandler)
     resolve(nil)
   }
 
