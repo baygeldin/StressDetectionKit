@@ -1,11 +1,12 @@
 import { TESTING_MODE } from 'lib/constants';
 import DeviceKit from 'lib/device-kit';
+import { requestPermissions } from 'lib/helpers';
 import initSideEffects from 'lib/side-effects';
 import { configure } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
 import { Component } from 'react';
 import * as React from 'react';
-import { Alert, BackHandler, PermissionsAndroid } from 'react-native';
+import { Alert, BackHandler, Platform } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import { addNavigationHelpers, StackNavigator } from 'react-navigation';
 import DeveloperScreen from 'screens/developer';
@@ -44,46 +45,48 @@ export default class extends Component<any, any> {
 
   componentDidMount() {
     const key = process.env.MEDM_DEVICEKIT_LICENSE_KEY;
-
+    
     if (key) {
       store.initialize(key).then(() => {
         SplashScreen.hide();
 
-        const requests = [PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION];
+        const requests = Platform.select({
+          ios: ['bluetooth'],
+          android: ['location']
+        });
 
-        if (__DEV__ || TESTING_MODE) {
-          requests.push(
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-          );
+        if ((__DEV__ || TESTING_MODE) && Platform.OS === 'android') {
+          requests.push('storage');
         }
 
-        PermissionsAndroid.requestMultiple(requests).then(permissions => {
-          if (!Object.values(permissions).every(p => p === 'granted')) {
-            Alert.alert(
-              'Permissions Not Granted',
-              'Requested permissions are required for the app to work properly. Please, grant them next time.',
-              [{ text: 'OK' }],
-              { cancelable: false }
-            );
-          }
+        requestPermissions(requests).catch(() => {
+          Alert.alert(
+            'Permissions Not Granted',
+            'Requested permissions are required for the app to work properly. Please, grant them next time.',
+            [{ text: 'OK' }],
+            { cancelable: false }
+          );
         });
       });
     } else {
       throw new Error('MEDM_DEVICEKIT_LICENSE_KEY is not provided!');
     }
 
-    BackHandler.addEventListener('hardwareBackPress', () => {
-      if (router.state.index === 0) {
-        return false;
-      } else {
-        router.goBack();
-        return true;
-      }
-    });
+    if (Platform.OS === 'android') {
+      BackHandler.addEventListener('hardwareBackPress', () => {
+        if (router.state.index === 0) {
+          return false;
+        } else {
+          router.goBack();
+          return true;
+        }
+      });
+    }
   }
 
   componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', router.goBack);
+    if (Platform.OS === 'android') {
+      BackHandler.removeEventListener('hardwareBackPress', router.goBack);
+    }
   }
 }

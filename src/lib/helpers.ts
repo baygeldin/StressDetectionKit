@@ -7,8 +7,9 @@ import {
 } from 'lib/constants';
 import { Device, Reading } from 'lib/device-kit';
 import { StressLevel } from 'lib/types';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as RNFS from 'react-native-fs';
+import Permissions from 'react-native-permissions';
 import { DOMParser } from 'xmldom';
 
 export function chunkBySize<T>(array: T[], size: number) {
@@ -128,14 +129,27 @@ export function readingToStreams(reading: Reading) {
   return { pulse: pulseStream, rrIntervals: rrIntervalsStream };
 }
 
+const APP_DATA_FOLDER = Platform.select({
+  ios: `${RNFS.DocumentDirectoryPath}/app_data`,
+  android: `${RNFS.ExternalStorageDirectoryPath}/${APP_NAME}`
+});
+
 // Persist data to disk to the application folder
 export function persist(
   folder: string,
   filename: string,
   data: any
 ): Promise<void> {
-  const path = `${RNFS.ExternalStorageDirectoryPath}/${APP_NAME}/${folder}`;
+  const path = `${APP_DATA_FOLDER}/${folder}`;
   return RNFS.mkdir(path).then(() =>
     RNFS.writeFile(`${path}/${filename}`, JSON.stringify(data), 'ascii')
   );
+}
+
+export async function requestPermissions(requests: string[]) {
+  for (let r of requests) {
+    if ((await Permissions.request(r)) !== 'authorized') {
+      throw new Error(`Request for ${r} denied.`);
+    }
+  }
 }
