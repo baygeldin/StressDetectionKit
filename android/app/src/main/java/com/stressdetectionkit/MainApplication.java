@@ -13,6 +13,7 @@ import com.oblador.vectoricons.VectorIconsPackage;
 import com.sensors.RNSensorsPackage;
 import com.horcrux.svg.SvgPackage;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
+import com.solinor.bluetoothstatus.RNBluetoothManagerPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +37,8 @@ public class MainApplication extends Application implements ReactApplication {
                     new RNSensorsPackage(),
                     new SvgPackage(),
                     new SplashScreenReactPackage(),
-                    new ForegroundPackage()
+                    new ForegroundPackage(),
+                    new RNBluetoothManagerPackage()
             );
         }
 
