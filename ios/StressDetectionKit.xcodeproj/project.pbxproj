@@ -45,6 +45,7 @@
 		A3A5D4FF6CC949258679A1FA /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 972411A52A9B46C784416C1D /* SimpleLineIcons.ttf */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		D12162CB20CBD42000E0BAB8 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D121629920CBD41600E0BAB8 /* libART.a */; };
+		D1286FA320CD91CC0058DAEC /* libRNBluetoothManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1286FA220CD91BF0058DAEC /* libRNBluetoothManager.a */; };
 		D130E13E20B34DA8006298A3 /* DeviceKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130E13C20B34DA7006298A3 /* DeviceKit.swift */; };
 		D130E13F20B34DA8006298A3 /* DeviceKit.m in Sources */ = {isa = PBXBuildFile; fileRef = D130E13D20B34DA7006298A3 /* DeviceKit.m */; };
 		D130E18220B485A3006298A3 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
@@ -54,7 +55,6 @@
 		D1496A6920C4202300A2F978 /* libRNSVG.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A5820C41FB700A2F978 /* libRNSVG.a */; };
 		D1496A6A20C4203D00A2F978 /* libRNBackgroundTimer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A4F20C41F9700A2F978 /* libRNBackgroundTimer.a */; };
 		D1496A6B20C4204400A2F978 /* libRNSensors.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A4820C41F7500A2F978 /* libRNSensors.a */; };
-		D1496A6C20C4204A00A2F978 /* libReactNativePermissions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A4220C41F6200A2F978 /* libReactNativePermissions.a */; };
 		D1496A6D20C4205000A2F978 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A3A20C41F4200A2F978 /* libRNFS.a */; };
 		D1496A6E20C4205300A2F978 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A3C20C41F4200A2F978 /* libRNFS.a */; };
 		D17B6B1F20C995E000E6E1A5 /* MedMDeviceKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D17B6B1D20C9958700E6E1A5 /* MedMDeviceKit.framework */; };
@@ -353,6 +353,13 @@
 			remoteGlobalIDString = 323A12871E5F266B004975B8;
 			remoteInfo = "ART-tvOS";
 		};
+		D1286FA120CD91BF0058DAEC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1286F9C20CD91BE0058DAEC /* RNBluetoothManager.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNBluetoothManager;
+		};
 		D1496A3920C41F4200A2F978 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D1496A3420C41F4200A2F978 /* RNFS.xcodeproj */;
@@ -366,13 +373,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 6456441F1EB8DA9100672408;
 			remoteInfo = "RNFS-tvOS";
-		};
-		D1496A4120C41F6200A2F978 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D1496A3D20C41F6200A2F978 /* ReactNativePermissions.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 9D23B34F1C767B80008B4819;
-			remoteInfo = ReactNativePermissions;
 		};
 		D1496A4720C41F7500A2F978 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -475,12 +475,12 @@
 		9B6C1D43E6EA4F90A805EE68 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		D121629320CBD41500E0BAB8 /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
+		D1286F9C20CD91BE0058DAEC /* RNBluetoothManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBluetoothManager.xcodeproj; path = "../node_modules/react-native-bluetooth-status/ios/RNBluetoothManager.xcodeproj"; sourceTree = "<group>"; };
 		D130E11620B34DA5006298A3 /* StressDetectionKit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StressDetectionKit-Bridging-Header.h"; sourceTree = "<group>"; };
 		D130E13C20B34DA7006298A3 /* DeviceKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeviceKit.swift; path = StressDetectionKit/DeviceKit.swift; sourceTree = "<group>"; };
 		D130E13D20B34DA7006298A3 /* DeviceKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceKit.m; path = StressDetectionKit/DeviceKit.m; sourceTree = "<group>"; };
 		D130E18520B497E9006298A3 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = StressDetectionKit/Constants.swift; sourceTree = "<group>"; };
 		D1496A3420C41F4200A2F978 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
-		D1496A3D20C41F6200A2F978 /* ReactNativePermissions.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativePermissions.xcodeproj; path = "../node_modules/react-native-permissions/ios/ReactNativePermissions.xcodeproj"; sourceTree = "<group>"; };
 		D1496A4320C41F7500A2F978 /* RNSensors.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSensors.xcodeproj; path = "../node_modules/react-native-sensors/ios/RNSensors.xcodeproj"; sourceTree = "<group>"; };
 		D1496A4920C41F9600A2F978 /* RNBackgroundTimer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBackgroundTimer.xcodeproj; path = "../node_modules/react-native-background-timer/ios/RNBackgroundTimer.xcodeproj"; sourceTree = "<group>"; };
 		D1496A5220C41FB700A2F978 /* RNSVG.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSVG.xcodeproj; path = "../node_modules/react-native-svg/ios/RNSVG.xcodeproj"; sourceTree = "<group>"; };
@@ -523,10 +523,10 @@
 				D1496A6920C4202300A2F978 /* libRNSVG.a in Frameworks */,
 				D1496A6A20C4203D00A2F978 /* libRNBackgroundTimer.a in Frameworks */,
 				D1496A6B20C4204400A2F978 /* libRNSensors.a in Frameworks */,
-				D1496A6C20C4204A00A2F978 /* libReactNativePermissions.a in Frameworks */,
 				D1496A6D20C4205000A2F978 /* libRNFS.a in Frameworks */,
 				D1496A6E20C4205300A2F978 /* libRNFS.a in Frameworks */,
 				D12162CB20CBD42000E0BAB8 /* libART.a in Frameworks */,
+				D1286FA320CD91CC0058DAEC /* libRNBluetoothManager.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -724,13 +724,13 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				D1286F9C20CD91BE0058DAEC /* RNBluetoothManager.xcodeproj */,
 				D121629320CBD41500E0BAB8 /* ART.xcodeproj */,
 				D1496A6120C4201000A2F978 /* RNVectorIcons.xcodeproj */,
 				D1496A5B20C41FD600A2F978 /* SplashScreen.xcodeproj */,
 				D1496A5220C41FB700A2F978 /* RNSVG.xcodeproj */,
 				D1496A4920C41F9600A2F978 /* RNBackgroundTimer.xcodeproj */,
 				D1496A4320C41F7500A2F978 /* RNSensors.xcodeproj */,
-				D1496A3D20C41F6200A2F978 /* ReactNativePermissions.xcodeproj */,
 				D1496A3420C41F4200A2F978 /* RNFS.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
@@ -801,19 +801,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		D1286F9D20CD91BE0058DAEC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D1286FA220CD91BF0058DAEC /* libRNBluetoothManager.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		D1496A3520C41F4200A2F978 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				D1496A3A20C41F4200A2F978 /* libRNFS.a */,
 				D1496A3C20C41F4200A2F978 /* libRNFS.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		D1496A3E20C41F6200A2F978 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				D1496A4220C41F6200A2F978 /* libReactNativePermissions.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1033,12 +1033,12 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
-					ProductGroup = D1496A3E20C41F6200A2F978 /* Products */;
-					ProjectRef = D1496A3D20C41F6200A2F978 /* ReactNativePermissions.xcodeproj */;
-				},
-				{
 					ProductGroup = D1496A4A20C41F9600A2F978 /* Products */;
 					ProjectRef = D1496A4920C41F9600A2F978 /* RNBackgroundTimer.xcodeproj */;
+				},
+				{
+					ProductGroup = D1286F9D20CD91BE0058DAEC /* Products */;
+					ProjectRef = D1286F9C20CD91BE0058DAEC /* RNBluetoothManager.xcodeproj */;
 				},
 				{
 					ProductGroup = D1496A3520C41F4200A2F978 /* Products */;
@@ -1345,6 +1345,13 @@
 			remoteRef = D121629A20CBD41600E0BAB8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		D1286FA220CD91BF0058DAEC /* libRNBluetoothManager.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNBluetoothManager.a;
+			remoteRef = D1286FA120CD91BF0058DAEC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		D1496A3A20C41F4200A2F978 /* libRNFS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1357,13 +1364,6 @@
 			fileType = archive.ar;
 			path = libRNFS.a;
 			remoteRef = D1496A3B20C41F4200A2F978 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		D1496A4220C41F6200A2F978 /* libReactNativePermissions.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libReactNativePermissions.a;
-			remoteRef = D1496A4120C41F6200A2F978 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		D1496A4820C41F7500A2F978 /* libRNSensors.a */ = {

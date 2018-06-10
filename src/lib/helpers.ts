@@ -8,8 +8,8 @@ import {
 import { Device, Reading } from 'lib/device-kit';
 import { StressLevel } from 'lib/types';
 import { Alert, Platform } from 'react-native';
+import { BluetoothStatus } from 'react-native-bluetooth-status';
 import * as RNFS from 'react-native-fs';
-import Permissions from 'react-native-permissions';
 import { DOMParser } from 'xmldom';
 
 export function chunkBySize<T>(array: T[], size: number) {
@@ -146,10 +146,19 @@ export function persist(
   );
 }
 
-export async function requestPermissions(requests: string[]) {
-  for (let r of requests) {
-    if ((await Permissions.request(r)) !== 'authorized') {
-      throw new Error(`Request for ${r} denied.`);
+export async function requestBluetooth() {
+  const status = await BluetoothStatus.state()
+
+  if (!status) {
+    if (Platform.OS === 'android') {
+      await BluetoothStatus.enable()
+    } else {
+      Alert.alert(
+        'Turn on Bluetooth',
+        'Bluetooth is required for the app to work properly.',
+        [{ text: 'OK', onPress: () => { BluetoothStatus.openBluetoothSettings() } }],
+        { cancelable: false }
+      );
     }
   }
 }
