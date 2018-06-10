@@ -44,41 +44,54 @@ export default class extends Component<any, any> {
   }
 
   componentDidMount() {
+    this.setup().catch(e => console.error(e));
+  }
+
+  componentWillUnmount() {
+    if (Platform.OS === 'android') {
+      BackHandler.removeEventListener('hardwareBackPress', router.goBack);
+    }
+  }
+
+  async setup() {
+    // Setup DeviceKit
     const key = process.env.MEDM_DEVICEKIT_LICENSE_KEY;
-    
+
     if (key) {
-      store.initialize(key).then(() => {
-        SplashScreen.hide();
-
-        if (Platform.OS === 'android') {
-          const requests = [PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION];
-
-          if (__DEV__ || TESTING_MODE) {
-            requests.push(
-              PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-              PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-            );
-          }
-
-          PermissionsAndroid.requestMultiple(requests).then(permissions => {
-            if (!Object.values(permissions).every(p => p === 'granted')) {
-              Alert.alert(
-                'Permissions Not Granted',
-                'Requested permissions are required for the app to work properly. Please, grant them next time.',
-                [{ text: 'OK' }],
-                { cancelable: false }
-              );
-            }
-          });
-        }
-
-        requestBluetooth()
-      });
+      await store.initialize(key);
     } else {
       throw new Error('MEDM_DEVICEKIT_LICENSE_KEY is not provided!');
     }
 
+    // Hide splash screen
+    SplashScreen.hide();
+
+    // Turn on bluetooth
+    await requestBluetooth();
+
     if (Platform.OS === 'android') {
+      // Setup required permissions for Android (iOS only needs bluetooth)
+      const requests = [PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION];
+
+      if (__DEV__ || TESTING_MODE) {
+        requests.push(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+        );
+      }
+
+      const permissions = await PermissionsAndroid.requestMultiple(requests);
+
+      if (!Object.values(permissions).every(p => p === 'granted')) {
+        Alert.alert(
+          'Permissions Not Granted',
+          'Requested permissions are required for the app to work properly. Please, grant them next time.',
+          [{ text: 'OK' }],
+          { cancelable: false }
+        );
+      }
+
+      // Setup back button for Android (not relevant for iOS)
       BackHandler.addEventListener('hardwareBackPress', () => {
         if (router.state.index === 0) {
           return false;
@@ -87,12 +100,6 @@ export default class extends Component<any, any> {
           return true;
         }
       });
-    }
-  }
-
-  componentWillUnmount() {
-    if (Platform.OS === 'android') {
-      BackHandler.removeEventListener('hardwareBackPress', router.goBack);
     }
   }
 }

@@ -147,18 +147,25 @@ export function persist(
 }
 
 export async function requestBluetooth() {
-  const status = await BluetoothStatus.state()
+  const status = await BluetoothStatus.state();
 
   if (!status) {
     if (Platform.OS === 'android') {
-      await BluetoothStatus.enable()
+      await BluetoothStatus.enable();
     } else {
-      Alert.alert(
-        'Turn on Bluetooth',
-        'Bluetooth is required for the app to work properly.',
-        [{ text: 'OK', onPress: () => { BluetoothStatus.openBluetoothSettings() } }],
-        { cancelable: false }
-      );
+      await new Promise(resolve => {
+        const onPress = () => {
+          BluetoothStatus.openBluetoothSettings();
+          resolve();
+        };
+
+        Alert.alert(
+          'Turn on Bluetooth',
+          'Bluetooth is required for the app to work properly.',
+          [{ text: 'OK', onPress }],
+          { cancelable: false }
+        );
+      });
     }
   }
 }
