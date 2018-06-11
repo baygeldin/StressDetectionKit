@@ -1,4 +1,5 @@
 import Component from 'lib/component';
+import { LIGHT } from 'lib/constants';
 import { inject, observer } from 'mobx-react/native';
 import moment from 'moment';
 import {
@@ -14,7 +15,6 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { Bar } from 'react-native-progress';
-import { LIGHT } from 'lib/constants';
 
 @inject('store', 'ui')
 @observer

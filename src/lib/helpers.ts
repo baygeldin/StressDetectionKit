@@ -43,7 +43,7 @@ export function chunkByPattern<T>(
 }
 
 export function calcOffsets<T>(array: T[][]) {
-  const { offsets } = array
+  return array
     .map(c => c.length)
     .reduce(
       ({ acc, offsets }, c) => ({ acc: acc + c, offsets: [...offsets, acc] }),
@@ -51,9 +51,7 @@ export function calcOffsets<T>(array: T[][]) {
         acc: 0,
         offsets: [] as number[]
       }
-    );
-
-  return offsets;
+    ).offsets;
 }
 
 export function stressColor(level: StressLevel) {
@@ -104,7 +102,7 @@ export function readingToStreams(reading: Reading) {
 
   const start =
     Date.parse(getTextContent(doc, 'measured-at')) +
-    parseInt(getTextContent(chunk, 'start'));
+    parseInt(getTextContent(chunk, 'start'), 10);
 
   const {
     pulse,

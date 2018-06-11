@@ -4,10 +4,10 @@ import {
   BLACK,
   BLUE,
   GREEN,
+  GREY,
   HEARTRATE_UNITS,
   HRV_UNITS,
-  RED,
-  GREY
+  RED
 } from 'lib/constants';
 import { ChartType } from 'lib/types';
 import { inject, observer } from 'mobx-react/native';

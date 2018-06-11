@@ -9,12 +9,12 @@ import { action, autorun, computed, observable, runInAction } from 'mobx';
 import Store from 'stores/main';
 
 export default class Ui {
+  @observable public currentChart: ChartType;
+  @observable public currentPrompt?: PromptValues;
+  @observable public currentPromptInput = '';
+
   @observable private _sliderOffset?: number;
   @observable.ref private _currentSample?: Sample;
-
-  @observable currentChart: ChartType;
-  @observable currentPrompt?: PromptValues;
-  @observable currentPromptInput = '';
 
   constructor(private store: Store) {
     autorun(() => {
@@ -71,7 +71,7 @@ export default class Ui {
   }
 
   @action.bound
-  moveSliderTo(offset: number) {
+  public moveSliderTo(offset: number) {
     this._sliderOffset =
       offset === this.store.currentSamples.length - 1 ? undefined : offset;
   }
@@ -84,7 +84,7 @@ export default class Ui {
   }
 
   @action
-  selectSample(sample: Sample) {
+  public selectSample(sample: Sample) {
     this._currentSample = sample;
   }
 
@@ -96,27 +96,27 @@ export default class Ui {
   }
 
   @action.bound
-  selectChart(chart: ChartType) {
+  public selectChart(chart: ChartType) {
     this.currentChart = chart;
   }
 
   @action.bound
-  prompt(value: PromptValues) {
+  public prompt(value: PromptValues) {
     this.currentPrompt = value;
   }
 
   @action.bound
-  hidePrompt() {
+  public hidePrompt() {
     this.currentPrompt = undefined;
   }
 
   @action.bound
-  inputPrompt(value: string) {
+  public inputPrompt(value: string) {
     this.currentPromptInput = value;
   }
 
   @action.bound
-  submitPrompt(handler: (value: number) => void) {
+  public submitPrompt(handler: (value: number) => void) {
     const value = parseFloat(this.currentPromptInput);
     if (!isNaN(value)) handler(value);
     this.hidePrompt();

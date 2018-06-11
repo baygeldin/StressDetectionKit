@@ -1,9 +1,9 @@
 import { Command } from 'commander';
+import { FeatureProps } from 'config/features';
 import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { Sample } from 'lib/types';
-import { max, min, std, mean } from 'mathjs';
+import { max, mean, min, std } from 'mathjs';
 import { join, resolve } from 'path';
-import { FeatureProps } from 'config/features';
 
 const ALL = 'all';
 
@@ -31,8 +31,7 @@ const entries = program.samples === ALL ? dirs : (program.samples as string[]);
 const absent = entries.find((e: string) => !dirs.includes(e));
 
 if (absent) {
-  console.error(`Samples for "${absent}" don't exist.`);
-  process.exit(1);
+  throw new Error(`Samples for "${absent}" don't exist.`);
 }
 
 function readSamples(entry: string) {

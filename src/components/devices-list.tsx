@@ -1,23 +1,23 @@
-import * as React from 'react';
-import { toJS } from 'mobx';
-import { observer, inject } from 'mobx-react/native';
-import { View } from 'react-native';
-import {
-  Container,
-  Content,
-  Text,
-  List,
-  ListItem,
-  Body,
-  Footer,
-  FooterTab,
-  Button
-} from 'native-base';
-import { Divider } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import Component from 'lib/component';
 import { Device } from 'lib/device-kit';
 import { deviceTitle } from 'lib/helpers';
+import { toJS } from 'mobx';
+import { inject, observer } from 'mobx-react/native';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Footer,
+  FooterTab,
+  List,
+  ListItem,
+  Text
+} from 'native-base';
+import * as React from 'react';
+import { View } from 'react-native';
+import { Divider } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 @inject('store')
 @observer

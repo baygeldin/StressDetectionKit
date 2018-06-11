@@ -46,7 +46,6 @@ import {
   StressMark
 } from 'lib/types';
 import { action, computed, observable, runInAction } from 'mobx';
-import { Vibration } from 'react-native';
 import BackgroundTimer from 'react-native-background-timer';
 import {
   Accelerometer,
@@ -54,48 +53,52 @@ import {
   SensorObservable
 } from 'react-native-sensors';
 
+// There's whole lotta unhandled promises there. This is more or less intentional
+// MobX is not as handy when actions are asynchronous and also I'm lazy.
+
 export default class Main {
   // State
-  @observable initialized = false;
-  @observable collecting = false;
-  @observable scanning = false;
-  @observable calibrating = false;
+  @observable public initialized = false;
+  @observable public collecting = false;
+  @observable public scanning = false;
+  @observable public calibrating = false;
 
   // Devices
-  @observable.shallow devices: Device[] = [];
-  @observable.ref currentDevice?: Device;
+  @observable.shallow public devices: Device[] = [];
+  @observable.ref public currentDevice?: Device;
 
   // Perceived stress
-  @observable.shallow percievedStress: StressMark[] = [];
-  @observable currentPercievedStressLevel: StressLevel = 'none';
-  @observable percievedStressStartedAt: number;
+  @observable.shallow public percievedStress: StressMark[] = [];
+  @observable public currentPercievedStressLevel: StressLevel = 'none';
+  @observable public percievedStressStartedAt: number;
 
   // Collection
-  @observable collectionStartedAt: number;
-  @observable.shallow pulseBuffer: PulseMark[] = [];
-  @observable.shallow rrIntervalsBuffer: RrIntervalMark[] = [];
-  @observable.shallow accelerometerBuffer: SensorData[] = [];
-  @observable.shallow gyroscopeBuffer: SensorData[] = [];
+  @observable public collectionStartedAt: number;
+  @observable.shallow public pulseBuffer: PulseMark[] = [];
+  @observable.shallow public rrIntervalsBuffer: RrIntervalMark[] = [];
+  @observable.shallow public accelerometerBuffer: SensorData[] = [];
+  @observable.shallow public gyroscopeBuffer: SensorData[] = [];
 
   // Chunks
-  private chunksQueue = new Denque<Chunk>([]);
-  @observable chunksCollected = 0;
+  @observable public chunksCollected = 0;
 
   // Samples
-  @observable.shallow currentSamples: Sample[] = [];
+  @observable.shallow public currentSamples: Sample[] = [];
 
   // Calibration
-  @observable baselineHrv: number;
-  @observable baselineHeartRate: number;
-  @observable accelerometerError: number;
-  @observable age: number;
-  @observable calibrationTimePassed: number;
+  @observable public baselineHrv: number;
+  @observable public baselineHeartRate: number;
+  @observable public accelerometerError: number;
+  @observable public age: number;
+  @observable public calibrationTimePassed: number;
 
   // Internal logic
   private accelerometer: SensorObservable;
   private gyroscope: SensorObservable;
 
   private timer: NodeJS.Timer;
+
+  private chunksQueue = new Denque<Chunk>([]);
 
   constructor(private sdk: DeviceKit) {}
 
@@ -109,7 +112,7 @@ export default class Main {
     return CALIBRATION_LENGTH - this.calibrationTimePassed;
   }
 
-  async initialize(key: string) {
+  public async initialize(key: string) {
     await this.sdk.register(key);
     const devices = await this.sdk.fetchDevices();
     const baselineHrv = await getFloat(BASELINE_HRV_KEY);
@@ -133,7 +136,7 @@ export default class Main {
   }
 
   @action.bound
-  startCalibration() {
+  public startCalibration() {
     if (this.calibrating) return;
 
     startForegroundService();
@@ -161,7 +164,7 @@ export default class Main {
   }
 
   @action.bound
-  stopCalibration() {
+  public stopCalibration() {
     if (!this.calibrating) return;
 
     stopForegroundService();
@@ -172,7 +175,7 @@ export default class Main {
   }
 
   @action.bound
-  resetBaselineValues() {
+  public resetBaselineValues() {
     this.accelerometerError = DEFAULT_ACCELEROMETER_ERROR;
     this.baselineHrv = DEFAULT_BASELINE_HRV;
     this.baselineHeartRate = DEFAULT_BASELINE_HEARTRATE;
@@ -180,7 +183,7 @@ export default class Main {
   }
 
   @action.bound
-  startCollection() {
+  public startCollection() {
     if (this.collecting) return;
 
     startForegroundService();
@@ -205,7 +208,7 @@ export default class Main {
   }
 
   @action.bound
-  stopCollection() {
+  public stopCollection() {
     if (!this.collecting) return;
 
     stopForegroundService();
@@ -228,41 +231,39 @@ export default class Main {
           accelerometerError: this.accelerometerError,
           age: this.age
         })
-      ]).catch(err => {
-        console.error(err);
-      });
+      ]);
     }
   }
 
   @action.bound
-  startScan() {
+  public startScan() {
     if (this.scanning) return;
 
     this.scanning = true;
     this.devices = [];
 
     this.sdk.on('deviceFound', d => this.addDevice(d));
-    this.sdk.startScan().catch(e => console.error(e));
+    this.sdk.startScan();
   }
 
   @action.bound
-  stopScan() {
+  public stopScan() {
     if (!this.scanning) return;
 
     this.scanning = false;
 
     this.sdk.removeAllListeners('deviceFound');
-    this.sdk.stopScan().catch(e => console.error(e));
+    this.sdk.stopScan();
   }
 
   @action.bound
-  restartScan() {
+  public restartScan() {
     this.stopScan();
     this.startScan();
   }
 
   @action.bound
-  addDevice(device: Device) {
+  public addDevice(device: Device) {
     if (
       SUPPORTED_HRM_IDS.includes(device.id) &&
       !this.devices.find(d => d.id === device.id)
@@ -271,7 +272,7 @@ export default class Main {
     }
   }
 
-  setDevice(device: Device) {
+  public setDevice(device: Device) {
     this.removeCurrentDevice();
 
     this.sdk.addDevice(device).then(
@@ -282,15 +283,15 @@ export default class Main {
   }
 
   @action.bound
-  removeCurrentDevice() {
+  public removeCurrentDevice() {
     if (this.currentDevice) {
-      this.sdk.removeDevice(this.currentDevice).catch(e => console.error(e));
+      this.sdk.removeDevice(this.currentDevice);
       this.currentDevice = undefined;
     }
   }
 
   @action.bound
-  changeStressLevel(level: StressLevel) {
+  public changeStressLevel(level: StressLevel) {
     if (level === this.currentPercievedStressLevel) return;
 
     const timestamp = Date.now();
@@ -302,27 +303,27 @@ export default class Main {
   }
 
   @action.bound
-  setBaselineHrv(value: number) {
+  public setBaselineHrv(value: number) {
     this.baselineHrv = value;
-    this.persistSingleValue(BASELINE_HRV_KEY, this.baselineHrv);
+    setFloat(BASELINE_HRV_KEY, this.baselineHrv);
   }
 
   @action.bound
-  setBaselineHeartRate(value: number) {
+  public setBaselineHeartRate(value: number) {
     this.baselineHeartRate = value;
-    this.persistSingleValue(BASELINE_HEARTRATE_KEY, this.baselineHeartRate);
+    setFloat(BASELINE_HEARTRATE_KEY, this.baselineHeartRate);
   }
 
   @action.bound
-  setAccelerometerError(value: number) {
+  public setAccelerometerError(value: number) {
     this.accelerometerError = value;
-    this.persistSingleValue(ACCELEROMETER_ERROR_KEY, this.accelerometerError);
+    setFloat(ACCELEROMETER_ERROR_KEY, this.accelerometerError);
   }
 
   @action.bound
-  setAge(value: number) {
+  public setAge(value: number) {
     this.age = value;
-    this.persistSingleValue(AGE_KEY, this.age);
+    setFloat(AGE_KEY, this.age);
   }
 
   // Private
@@ -344,7 +345,7 @@ export default class Main {
 
   private stopSensors() {
     if (ACCELERATED_MODE) return;
-    this.sdk.stopCollection().catch(e => console.error(e));
+    this.sdk.stopCollection();
     this.accelerometer.stop();
     // this.gyroscope.stop();
   }
@@ -370,9 +371,7 @@ export default class Main {
         this.chunksCollected % WINDOW_SIZE === 0
       ) {
         const chunks = this.chunksQueue.toArray();
-        this.persist(timestamp.toString(), chunks).catch(err => {
-          console.error(err);
-        });
+        this.persist(timestamp.toString(), chunks);
       }
 
       this.chunksQueue.shift();
@@ -427,41 +426,40 @@ export default class Main {
       try {
         this.processReading(r);
       } catch (e) {
-        console.error('Reading is corrupted.', e);
+        if (__DEV__) {
+          // tslint:disable-next-line:no-console
+          console.error('Reading is corrupted.', e);
+        }
       }
     });
 
-    this.sdk.startCollection().catch(e => console.error(e));
+    this.sdk.startCollection();
   }
 
   private startSensorCollection(sensor: Sensor) {
-    sensor({ updateInterval: SENSOR_UPDATE_INTERVAL })
-      .then(observable => {
-        const isAccelerometer = sensor === Accelerometer;
+    sensor({ updateInterval: SENSOR_UPDATE_INTERVAL }).then(stream => {
+      const isAccelerometer = sensor === Accelerometer;
 
-        if (isAccelerometer) {
-          this.accelerometer = observable;
-        } else {
-          this.gyroscope = observable;
-        }
+      if (isAccelerometer) {
+        this.accelerometer = stream;
+      } else {
+        this.gyroscope = stream;
+      }
 
-        const actionName = isAccelerometer
-          ? 'addAccelerometerData'
-          : 'addGyroscopeData';
+      const actionName = isAccelerometer
+        ? 'addAccelerometerData'
+        : 'addGyroscopeData';
 
-        const data = isAccelerometer
-          ? this.accelerometerBuffer
-          : this.gyroscopeBuffer;
+      const data = isAccelerometer
+        ? this.accelerometerBuffer
+        : this.gyroscopeBuffer;
 
-        observable.subscribe(
-          action(actionName, (d: SensorData) => {
-            data.push(d);
-          })
-        );
-      })
-      .catch(error => {
-        console.error(error);
-      });
+      stream.subscribe(
+        action(actionName, (d: SensorData) => {
+          data.push(d);
+        })
+      );
+    });
   }
 
   @action.bound
@@ -493,13 +491,7 @@ export default class Main {
       setFloat(BASELINE_HRV_KEY, this.baselineHrv),
       setFloat(BASELINE_HEARTRATE_KEY, this.baselineHeartRate),
       setFloat(AGE_KEY, this.age)
-    ]).catch(err => {
-      console.error(err);
-    });
-  }
-
-  private persistSingleValue(key: string, value: number) {
-    setFloat(key, value).catch(err => console.error(err));
+    ]);
   }
 
   @action.bound

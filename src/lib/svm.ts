@@ -20,7 +20,7 @@ class Svm {
     Object.assign(this, options);
   }
 
-  predict(features: number[]) {
+  public predict(features: number[]) {
     const kernels = new Array(this.vectors.length);
 
     switch (this.kernel) {
@@ -69,7 +69,7 @@ class Svm {
     const starts = new Array(this.nRows);
 
     for (let i = 0; i < this.nRows; i++) {
-      if (i != 0) {
+      if (i !== 0) {
         let start = 0;
         for (let j = 0; j < i; j++) {
           start += this.weights[j];
@@ -86,7 +86,7 @@ class Svm {
       ends[i] = this.weights[i] + starts[i];
     }
 
-    if (this.nClasses == 2) {
+    if (this.nClasses === 2) {
       for (let i = 0; i < kernels.length; i++) {
         kernels[i] = -kernels[i];
       }

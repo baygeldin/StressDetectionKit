@@ -1,3 +1,19 @@
 {
-  "extends": ["tslint:latest", "tslint-react", "tslint-microsoft-contrib"]
+  "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
+  "rules": {
+    "no-implicit-dependencies": false,
+    "no-submodule-imports": [
+      true,
+      "lib",
+      "screens",
+      "stores",
+      "components",
+      "config"
+    ],
+    "interface-name": [true, "never-prefix"],
+    "curly": [true, "ignore-same-line"],
+    "object-literal-sort-keys": false,
+    "variable-name": [true, "allow-leading-underscore"],
+    "no-empty-interface": false
+  }
 }

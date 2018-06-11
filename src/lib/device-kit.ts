@@ -29,9 +29,9 @@ type DEVICE_EVENTS =
 type STATE_EVENTS = SCAN_FINISHED | COLLECTION_FINISHED;
 type EVENTS = DATA | DEVICE_EVENTS | STATE_EVENTS;
 
-const DeviceKitModule = NativeModules.DeviceKit;
-const eventEmitter = new NativeEventEmitter(DeviceKitModule);
-const { EVENTS } = DeviceKitModule;
+const deviceKitModule = NativeModules.DeviceKit;
+const eventEmitter = new NativeEventEmitter(deviceKitModule);
+const { EVENTS } = deviceKitModule;
 
 interface DeviceKit {
   on(event: DATA, fn: (reading: Reading) => void): this;
@@ -51,47 +51,47 @@ class DeviceKit extends EventEmitter {
   constructor() {
     super();
 
-    for (let e of EVENTS) {
+    for (const e of EVENTS) {
       eventEmitter.addListener(e, d => {
         d !== null ? this.emit(e, d) : this.emit(e);
       });
     }
   }
 
-  register(key: string): Promise<void> {
-    return DeviceKitModule.initialize(key);
+  public register(key: string): Promise<void> {
+    return deviceKitModule.initialize(key);
   }
 
-  startScan(): Promise<void> {
-    return DeviceKitModule.startScan();
+  public startScan(): Promise<void> {
+    return deviceKitModule.startScan();
   }
 
-  stopScan(): Promise<void> {
-    return DeviceKitModule.stopScan();
+  public stopScan(): Promise<void> {
+    return deviceKitModule.stopScan();
   }
 
-  addDevice(device: Device): Promise<void> {
-    return DeviceKitModule.addDevice(device.id);
+  public addDevice(device: Device): Promise<void> {
+    return deviceKitModule.addDevice(device.id);
   }
 
-  removeDevice(device: Device): Promise<void> {
-    return DeviceKitModule.removeDevice(device.address);
+  public removeDevice(device: Device): Promise<void> {
+    return deviceKitModule.removeDevice(device.address);
   }
 
-  fetchDevices(): Promise<Device[]> {
-    return DeviceKitModule.listDevices();
+  public fetchDevices(): Promise<Device[]> {
+    return deviceKitModule.listDevices();
   }
 
-  cancelPairings(): Promise<void> {
-    return DeviceKitModule.cancelPairings();
+  public cancelPairings(): Promise<void> {
+    return deviceKitModule.cancelPairings();
   }
 
-  startCollection(): Promise<void> {
-    return DeviceKitModule.startCollection();
+  public startCollection(): Promise<void> {
+    return deviceKitModule.startCollection();
   }
 
-  stopCollection(): Promise<void> {
-    return DeviceKitModule.stopCollection();
+  public stopCollection(): Promise<void> {
+    return deviceKitModule.stopCollection();
   }
 }
 

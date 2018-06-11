@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { observer, inject } from 'mobx-react/native';
-import { Button, View } from 'react-native';
 import Component from 'lib/component';
 import {
-  NONE_STRESS_COLOR,
+  HIGH_STRESS_COLOR,
   LOW_STRESS_COLOR,
   MEDIUM_STRESS_COLOR,
-  HIGH_STRESS_COLOR
+  NONE_STRESS_COLOR
 } from 'lib/constants';
+import { inject, observer } from 'mobx-react/native';
+import * as React from 'react';
+import { Button, View } from 'react-native';
 
 @inject('store')
 @observer

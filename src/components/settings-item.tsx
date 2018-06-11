@@ -1,8 +1,8 @@
+import Component from 'lib/component';
+import { ListItem } from 'native-base';
 import { Props } from 'react';
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
-import { ListItem } from 'native-base';
-import Component from 'lib/component';
 
 const styles = StyleSheet.create({
   container: {

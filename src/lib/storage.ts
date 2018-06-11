@@ -18,7 +18,7 @@ export function getFloat(name: string) {
 }
 
 export function set(name: string, data: any) {
-  return _set(name, data, data => data.toString());
+  return _set(name, data, d => d.toString());
 }
 
 export function setFloat(name: string, data: number) {

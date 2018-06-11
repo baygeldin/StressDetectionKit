@@ -10,9 +10,9 @@ interface Context {
 }
 
 class ComponentWithContext<A, B> extends Component<Context & A, B> {
-  store: Store;
-  router: Router;
-  ui: Ui;
+  public store: Store;
+  public router: Router;
+  public ui: Ui;
 
   constructor(props: Context & A) {
     super(props);

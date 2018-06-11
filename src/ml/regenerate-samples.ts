@@ -26,8 +26,7 @@ const entries = program.samples === ALL ? dirs : (program.samples as string[]);
 const absent = entries.find((e: string) => !dirs.includes(e));
 
 if (absent) {
-  console.error(`Samples for "${absent}" don't exist.`);
-  process.exit(1);
+  throw new Error(`Samples for "${absent}" don't exist.`);
 }
 
 function sample<T>(array: T[], windowSize: number, stepSize: number) {
@@ -40,7 +39,7 @@ function sample<T>(array: T[], windowSize: number, stepSize: number) {
   return result;
 }
 
-for (let e of entries) {
+for (const e of entries) {
   const dest = join(root, e);
 
   function readJson(name: string) {

@@ -1,43 +1,43 @@
-import { observable, action } from 'mobx';
+import { action, observable } from 'mobx';
 import { NavigationActions, NavigationRouter } from 'react-navigation';
 
 export default class Router {
+  @observable.ref
+  public state = this.router.getStateForAction(NavigationActions.init(), null);
+
   constructor(public router: NavigationRouter<any, any, any>) {}
 
-  @observable.ref
-  state = this.router.getStateForAction(NavigationActions.init(), null);
-
   @action.bound
-  dispatch(action: any, reset = false) {
+  public dispatch(actionObject: any, reset = false) {
     this.state = this.router.getStateForAction(
-      action,
+      actionObject,
       reset ? null : this.state
     );
     return this.state;
   }
 
   @action.bound
-  reset() {
+  public reset() {
     this.dispatch(NavigationActions.init(), true);
   }
 
   @action.bound
-  goBack() {
+  public goBack() {
     this.dispatch(NavigationActions.back());
   }
 
   @action.bound
-  goTo(route: string) {
+  public goTo(route: string) {
     this.dispatch(NavigationActions.navigate({ routeName: route }));
   }
 
   @action.bound
-  goToSettings() {
+  public goToSettings() {
     this.goTo('Settings');
   }
 
   @action.bound
-  goToDeveloperScreen() {
+  public goToDeveloperScreen() {
     this.goTo('Developer');
   }
 }

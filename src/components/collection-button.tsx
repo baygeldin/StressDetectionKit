@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { observer, inject } from 'mobx-react/native';
-import { Text, Button } from 'native-base';
 import Component from 'lib/component';
 import { confirmAction } from 'lib/helpers';
+import { inject, observer } from 'mobx-react/native';
+import { Button, Text } from 'native-base';
+import * as React from 'react';
 
 @inject('store', 'ui')
 @observer
