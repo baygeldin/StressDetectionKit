@@ -44,7 +44,7 @@ export default class extends Component<any, any> {
   }
 
   componentDidMount() {
-    this.setup()
+    this.setup();
   }
 
   componentWillUnmount() {

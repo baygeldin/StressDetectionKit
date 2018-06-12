@@ -122,7 +122,7 @@ gridX, gridY = np.meshgrid(space, space)
 ax.plot_surface(gridX, gridY, zGrid(gridX, gridY))
 ax.plot3D(x[y == False, 0], x[y == False, 1], x[y == False, 2], 'og')
 ax.plot3D(x[y == True, 0], x[y == True, 1], x[y == True, 2], 'sr')
-ax.set_xlabel('$\Delta$HRV')
+ax.set_xlabel('$\Delta$HRV')  # pylint: disable=W1401
 ax.set_ylabel('%HR')
 ax.set_zlabel('AI')
 plt.show()
