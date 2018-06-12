@@ -20,7 +20,6 @@ import {
   TESTING_MODE,
   WINDOW_SIZE
 } from 'lib/constants';
-import DeviceKit, { Device, Reading } from 'lib/device-kit';
 import {
   calcAccelerometerVariance,
   calcHeartRate,
@@ -47,6 +46,7 @@ import {
 } from 'lib/types';
 import { action, computed, observable, runInAction } from 'mobx';
 import BackgroundTimer from 'react-native-background-timer';
+import DeviceKit, { Device, Reading } from 'react-native-device-kit';
 import {
   Accelerometer,
   SensorData,

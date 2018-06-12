@@ -1,5 +1,4 @@
 import { TESTING_MODE } from 'lib/constants';
-import DeviceKit from 'lib/device-kit';
 import { requestBluetooth } from 'lib/helpers';
 import initSideEffects from 'lib/side-effects';
 import { configure } from 'mobx';
@@ -7,6 +6,7 @@ import { observer, Provider } from 'mobx-react/native';
 import { Component } from 'react';
 import * as React from 'react';
 import { Alert, BackHandler, PermissionsAndroid, Platform } from 'react-native';
+import DeviceKit from 'react-native-device-kit';
 import SplashScreen from 'react-native-splash-screen';
 import { addNavigationHelpers, StackNavigator } from 'react-navigation';
 import DeveloperScreen from 'screens/developer';

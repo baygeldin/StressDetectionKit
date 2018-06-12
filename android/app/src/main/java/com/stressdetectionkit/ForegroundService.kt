@@ -11,7 +11,7 @@ import android.support.v4.app.NotificationCompat
 class ForegroundService : Service() {
     private val wakeLock by lazy {
         val pm = getSystemService(POWER_SERVICE) as PowerManager
-        pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$APP_TAG:WakeLock")
+        pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WakeLock")
     }
 
     private val compatNotification by lazy {

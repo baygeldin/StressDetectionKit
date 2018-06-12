@@ -5,7 +5,7 @@ import {
   MEDIUM_STRESS_COLOR,
   NONE_STRESS_COLOR
 } from 'lib/constants';
-import { Device, Reading } from 'lib/device-kit';
+import { Device, Reading } from 'react-native-device-kit';
 import { StressLevel } from 'lib/types';
 import { Alert, Platform } from 'react-native';
 import { BluetoothStatus } from 'react-native-bluetooth-status';
