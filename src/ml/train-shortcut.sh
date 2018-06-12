@@ -1,4 +1,7 @@
+#!/bin/bash
+
 array=()
+
 for arg in "$@"; do
     array+=(\-s $arg)
 done

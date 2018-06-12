@@ -23,6 +23,7 @@
     "pull-samples": "adb pull /sdcard/Stress\\ Detection\\ Kit src/ml/samples",
     "regenerate-samples": "npm run ts-node -- src/ml/regenerate-samples.ts",
     "calc-features-meta": "npm run ts-node -- src/ml/features-meta.ts",
+    "train-shortcut": "src/ml/train-shortcut.sh",
     "ts-node": "ts-node -r tsconfig-paths/register -O '{\"module\": \"commonjs\"}'"
   },
   "dependencies": {
