@@ -46,10 +46,7 @@
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		D12162CB20CBD42000E0BAB8 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D121629920CBD41600E0BAB8 /* libART.a */; };
 		D1286FA320CD91CC0058DAEC /* libRNBluetoothManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1286FA220CD91BF0058DAEC /* libRNBluetoothManager.a */; };
-		D130E13E20B34DA8006298A3 /* DeviceKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130E13C20B34DA7006298A3 /* DeviceKit.swift */; };
-		D130E13F20B34DA8006298A3 /* DeviceKit.m in Sources */ = {isa = PBXBuildFile; fileRef = D130E13D20B34DA7006298A3 /* DeviceKit.m */; };
 		D130E18220B485A3006298A3 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
-		D130E18620B497EA006298A3 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130E18520B497E9006298A3 /* Constants.swift */; };
 		D1496A6720C4201700A2F978 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A6620C4201000A2F978 /* libRNVectorIcons.a */; };
 		D1496A6820C4201D00A2F978 /* libSplashScreen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A6020C41FD700A2F978 /* libSplashScreen.a */; };
 		D1496A6920C4202300A2F978 /* libRNSVG.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A5820C41FB700A2F978 /* libRNSVG.a */; };
@@ -57,8 +54,6 @@
 		D1496A6B20C4204400A2F978 /* libRNSensors.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A4820C41F7500A2F978 /* libRNSensors.a */; };
 		D1496A6D20C4205000A2F978 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A3A20C41F4200A2F978 /* libRNFS.a */; };
 		D1496A6E20C4205300A2F978 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1496A3C20C41F4200A2F978 /* libRNFS.a */; };
-		D17B6B1F20C995E000E6E1A5 /* MedMDeviceKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D17B6B1D20C9958700E6E1A5 /* MedMDeviceKit.framework */; };
-		D17B6B2020C995E000E6E1A5 /* MedMDeviceKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D17B6B1D20C9958700E6E1A5 /* MedMDeviceKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E6732F7F50474A4B8960E29C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F55D80212EC2442FA0362D6E /* FontAwesome.ttf */; };
 		F18BE5BE3C1B480DB6B1D74D /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B6C1D43E6EA4F90A805EE68 /* Octicons.ttf */; };
 		F63C76F1FFE444E281069BF6 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 83ECB8D043D3434F97E47F58 /* MaterialCommunityIcons.ttf */; };
@@ -432,7 +427,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				D17B6B2020C995E000E6E1A5 /* MedMDeviceKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -476,17 +470,12 @@
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		D121629320CBD41500E0BAB8 /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
 		D1286F9C20CD91BE0058DAEC /* RNBluetoothManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBluetoothManager.xcodeproj; path = "../node_modules/react-native-bluetooth-status/ios/RNBluetoothManager.xcodeproj"; sourceTree = "<group>"; };
-		D130E11620B34DA5006298A3 /* StressDetectionKit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StressDetectionKit-Bridging-Header.h"; sourceTree = "<group>"; };
-		D130E13C20B34DA7006298A3 /* DeviceKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeviceKit.swift; path = StressDetectionKit/DeviceKit.swift; sourceTree = "<group>"; };
-		D130E13D20B34DA7006298A3 /* DeviceKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceKit.m; path = StressDetectionKit/DeviceKit.m; sourceTree = "<group>"; };
-		D130E18520B497E9006298A3 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = StressDetectionKit/Constants.swift; sourceTree = "<group>"; };
 		D1496A3420C41F4200A2F978 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		D1496A4320C41F7500A2F978 /* RNSensors.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSensors.xcodeproj; path = "../node_modules/react-native-sensors/ios/RNSensors.xcodeproj"; sourceTree = "<group>"; };
 		D1496A4920C41F9600A2F978 /* RNBackgroundTimer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBackgroundTimer.xcodeproj; path = "../node_modules/react-native-background-timer/ios/RNBackgroundTimer.xcodeproj"; sourceTree = "<group>"; };
 		D1496A5220C41FB700A2F978 /* RNSVG.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSVG.xcodeproj; path = "../node_modules/react-native-svg/ios/RNSVG.xcodeproj"; sourceTree = "<group>"; };
 		D1496A5B20C41FD600A2F978 /* SplashScreen.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SplashScreen.xcodeproj; path = "../node_modules/react-native-splash-screen/ios/SplashScreen.xcodeproj"; sourceTree = "<group>"; };
 		D1496A6120C4201000A2F978 /* RNVectorIcons.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNVectorIcons.xcodeproj; path = "../node_modules/react-native-vector-icons/RNVectorIcons.xcodeproj"; sourceTree = "<group>"; };
-		D17B6B1D20C9958700E6E1A5 /* MedMDeviceKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MedMDeviceKit.framework; path = "../../medm_client/iPhone/sources/MedMDeviceKit/Build/Products/Debug-iphoneos/MedMDeviceKit.framework"; sourceTree = "<group>"; };
 		DC4EAB8E52354E6E80D61872 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
 		E367FA918BC54C898AE2F98F /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		F55D80212EC2442FA0362D6E /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
@@ -508,7 +497,6 @@
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				D130E18220B485A3006298A3 /* libRCTAnimation.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
-				D17B6B1F20C995E000E6E1A5 /* MedMDeviceKit.framework in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
@@ -656,10 +644,6 @@
 		13B07FAE1A68108700A75B9A /* StressDetectionKit */ = {
 			isa = PBXGroup;
 			children = (
-				D17B6B1D20C9958700E6E1A5 /* MedMDeviceKit.framework */,
-				D130E18520B497E9006298A3 /* Constants.swift */,
-				D130E13D20B34DA7006298A3 /* DeviceKit.m */,
-				D130E13C20B34DA7006298A3 /* DeviceKit.swift */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -667,7 +651,6 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				D130E11620B34DA5006298A3 /* StressDetectionKit-Bridging-Header.h */,
 			);
 			name = StressDetectionKit;
 			sourceTree = "<group>";
@@ -1520,11 +1503,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D130E18620B497EA006298A3 /* Constants.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				D130E13F20B34DA8006298A3 /* DeviceKit.m in Sources */,
-				D130E13E20B34DA8006298A3 /* DeviceKit.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1576,7 +1556,6 @@
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = Y5Y9T3N353;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1599,7 +1578,6 @@
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = Y5Y9T3N353;
@@ -1642,7 +1620,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.StressDetectionKit;
 				PRODUCT_NAME = StressDetectionKit;
-				SWIFT_OBJC_BRIDGING_HEADER = "StressDetectionKit-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1671,7 +1648,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.StressDetectionKit;
 				PRODUCT_NAME = StressDetectionKit;
-				SWIFT_OBJC_BRIDGING_HEADER = "StressDetectionKit-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
