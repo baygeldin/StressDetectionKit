@@ -53,7 +53,7 @@ class Calibration extends Component<{}, {}> {
         <Footer>
           <FooterTab>
             <Button full onPress={this.store.stopCalibration}>
-              <Text>Cancel</Text>
+              <Text>CANCEL</Text>
             </Button>
           </FooterTab>
         </Footer>

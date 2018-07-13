@@ -1,5 +1,4 @@
 import Component from 'lib/component';
-import { Device } from 'react-native-device-kit';
 import { deviceTitle } from 'lib/helpers';
 import { toJS } from 'mobx';
 import { inject, observer } from 'mobx-react/native';
@@ -16,6 +15,7 @@ import {
 } from 'native-base';
 import * as React from 'react';
 import { View } from 'react-native';
+import { Device } from 'react-native-device-kit';
 import { Divider } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -57,7 +57,7 @@ class DevicesList extends Component<{}, {}> {
         <Footer>
           <FooterTab>
             <Button full onPress={this.store.stopScan}>
-              <Text>Cancel</Text>
+              <Text>CANCEL</Text>
             </Button>
           </FooterTab>
         </Footer>

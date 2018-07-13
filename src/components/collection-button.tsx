@@ -1,4 +1,5 @@
 import Component from 'lib/component';
+import { WHITE } from 'lib/constants';
 import { confirmAction } from 'lib/helpers';
 import { inject, observer } from 'mobx-react/native';
 import { Button, Text } from 'native-base';
@@ -29,7 +30,7 @@ class CollectionButton extends Component<{}, {}> {
 
     return (
       <Button full primary={!collecting} danger={collecting} onPress={action}>
-        <Text>{title}</Text>
+        <Text style={{ color: WHITE }}>{title.toUpperCase()}</Text>
       </Button>
     );
   }
