@@ -3,6 +3,7 @@ package com.stressdetectionkit;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.medm.reactnative.RNDeviceKitPackage;
 import com.ocetnik.timer.BackgroundTimerPackage;
 import com.rnfs.RNFSPackage;
 import com.facebook.react.ReactNativeHost;
@@ -30,10 +31,10 @@ public class MainApplication extends Application implements ReactApplication {
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
+                    new RNDeviceKitPackage(),
                     new BackgroundTimerPackage(),
                     new RNFSPackage(),
                     new VectorIconsPackage(),
-                    new DeviceKitPackage(),
                     new RNSensorsPackage(),
                     new SvgPackage(),
                     new SplashScreenReactPackage(),

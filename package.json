@@ -5,7 +5,8 @@
   "scripts": {
     "start": "haul start --platform all",
     "test": "jest",
-    "postinstall": "pipenv install --dev",
+    "postinstall": "pipenv install --dev && npm run inject-device-kit",
+    "inject-device-kit": "inject-device-kit --android MedMDeviceKit/MedMDeviceKit.aar --ios MedMDeviceKit/MedMDeviceKit.framework",
     "release-workaround": "node ./workaround/android-release-gradle-fix.js",
     "clean": "rimraf build",
     "build": "npm run clean && npm run tsc --",
@@ -39,12 +40,14 @@
     "react-native": "^0.55.4",
     "react-native-background-timer": "^2.0.1",
     "react-native-bluetooth-status": "^1.1.3",
+    "react-native-device-kit": "^0.1.1",
     "react-native-elements": "^0.18.5",
     "react-native-fs": "^2.9.11",
     "react-native-progress": "^3.4.0",
     "react-native-sensors": "3.0.0",
     "react-native-splash-screen": "^3.0.6",
     "react-native-svg": "^6.3.1",
+    "react-native-swift": "^1.2.1",
     "react-native-vector-icons": "^4.4.2",
     "react-navigation": "^1.0.0-beta.21",
     "xmldom": "^0.1.27"
@@ -82,5 +85,6 @@
   },
   "jest": {
     "preset": "react-native"
-  }
+  },
+  "isSwift": true
 }

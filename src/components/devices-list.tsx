@@ -1,5 +1,5 @@
 import Component from 'lib/component';
-import { Device } from 'lib/device-kit';
+import { Device } from 'react-native-device-kit';
 import { deviceTitle } from 'lib/helpers';
 import { toJS } from 'mobx';
 import { inject, observer } from 'mobx-react/native';

@@ -1,5 +1,5 @@
 apply plugin: "com.android.application"
-apply plugin: "kotlin-android"
+apply plugin: 'kotlin-android'
 
 import com.android.build.OutputFile
 
@@ -156,13 +156,8 @@ android {
     }
 }
 
-repositories{
-    flatDir{
-        dirs 'libs'
-    }
-}
-
 dependencies {
+    compile project(':react-native-device-kit')
     compile project(':react-native-background-timer')
     compile project(':react-native-fs')
     compile project(':react-native-vector-icons')
@@ -174,7 +169,6 @@ dependencies {
     compile "com.facebook.react:react-native:+"  // From node_modules
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     // compile "com.facebook.stetho:stetho:1.5.0"
-    compile 'com.medm.devicekit:MedMDeviceKit:1.0@aar'
 }
 
 
@@ -183,4 +177,10 @@ dependencies {
 task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.compile
     into 'libs'
+}
+
+repositories{
+  flatDir{
+      dirs "$rootDir/../node_modules/react-native-device-kit/android/libs"
+  }
 }
