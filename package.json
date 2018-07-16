@@ -1,7 +1,9 @@
 {
   "name": "stress-detection-kit",
   "version": "0.0.1",
-  "private": true,
+  "description": "Stress monitoring app for Android and iOS.",
+  "author": "Alexander Baygeldin",
+  "license": "GPL-3.0",
   "scripts": {
     "start": "haul start --platform all",
     "test": "jest",
