@@ -9,8 +9,8 @@ Tools used: React Native, MobX, TypeScript, D3, SciKit-Learn, MedM DeviceKit SDK
 ## Screenshots
 
 | ![Android Stats](screenshots/android_stats.png?raw=true "Android Stats") | ![Android Sensors](screenshots/android_sensors.png?raw=true "Android Sensors") | ![Android Dev Mode](screenshots/android_dev.png?raw=true "Android Dev Mode") |
-| ![iOS Home](screenshots/ios_home.png?raw=true "iOS Home") | ![iOS Settings](screenshots/ios_settings.png?raw=true "iOS Settings") | ![iOS Calibration](screenshots/ios_calibration.png?raw=true "iOS Calibration") |
 |---|---|---|
+| ![iOS Home](screenshots/ios_home.png?raw=true "iOS Home") | ![iOS Settings](screenshots/ios_settings.png?raw=true "iOS Settings") | ![iOS Calibration](screenshots/ios_calibration.png?raw=true "iOS Calibration") |
 
 ## Science
 
