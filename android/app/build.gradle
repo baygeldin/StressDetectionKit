@@ -101,7 +101,7 @@ android {
     defaultConfig {
         applicationId "com.stressdetectionkit"
         minSdkVersion 17
-        targetSdkVersion 23
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         ndk {
@@ -165,7 +165,7 @@ dependencies {
     compile project(':react-native-svg')
     compile project(':react-native-splash-screen')
     compile project(':react-native-bluetooth-status')
-    compile "com.android.support:appcompat-v7:24.2.1"
+    compile "com.android.support:appcompat-v7:27.1.1"
     compile "com.facebook.react:react-native:+"  // From node_modules
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     // compile "com.facebook.stetho:stetho:1.5.0"

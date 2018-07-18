@@ -5,6 +5,7 @@ buildscript {
 
     repositories {
         jcenter()
+        google()
     }
 
     dependencies {
@@ -24,12 +25,13 @@ allprojects {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url "$rootDir/../node_modules/react-native/android"
         }
+        google()
     }
 }
 
 ext {
-    compileSdkVersion = 23
-    buildToolsVersion = '26.0.2'
+    compileSdkVersion = 27
+    buildToolsVersion = '27.0.3'
 }
 
 subprojects { subproject ->
