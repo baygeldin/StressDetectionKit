@@ -40,23 +40,26 @@ There are several npm scripts that neatly embed in this process:
 
 ## How to build
 
-### Android
-
-1. Put `MedMDeviceKitSDK.aar` file into `MedMDeviceKit/`.
+1. Put `MedMDeviceKit.aar` and `MedMDeviceKit.framework` to `MedMDeviceKit/` folder in the root of the project.
 2. `npm install`
 3. Provide `MEDM_DEVICEKIT_LICENSE_KEY` environment variable with a licence key.
+
+### Android
+
 4. Run `npm run android`.
-5. Run the app on device via Android Studio.
+5. Open the `android` folder in Android Studio and run the app on device as usual.
 6. Open `http://localhost:8081/debugger-ui` (optional).
 
 ### iOS
 
-1. Put `MedMDeviceKitSDK.framework` to `MedMDeviceKit/`.
-2. `npm install`
-3. Provide `MEDM_DEVICEKIT_LICENSE_KEY` environment variable with a licence key.
 4. Run `npm run ios`.
-5. Run the app on device via Xcode.
+5. Open the `ios` folder in Xcode and run the app on device as usual.
 6. Open `http://<YOUR_IP>:8081/debugger-ui` (optional).
+
+### Troubleshooting
+
+* If the Android app can't locate the dev server, try running `npm run reverse` first.
+* Disable delta bundles in the React Native Dev Settings if they are enabled.
 
 ### Tips
 
